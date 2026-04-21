@@ -1,0 +1,33 @@
+# build directories
+build/
+cmake-build-*/
+out/
+
+# IDE
+.idea/
+.vscode/
+
+# generated helper files
+compile_commands.json
+CTestTestfile.cmake
+Testing/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+
+# coverage
+*.gcno
+*.gcda
+*.profraw
+*.profdata
+
+# logs and tmp files
+*.log
+*.tmp
+*.swp
+*~
+
+# os specific
+.DS_Store
+Thumbs.db
