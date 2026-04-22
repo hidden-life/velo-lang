@@ -19,6 +19,7 @@ include(warnings)
 velo_setup_options()
 velo_setup_warnings()
 
+add_subdirectory(src)
 add_subdirectory(apps/velo)
 
 if (VELO_ENABLE_TESTS)
