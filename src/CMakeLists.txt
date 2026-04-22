@@ -37,3 +37,25 @@ target_link_libraries(velo_diagnostic
 
         Velo::Source
 )
+
+add_library(velo_lexer
+        lexer/token_kind.cpp
+        lexer/token.cpp
+        lexer/lexer.cpp
+)
+
+add_library(Velo::Lexer ALIAS velo_lexer)
+
+target_include_directories(velo_lexer
+        PUBLIC
+        "${PROJECT_SOURCE_DIR}/include"
+)
+
+target_link_libraries(velo_lexer
+        PUBLIC
+        Velo::ProjectOptions
+        Velo::ProjectWarnings
+
+        Velo::Source
+        Velo::Diagnostic
+)

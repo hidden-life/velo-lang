@@ -11,6 +11,8 @@ add_executable(velo_smoke_tests
 
         unit/source/source_file_test.cpp
         unit/diagnostic/diagnostic_engine_test.cpp
+
+        unit/lexer/lexer_test.cpp
 )
 
 target_link_libraries(velo_smoke_tests PRIVATE
@@ -20,6 +22,7 @@ target_link_libraries(velo_smoke_tests PRIVATE
 
         Velo::Source
         Velo::Diagnostic
+        Velo::Lexer
 )
 
 gtest_discover_tests(velo_smoke_tests)
