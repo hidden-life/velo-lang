@@ -1,0 +1,53 @@
+#include <gtest/gtest.h>
+#include "velo/driver/driver.h"
+
+using Velo::Driver::Driver;
+
+TEST(DriverTest, ParsesSourceTextAndReturnsASTText) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "hello.velo",
+        R"(module app;
+use std::console;
+fn main(): int {
+    console::println("Hello, Velo!");
+    return 0;
+}
+)"
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.error.empty());
+    ASSERT_TRUE(result.diagnostics.empty());
+
+    EXPECT_NE(result.astText.find("Program"), std::string::npos);
+    EXPECT_NE(result.astText.find("Module app"), std::string::npos);
+    EXPECT_NE(result.astText.find("Call console::println"), std::string::npos);
+}
+
+TEST(DriverTest, ReturnsDiagnosticsForInvalidProgram) {
+    Driver driver;
+
+    const auto result = driver.parseText(
+        "broken.velo",
+        R"(module app;
+use std::console
+fn main(): int {
+    return 0;
+}
+)"
+    );
+
+    ASSERT_FALSE(result.success);
+    ASSERT_TRUE(result.error.empty());
+    ASSERT_FALSE(result.diagnostics.empty());
+    EXPECT_EQ(result.diagnostics.front().code(), "PAR006");
+}
+
+TEST(DriverTest, ReturnsErrorMessageWhenFileCannotBeLoaded) {
+    Driver driver;
+    const auto result = driver.parseFile("this_file_should_not_exists.velo");
+
+    ASSERT_FALSE(result.success);
+    ASSERT_FALSE(result.error.empty());
+}

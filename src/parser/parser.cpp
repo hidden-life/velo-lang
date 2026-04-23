@@ -366,8 +366,10 @@ namespace Velo::Parser {
 
     void Parser::sync() {
         while (!isAtEnd()) {
-            if (previous().is(TokenKind::Semicolon) || previous().is(TokenKind::CloseBrace)) {
-                return;
+            if (_position > 0U) {
+                if (previous().is(TokenKind::Semicolon) || previous().is(TokenKind::CloseBrace)) {
+                    return;
+                }
             }
 
             if (check(TokenKind::KwFn) || check(TokenKind::KwUse) || check(TokenKind::KwModule) || check(TokenKind::KwPub)) {

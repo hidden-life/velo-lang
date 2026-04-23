@@ -1,0 +1,8 @@
+module app;
+
+use std::console;
+
+fn main(): int {
+    console::println("Hello, Velo!");
+    return 0;
+}

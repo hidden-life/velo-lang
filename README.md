@@ -10,6 +10,8 @@ Implemented so far:
 - handwritten lexer
 - minimal AST for the first executable program
 - minimal recursive descent parser
+- AST printer
+- first driver for the source -> lexer -> parser pipeline
 - GoogleTest test setup
 
 ## Build
@@ -21,7 +23,7 @@ ctest --preset debug
 
 ## Run
 ```bash
-./build/debug/apps/velo/velo
+./build/debug/apps/velo/velo ./examples/hello_world/main.velo
 ```
 
 ## Current milestone
@@ -32,15 +34,20 @@ The project can now:
 - tokenize basic Velo syntax
 - build minimal AST
 - parse the first executable Velo program shape
+- print AST from the CLI
 
-Supported parser shape:
-- `module app;`
-- `use std::console;`
-- `use std::console as out;`
-- `fn main(): int { ... }`
-- `pub fn main(): int { ... }`
-- expression statement with call expression
-- `return` statement with integer literal
+Example output:
+```
+Program
+    Module app
+    Use std::console
+    Function main -> int
+        ExprStmt
+            Call console::println
+                String "Hello, Velo!"
+        Return
+            Integer 0
+```
 
 ## Next milestone
-Next step: add a simple AST printer and a compilation driver that runs source -> lexer -> parser.
+Next step: add a real example `.velo` file and start preparing a semantic layer.

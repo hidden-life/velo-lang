@@ -25,5 +25,15 @@ pub fn main(): int {
 }
 ```
 
+## Expression statement
+```velo
+console::println("Hello, Velo!");
+```
+
+## Return statement
+```velo
+return 0;
+```
+
 ## Notes
 This document describes only the syntax implemented in the current codebase.
