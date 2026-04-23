@@ -59,3 +59,38 @@ target_link_libraries(velo_lexer
         Velo::Source
         Velo::Diagnostic
 )
+
+add_library(velo_ast INTERFACE)
+add_library(Velo::AST ALIAS velo_ast)
+
+target_include_directories(velo_ast
+        INTERFACE
+        "${PROJECT_SOURCE_DIR}/include"
+)
+
+target_link_libraries(velo_ast
+        INTERFACE
+        Velo::ProjectOptions
+        Velo::ProjectWarnings
+        Velo::Source
+)
+
+add_library(velo_parser
+        parser/parser.cpp
+)
+add_library(Velo::Parser ALIAS velo_parser)
+
+target_include_directories(velo_parser
+        PUBLIC
+        "${PROJECT_SOURCE_DIR}/include"
+)
+
+target_link_libraries(velo_parser
+        PUBLIC
+        Velo::ProjectOptions
+        Velo::ProjectWarnings
+
+        Velo::AST
+        Velo::Lexer
+        Velo::Diagnostic
+)

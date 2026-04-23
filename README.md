@@ -8,6 +8,8 @@ Implemented so far:
 - source locations and ranges
 - diagnostic engine
 - handwritten lexer
+- minimal AST for the first executable program
+- minimal recursive descent parser
 - GoogleTest test setup
 
 ## Build
@@ -28,14 +30,17 @@ The project can now:
 - map offsets to line/column
 - collect diagnostics
 - tokenize basic Velo syntax
+- build minimal AST
+- parse the first executable Velo program shape
 
-Supported lexical elements:
-- keywords: `module`, `use`, `as`, `fn`, `return`, `pub`
-- identifiers
-- integer literals
-- string literals
-- punctuation: `::`, `:`, `;`, `,`, `(`, `)`, `{`, `}`
-- line comments: `// ...`
+Supported parser shape:
+- `module app;`
+- `use std::console;`
+- `use std::console as out;`
+- `fn main(): int { ... }`
+- `pub fn main(): int { ... }`
+- expression statement with call expression
+- `return` statement with integer literal
 
 ## Next milestone
-Next step: implement AST and parser for the first executable Velo program.
+Next step: add a simple AST printer and a compilation driver that runs source -> lexer -> parser.
