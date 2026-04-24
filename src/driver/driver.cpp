@@ -4,6 +4,8 @@
 #include "velo/lexer/lexer.h"
 #include "velo/parser/parser.h"
 #include "velo/semantic/semantic_analyzer.h"
+#include "velo/ir/lowerer.h"
+#include "velo/interpreter/interpreter.h"
 
 namespace Velo::Driver {
     auto Driver::parseFile(const std::string &path) -> DriverResult {
@@ -39,6 +41,12 @@ namespace Velo::Driver {
         result.success = !engine.hasErrors() && program != nullptr;
 
         if (result.success) {
+            IR::Lowerer lowerer;
+            auto module = lowerer.lower(*program);
+
+            Interpreter::Interpreter interpreter;
+            [[maybe_unused]] auto ignored = interpreter.execute(module);
+
             AST::ASTPrinter printer;
             result.astText = printer.print(*program);
         }

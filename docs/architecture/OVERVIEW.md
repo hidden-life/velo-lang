@@ -9,10 +9,12 @@ At the current stage Velo has the following layers:
 6. semantic
 7. driver
 8. CLI
+9. IR
+10. interpreter
 
 ## Current pipeline
 ```text
-source text -> source model -> lexer -> tokens -> parser -> AST -> semantic checks -> AST printer -> CLI output
+source text -> source model -> lexer -> tokens -> parser -> AST -> semantic checks -> IR -> interpreter -> AST printer -> CLI output
 ```
 
 ## Notes

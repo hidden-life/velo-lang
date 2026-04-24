@@ -117,6 +117,28 @@ target_link_libraries(velo_semantic
         Velo::Diagnostic
 )
 
+add_library(velo_ir
+        ir/lowerer.cpp
+)
+
+add_library(Velo::IR ALIAS velo_ir)
+
+target_include_directories(velo_ir
+        PUBLIC
+        "${PROJECT_SOURCE_DIR}/include"
+)
+
+add_library(velo_interpreter
+        interpreter/interpreter.cpp
+)
+
+add_library(Velo::Interpreter ALIAS velo_interpreter)
+
+target_include_directories(velo_interpreter
+        PUBLIC
+        "${PROJECT_SOURCE_DIR}/include"
+)
+
 add_library(velo_driver
         driver/driver.cpp
 )
@@ -138,4 +160,6 @@ target_link_libraries(velo_driver
         Velo::AST
         Velo::Parser
         Velo::Semantic
+        Velo::IR
+        Velo::Interpreter
 )
