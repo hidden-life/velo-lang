@@ -2,6 +2,7 @@
 #define INC_VELO_RUNTIME_RUNTIME_H
 
 #include "builtin_registry.h"
+#include "velo/module/module_registry.h"
 
 namespace Velo::Runtime {
     class Runtime final {
@@ -11,10 +12,13 @@ namespace Velo::Runtime {
         [[nodiscard]] auto builtins() const -> const BuiltinRegistry&;
         [[nodiscard]] auto builtins() -> BuiltinRegistry&;
 
+        [[nodiscard]] auto modules() const -> const Module::ModuleRegistry&;
+
     private:
         void registerStdConsole();
 
         BuiltinRegistry _registry {};
+        Module::ModuleRegistry _modules {};
     };
 }
 

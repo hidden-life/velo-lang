@@ -25,6 +25,10 @@ namespace Velo::Runtime {
         return _registry;
     }
 
+    auto Runtime::modules() const -> const Module::ModuleRegistry& {
+        return _modules;
+    }
+
     void Runtime::registerStdConsole() {
         _registry.registerFunc(
             BuiltinFunction {
@@ -45,5 +49,9 @@ namespace Velo::Runtime {
                 }
             }
         );
+
+        Module::ModuleSymbol consoleModule("console");
+        consoleModule.addFunction("println");
+        _modules.registerModule(std::move(consoleModule));
     }
 }

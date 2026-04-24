@@ -1,10 +1,14 @@
 #include "velo/semantic/semantic_analyzer.h"
 
 namespace Velo::Semantic {
-    SematicAnalyzer::SematicAnalyzer(const AST::Program &program, Diagnostic::DiagnosticEngine &engine) : _program(program), _engine(engine) {
+    SemanticAnalyzer::SemanticAnalyzer(
+        const AST::Program &program,
+        Diagnostic::DiagnosticEngine &engine,
+        const Module::ModuleRegistry &modules
+        ) : _program(program), _engine(engine), _modules(modules) {
     }
 
-    auto SematicAnalyzer::analyze() -> bool {
+    auto SemanticAnalyzer::analyze() -> bool {
         collectImports();
         collectFunctions();
         validateEntryPoint();
@@ -16,7 +20,7 @@ namespace Velo::Semantic {
         return !_engine.hasErrors();
     }
 
-    void SematicAnalyzer::collectImports() {
+    void SemanticAnalyzer::collectImports() {
         for (const auto &useDecl : _program.uses) {
             const std::string visibleName = visibleImportName(useDecl);
             const auto [it, inserted] = _visibleImports.emplace(visibleName, &useDecl);
@@ -30,7 +34,7 @@ namespace Velo::Semantic {
         }
     }
 
-    void SematicAnalyzer::collectFunctions() {
+    void SemanticAnalyzer::collectFunctions() {
         for (const auto &func : _program.functions) {
             const auto [it, inserted] = _functions.emplace(func.name, &func);
             if (!inserted) {
@@ -43,7 +47,7 @@ namespace Velo::Semantic {
         }
     }
 
-    void SematicAnalyzer::validateEntryPoint() {
+    void SemanticAnalyzer::validateEntryPoint() {
         const auto it = _functions.find("main");
         if (it == _functions.end()) {
             _engine.error(
@@ -72,13 +76,13 @@ namespace Velo::Semantic {
         }
     }
 
-    void SematicAnalyzer::analyzeFunction(const AST::FunctionDeclaration &func) {
+    void SemanticAnalyzer::analyzeFunction(const AST::FunctionDeclaration &func) {
         for (const auto &stmt : func.statements) {
             analyzeStatement(*stmt);
         }
     }
 
-    void SematicAnalyzer::analyzeStatement(const AST::Statement &stmt) {
+    void SemanticAnalyzer::analyzeStatement(const AST::Statement &stmt) {
         switch (stmt.kind) {
             case AST::StatementKind::Expression: {
                 const auto &exprStmt = static_cast<const AST::ExpressionStatement&>(stmt);
@@ -93,7 +97,7 @@ namespace Velo::Semantic {
         }
     }
 
-    void SematicAnalyzer::analyzeExpression(const AST::Expression &expr) {
+    void SemanticAnalyzer::analyzeExpression(const AST::Expression &expr) {
         switch (expr.kind) {
             case AST::ExpressionKind::IntegerLiteral:
             case AST::ExpressionKind::StringLiteral:
@@ -116,7 +120,7 @@ namespace Velo::Semantic {
         }
     }
 
-    void SematicAnalyzer::resolveQualifiedName(const AST::QualifiedName &name, bool isCallable) {
+    void SemanticAnalyzer::resolveQualifiedName(const AST::QualifiedName &name, bool isCallable) {
         if (name.segments.empty()) {
             return;
         }
@@ -128,19 +132,13 @@ namespace Velo::Semantic {
             }
 
             if (_visibleImports.contains(firstSegment)) {
-                if (isCallable) {
-                    _engine.error(
-                        "SEM006",
-                        "Imported module name '" + firstSegment + "' cannot be called directly. Use '" + firstSegment + "::...'.",
+                _engine.error(
+                    "SEM006",
+                    isCallable ?
+                        "Imported module name '" + firstSegment + "' cannot be called directly. Use '" + firstSegment + "::...'." :
+                        "Imported module name '" + firstSegment + "' cannot be used as a value directly. Use '" + firstSegment +"::...'.",
                         name.range
-                    );
-                } else {
-                    _engine.error(
-                        "SEM006",
-                        "Imported module name '" + firstSegment + "' cannot be used as a value directly. Use '" + firstSegment + "::...'.",
-                        name.range
-                    );
-                }
+                );
                 return;
             }
 
@@ -152,18 +150,41 @@ namespace Velo::Semantic {
             return;
         }
 
-        if (_visibleImports.contains(firstSegment)) {
+        const auto it = _visibleImports.find(firstSegment);
+        if (it == _visibleImports.end()) {
+            _engine.error(
+                "SEM008",
+                "Unknown module qualifier '" + firstSegment + "'. Add a matching 'use' declaration.",
+                name.range
+            );
             return;
         }
 
-        _engine.error(
-            "SEM008",
-            "Unknown module qualifier '" + firstSegment + "'. Add a matching 'use' declaration.",
-            name.range
-        );
+        const auto *module = _modules.find(firstSegment);
+        if (module == nullptr) {
+            _engine.error(
+                "SEM008",
+                "Unknown module qualifier '" + firstSegment + "'. Add a matching 'use' declaration.",
+                name.range
+            );
+
+            return;
+        }
+
+        if (name.segments.size() < 2U) {
+            return;
+        }
+
+        if (const std::string &funcName = name.segments[1]; !module->hasFunction(funcName)) {
+            _engine.error(
+                "SEM009",
+                "Unknown function '" + funcName + "' in module '" + firstSegment + "'.",
+                name.range
+            );
+        }
     }
 
-    auto SematicAnalyzer::visibleImportName(const AST::UseDeclaration &useDecl) -> std::string {
+    auto SemanticAnalyzer::visibleImportName(const AST::UseDeclaration &useDecl) -> std::string {
         if (useDecl.alias.has_value()) {
             return useDecl.alias.value();
         }
@@ -175,7 +196,7 @@ namespace Velo::Semantic {
         return {};
     }
 
-    auto SematicAnalyzer::isBuiltinInt(const AST::TypeName &typeName) -> bool {
+    auto SemanticAnalyzer::isBuiltinInt(const AST::TypeName &typeName) -> bool {
         return typeName.name.segments.size() == 1U && typeName.name.segments[0] == "int";
     }
 }

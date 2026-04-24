@@ -5,10 +5,13 @@
 #include "velo/parser/parser.h"
 #include "velo/semantic/semantic_analyzer.h"
 
+#include "velo/runtime/runtime.h"
+#include "velo/runtime/value.h"
+
 using Velo::Diagnostic::DiagnosticEngine;
 using Velo::Lexer::Lexer;
 using Velo::Parser::Parser;
-using Velo::Semantic::SematicAnalyzer;
+using Velo::Semantic::SemanticAnalyzer;
 using Velo::Source::SourceFile;
 
 namespace {
@@ -37,7 +40,8 @@ fn main(): int {
     ASSERT_NE(program, nullptr);
     ASSERT_FALSE(engine.hasErrors());
 
-    SematicAnalyzer analyzer(*program, engine);
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
     EXPECT_TRUE(analyzer.analyze());
     EXPECT_FALSE(engine.hasErrors());
 }
@@ -56,7 +60,8 @@ fn run(): int {
     ASSERT_NE(program, nullptr);
     ASSERT_FALSE(engine.hasErrors());
 
-    SematicAnalyzer analyzer(*program, engine);
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
     EXPECT_FALSE(analyzer.analyze());
 
     ASSERT_TRUE(engine.hasErrors());
@@ -78,8 +83,8 @@ fn main(): int {
 
     ASSERT_NE(program, nullptr);
     ASSERT_FALSE(engine.hasErrors());
-
-    SematicAnalyzer analyzer(*program, engine);
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
     EXPECT_FALSE(analyzer.analyze());
 
     ASSERT_TRUE(engine.hasErrors());
@@ -105,7 +110,8 @@ fn main(): int {
     ASSERT_NE(program, nullptr);
     ASSERT_FALSE(engine.hasErrors());
 
-    SematicAnalyzer analyzer(*program, engine);
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
     EXPECT_FALSE(analyzer.analyze());
 
     ASSERT_TRUE(engine.hasErrors());

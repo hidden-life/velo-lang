@@ -136,6 +136,15 @@ target_link_libraries(velo_ir
         Velo::AST
 )
 
+add_library(velo_module
+        module/module_symbol.cpp
+        module/module_registry.cpp
+)
+
+add_library(Velo::Module ALIAS velo_module)
+
+target_include_directories(velo_module PUBLIC "${PROJECT_SOURCE_DIR}/include")
+
 add_library(velo_runtime
         runtime/builtin_function.cpp
         runtime/builtin_registry.cpp
@@ -153,6 +162,8 @@ target_link_libraries(velo_runtime
         PUBLIC
         Velo::ProjectOptions
         Velo::ProjectWarnings
+
+        Velo::Module
 )
 
 add_library(velo_interpreter

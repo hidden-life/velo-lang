@@ -32,7 +32,8 @@ namespace Velo::Driver {
 
         auto program = parser.parse();
         if (program != nullptr && !engine.hasErrors()) {
-            Semantic::SematicAnalyzer analyzer(*program, engine);
+            Runtime::Runtime runtime;
+            Semantic::SemanticAnalyzer analyzer(*program, engine, runtime.modules());
             [[maybe_unused]] auto ok = analyzer.analyze();
         }
 

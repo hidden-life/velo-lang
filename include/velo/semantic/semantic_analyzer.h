@@ -5,12 +5,13 @@
 
 #include "velo/ast/ast.h"
 #include "velo/diagnostic/diagnostic_engine.h"
+#include "velo/module/module_registry.h"
 
 namespace Velo::Semantic {
     // Minimal semantic analyzer for the first executable Velo program shape.
-    class SematicAnalyzer final {
+    class SemanticAnalyzer final {
     public:
-        SematicAnalyzer(const AST::Program &program, Diagnostic::DiagnosticEngine &engine);
+        SemanticAnalyzer(const AST::Program &program, Diagnostic::DiagnosticEngine &engine, const Module::ModuleRegistry &modules);
 
         [[nodiscard]] auto analyze() -> bool;
 
@@ -31,6 +32,8 @@ namespace Velo::Semantic {
 
         std::unordered_map<std::string, const AST::UseDeclaration*> _visibleImports {};
         std::unordered_map<std::string, const AST::FunctionDeclaration*> _functions {};
+
+        const Module::ModuleRegistry &_modules;
     };
 }
 
