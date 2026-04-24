@@ -7,6 +7,7 @@ The current semantic layer performs only a minimal set of checks:
 4. validates duplicate visible import names
 5. validates duplicate function declarations
 6. resolves qualified names in expressions through `use`
+7. validates builtin function argument count
 
 ## Current limitations
 The current semantic layer does not yet implement:
@@ -16,3 +17,5 @@ The current semantic layer does not yet implement:
 - return type validation inside function bodies
 - module registry
 - standard library symbol validation
+- expression type checking
+- user-defined function call validation

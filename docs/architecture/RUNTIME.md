@@ -31,3 +31,13 @@ Each builtin function defines:
 
 Example:
 `console::println -> module: console, function: println`
+
+## Builtin arity
+Each builtin function stores its expected argument count.
+
+The runtime uses this information for interpreter validation, and the module registry mirrors it for semantic validation.
+
+Example:
+```text
+console::println(value) -> arity: 1
+```

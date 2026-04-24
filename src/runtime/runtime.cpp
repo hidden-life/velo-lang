@@ -42,11 +42,13 @@ namespace Velo::Runtime {
             auto *module = _modules.find(moduleName);
             if (module == nullptr) {
                 Module::ModuleSymbol newModule(moduleName);
-                newModule.addFunction(functionName);
+                newModule.addFunction(functionName, func.arity());
                 _modules.registerModule(std::move(newModule));
-            } else {
-                const_cast<Module::ModuleSymbol*>(module)->addFunction(functionName);
+                continue;
             }
+            // ModuleRegistry currently exposes immutable lookup, so we temporarily
+            // update the module through const_cast. Later we will replace it with a mutable.
+            const_cast<Module::ModuleSymbol*>(module)->addFunction(functionName, func.arity());
         }
     }
 

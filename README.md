@@ -51,6 +51,7 @@ Current semantic checks:
 - visible import names must be unique
 - function names must be unique
 - qualified call roots must resolve through `use`
+- builtin function argument count must match module metadata
 
 Example output:
 ```

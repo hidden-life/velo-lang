@@ -52,7 +52,7 @@ namespace Velo::Interpreter {
                 _stack.emplace_back(inst.stringOperand);
                 return {};
             case OpCode::CallBuiltin:
-                return callBuiltin(inst.stringOperand);
+                return callBuiltin(inst.stringOperand, inst.argsCount);
             case OpCode::Return:
                 if (!_stack.empty() && std::holds_alternative<int>(_stack.back())) {
                     return Runtime::ExecutionResult {
@@ -71,17 +71,29 @@ namespace Velo::Interpreter {
         };
     }
 
-    auto Interpreter::callBuiltin(const std::string &name) -> Runtime::ExecutionResult {
+    auto Interpreter::callBuiltin(const std::string &name, std::size_t argsCount) -> Runtime::ExecutionResult {
         const auto *func = _runtime.builtins().find(name);
         if (func == nullptr) {
             return Runtime::ExecutionResult {
                 .success = false,
                 .exitCode = 1,
-                .error = "Unknown builtin function:" + name
+                .error = "Unknown builtin function: " + name
             };
         }
 
-        if (_stack.size() < func->arity()) {
+        if (argsCount != func->arity()) {
+            return Runtime::ExecutionResult {
+                false,
+                1,
+                "Builtin function '" + name + "' expects " +
+                    std::to_string(func->arity()) +
+                    " argument(s), but " +
+                    std::to_string(argsCount) +
+                    " provided."
+            };
+        }
+
+        if (_stack.size() < argsCount) {
             return Runtime::ExecutionResult {
                 .success = false,
                 .exitCode = 1,
@@ -90,9 +102,9 @@ namespace Velo::Interpreter {
         }
 
         std::vector<Runtime::Value> arguments;
-        arguments.reserve(func->arity());
+        arguments.reserve(argsCount);
 
-        const auto first = _stack.end() - static_cast<std::ptrdiff_t>(func->arity());
+        const auto first = _stack.end() - static_cast<std::ptrdiff_t>(argsCount);
         arguments.insert(arguments.end(), first, _stack.end());
         _stack.erase(first, _stack.end());
 

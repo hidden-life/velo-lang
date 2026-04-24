@@ -22,7 +22,7 @@ namespace Velo::Semantic {
         void analyzeFunction(const AST::FunctionDeclaration &func);
         void analyzeStatement(const AST::Statement &stmt);
         void analyzeExpression(const AST::Expression &expr);
-        void resolveQualifiedName(const AST::QualifiedName &name, bool isCallable);
+        void resolveQualifiedName(const AST::QualifiedName &name, bool isCallable, std::size_t argsCount);
 
         [[nodiscard]] static auto visibleImportName(const AST::UseDeclaration &useDecl) -> std::string;
         [[nodiscard]] static auto isBuiltinInt(const AST::TypeName &typeName) -> bool;

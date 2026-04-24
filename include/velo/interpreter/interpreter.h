@@ -17,7 +17,7 @@ namespace Velo::Interpreter {
     private:
         [[nodiscard]] auto executeFunc(const IR::Function &func) -> Runtime::ExecutionResult;
         [[nodiscard]] auto executeInstruction(const IR::Instruction &inst) -> Runtime::ExecutionResult;
-        [[nodiscard]] auto callBuiltin(const std::string &name) -> Runtime::ExecutionResult;
+        [[nodiscard]] auto callBuiltin(const std::string &name, std::size_t argsCount) -> Runtime::ExecutionResult;
 
         std::vector<Runtime::Value> _stack {};
         Runtime::Runtime &_runtime;

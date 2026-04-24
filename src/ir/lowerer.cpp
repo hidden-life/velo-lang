@@ -71,11 +71,12 @@ namespace Velo::IR {
 
                 Instruction i;
                 i.code = OpCode::CallBuiltin;
+                i.argsCount = call.arguments.size();
 
                 // concat names currently
                 std::string name;
                 for (size_t it = 0; it < call.callee.segments.size(); ++it) {
-                    if (it > 0) name += "::";
+                    if (it > 0U) name += "::";
                     name += call.callee.segments[it];
                 }
 

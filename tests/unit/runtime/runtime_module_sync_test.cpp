@@ -10,5 +10,9 @@ TEST(RuntimeTest, BuildsModulesFromBuiltins) {
     const auto *console = modules.find("console");
 
     ASSERT_NE(console, nullptr);
-    EXPECT_TRUE(console->hasFunction("println"));
+    const auto *println = console->findFunction("println");
+    ASSERT_NE(println, nullptr);
+
+    EXPECT_EQ(println->name, "println");
+    EXPECT_EQ(println->arity, 1U);
 }

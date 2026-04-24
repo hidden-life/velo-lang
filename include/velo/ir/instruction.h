@@ -17,6 +17,8 @@ namespace Velo::IR {
 
         std::string stringOperand {};
         int intOperand {0};
+        // Argument count for CallBuiltin.
+        std::size_t argsCount {0};
     };
 }
 

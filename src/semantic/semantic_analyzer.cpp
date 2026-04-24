@@ -104,13 +104,13 @@ namespace Velo::Semantic {
                 return;
             case AST::ExpressionKind::Name: {
                 const auto &nameExpr = static_cast<const AST::NameExpression&>(expr);
-                resolveQualifiedName(nameExpr.name, false);
+                resolveQualifiedName(nameExpr.name, false, 0U);
                 return;
             }
 
             case AST::ExpressionKind::Call: {
                 const auto &callExpr = static_cast<const AST::CallExpression&>(expr);
-                resolveQualifiedName(callExpr.callee, true);
+                resolveQualifiedName(callExpr.callee, true, callExpr.arguments.size());
                 for (const auto &arg : callExpr.arguments) {
                     analyzeExpression(*arg);
                 }
@@ -120,7 +120,7 @@ namespace Velo::Semantic {
         }
     }
 
-    void SemanticAnalyzer::resolveQualifiedName(const AST::QualifiedName &name, bool isCallable) {
+    void SemanticAnalyzer::resolveQualifiedName(const AST::QualifiedName &name, bool isCallable, std::size_t argsCount) {
         if (name.segments.empty()) {
             return;
         }
@@ -171,14 +171,25 @@ namespace Velo::Semantic {
             return;
         }
 
-        if (name.segments.size() < 2U) {
-            return;
-        }
-
-        if (const std::string &funcName = name.segments[1]; !module->hasFunction(funcName)) {
+        const std::string &funcName = name.segments[1];
+        const auto *func = module->findFunction(funcName);
+        if (func == nullptr) {
             _engine.error(
                 "SEM009",
                 "Unknown function '" + funcName + "' in module '" + firstSegment + "'.",
+                name.range
+            );
+            return;
+        }
+
+        if (isCallable && func->arity != argsCount) {
+            _engine.error(
+                "SEM010",
+                "Function '" + firstSegment + "::" + funcName + "' expects " +
+                std::to_string(func->arity) +
+                " argument(s), but " +
+                std::to_string(argsCount) +
+                " provided.",
                 name.range
             );
         }
