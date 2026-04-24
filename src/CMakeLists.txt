@@ -97,6 +97,26 @@ target_link_libraries(velo_parser
         Velo::Diagnostic
 )
 
+add_library(velo_semantic
+        semantic/semantic_analyzer.cpp
+)
+
+add_library(Velo::Semantic ALIAS velo_semantic)
+
+target_include_directories(velo_semantic
+        PUBLIC
+        "${PROJECT_SOURCE_DIR}/include"
+)
+
+target_link_libraries(velo_semantic
+        PUBLIC
+        Velo::ProjectOptions
+        Velo::ProjectWarnings
+
+        Velo::AST
+        Velo::Diagnostic
+)
+
 add_library(velo_driver
         driver/driver.cpp
 )
@@ -117,4 +137,5 @@ target_link_libraries(velo_driver
         Velo::Lexer
         Velo::AST
         Velo::Parser
+        Velo::Semantic
 )

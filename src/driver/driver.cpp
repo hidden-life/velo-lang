@@ -3,6 +3,7 @@
 #include "velo/ast/ast_printer.h"
 #include "velo/lexer/lexer.h"
 #include "velo/parser/parser.h"
+#include "velo/semantic/semantic_analyzer.h"
 
 namespace Velo::Driver {
     auto Driver::parseFile(const std::string &path) -> DriverResult {
@@ -13,17 +14,26 @@ namespace Velo::Driver {
             return result;
         }
 
-        return parseText(file->path(), file->content());
+        return runPipeline(*file);
     }
 
     auto Driver::parseText(std::string path, std::string content) -> DriverResult {
         const auto &file = _sourceManager.addVirtualFile(std::move(path), std::move(content));
 
+        return runPipeline(file);
+    }
+
+    auto Driver::runPipeline(const Source::SourceFile &source) -> DriverResult {
         Diagnostic::DiagnosticEngine engine;
-        Lexer::Lexer lexer(file, engine);
+        Lexer::Lexer lexer(source, engine);
         Parser::Parser parser(lexer.lexAll(), engine);
 
         auto program = parser.parse();
+        if (program != nullptr && !engine.hasErrors()) {
+            Semantic::SematicAnalyzer analyzer(*program, engine);
+            [[maybe_unused]] auto ok = analyzer.analyze();
+        }
+
         DriverResult result;
         result.diagnostics = engine.diagnostics();
         result.success = !engine.hasErrors() && program != nullptr;

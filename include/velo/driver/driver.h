@@ -15,13 +15,15 @@ namespace Velo::Driver {
         std::string error {};
     };
 
-    // The first orchestration layer for the source -> lexer -> parser -> AST print pipeline.
+    // The first orchestration layer for the source -> lexer -> parser -> semantic -> AST print pipeline.
     class Driver final {
     public:
         [[nodiscard]] auto parseFile(const std::string &path) -> DriverResult;
         [[nodiscard]] auto parseText(std::string path, std::string content) -> DriverResult;
 
     private:
+        [[nodiscard]] auto runPipeline(const Source::SourceFile &source) -> DriverResult;
+
         Source::SourceManager _sourceManager {};
     };
 }

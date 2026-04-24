@@ -35,5 +35,11 @@ console::println("Hello, Velo!");
 return 0;
 ```
 
+## Current semantic rules
+- a program must contain `main`
+- `main` must return `int`
+- `main` must not have parameters
+- qualified module calls must resolve through `use`
+
 ## Notes
-This document describes only the syntax implemented in the current codebase.
+This document describes only the syntax and the semantic rules implemented in the current codebase.

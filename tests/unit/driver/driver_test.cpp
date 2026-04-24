@@ -44,6 +44,24 @@ fn main(): int {
     EXPECT_EQ(result.diagnostics.front().code(), "PAR006");
 }
 
+TEST(DriverTest, ReturnsSemanticDiagnosticsForUnknownQualifier) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "broken_semantic.velo",
+        R"(module app;
+fn main(): int {
+    console::println("Hello, Velo!");
+    return 0;
+}
+)"
+    );
+
+    ASSERT_FALSE(result.success);
+    ASSERT_TRUE(result.error.empty());
+    ASSERT_FALSE(result.diagnostics.empty());
+    EXPECT_EQ(result.diagnostics.front().code(), "SEM008");
+}
+
 TEST(DriverTest, ReturnsErrorMessageWhenFileCannotBeLoaded) {
     Driver driver;
     const auto result = driver.parseFile("this_file_should_not_exists.velo");
