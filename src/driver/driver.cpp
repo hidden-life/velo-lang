@@ -40,16 +40,24 @@ namespace Velo::Driver {
         result.diagnostics = engine.diagnostics();
         result.success = !engine.hasErrors() && program != nullptr;
 
-        if (result.success) {
-            IR::Lowerer lowerer;
-            auto module = lowerer.lower(*program);
-
-            Interpreter::Interpreter interpreter;
-            [[maybe_unused]] auto ignored = interpreter.execute(module);
-
-            AST::ASTPrinter printer;
-            result.astText = printer.print(*program);
+        if (!result.success) {
+            return result;
         }
+
+        IR::Lowerer lowerer;
+        const auto module = lowerer.lower(*program);
+        Runtime::Runtime runtime;
+        Interpreter::Interpreter interpreter(runtime);
+        const auto execResult = interpreter.execute(module);
+        if (!execResult.success) {
+            result.success = false;
+            result.error = execResult.error;
+
+            return result;
+        }
+
+        AST::ASTPrinter printer;
+        result.astText = printer.print(*program);
 
         return result;
     }

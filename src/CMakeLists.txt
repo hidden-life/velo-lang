@@ -128,6 +128,33 @@ target_include_directories(velo_ir
         "${PROJECT_SOURCE_DIR}/include"
 )
 
+target_link_libraries(velo_ir
+        PUBLIC
+        Velo::ProjectOptions
+        Velo::ProjectWarnings
+
+        Velo::AST
+)
+
+add_library(velo_runtime
+        runtime/builtin_function.cpp
+        runtime/builtin_registry.cpp
+        runtime/runtime.cpp
+)
+
+add_library(Velo::Runtime ALIAS velo_runtime)
+
+target_include_directories(velo_runtime
+        PUBLIC
+        "${PROJECT_SOURCE_DIR}/include"
+)
+
+target_link_libraries(velo_runtime
+        PUBLIC
+        Velo::ProjectOptions
+        Velo::ProjectWarnings
+)
+
 add_library(velo_interpreter
         interpreter/interpreter.cpp
 )
@@ -137,6 +164,15 @@ add_library(Velo::Interpreter ALIAS velo_interpreter)
 target_include_directories(velo_interpreter
         PUBLIC
         "${PROJECT_SOURCE_DIR}/include"
+)
+
+target_link_libraries(velo_interpreter
+        PUBLIC
+        Velo::ProjectOptions
+        Velo::ProjectWarnings
+
+        Velo::IR
+        Velo::Runtime
 )
 
 add_library(velo_driver
@@ -161,5 +197,6 @@ target_link_libraries(velo_driver
         Velo::Parser
         Velo::Semantic
         Velo::IR
+        Velo::Runtime
         Velo::Interpreter
 )

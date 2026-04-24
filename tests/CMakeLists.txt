@@ -14,6 +14,8 @@ add_executable(velo_smoke_tests
         unit/lexer/lexer_test.cpp
         unit/parser/parser_test.cpp
         unit/semantic/semantic_analyzer_test.cpp
+        unit/runtime/builtin_registry_test.cpp
+        unit/interpreter/interpreter_test.cpp
         unit/driver/driver_test.cpp
         unit/ast/ast_printer_test.cpp
 )
@@ -29,6 +31,9 @@ target_link_libraries(velo_smoke_tests PRIVATE
         Velo::AST
         Velo::Parser
         Velo::Semantic
+        Velo::IR
+        Velo::Runtime
+        Velo::Interpreter
         Velo::Driver
 )
 

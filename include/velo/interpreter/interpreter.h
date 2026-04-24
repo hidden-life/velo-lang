@@ -5,20 +5,22 @@
 #include <string>
 
 #include "velo/ir/module.h"
+#include "velo/runtime/runtime.h"
 
 namespace Velo::Interpreter {
-    using Value = std::variant<int, std::string>;
-
     class Interpreter final {
     public:
-        [[nodiscard]] auto execute(const IR::Module &module) -> int;
+        explicit Interpreter(Runtime::Runtime &runtime);
+
+        [[nodiscard]] auto execute(const IR::Module &module) -> Runtime::ExecutionResult;
 
     private:
-        void executeFunc(const IR::Function &func);
-        void executeInstruction(const IR::Instruction &inst);
-        void callBuiltin(const std::string &name);
+        [[nodiscard]] auto executeFunc(const IR::Function &func) -> Runtime::ExecutionResult;
+        [[nodiscard]] auto executeInstruction(const IR::Instruction &inst) -> Runtime::ExecutionResult;
+        [[nodiscard]] auto callBuiltin(const std::string &name) -> Runtime::ExecutionResult;
 
-        std::vector<Value> _stack {};
+        std::vector<Runtime::Value> _stack {};
+        Runtime::Runtime &_runtime;
     };
 }
 

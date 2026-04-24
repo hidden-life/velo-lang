@@ -13,6 +13,10 @@ Implemented so far:
 - minimal semantic analyzer
 - AST printer
 - first driver for the source -> lexer -> parser -> semantic pipeline
+- minimal runtime layer
+- builtin function registry
+- registered `console::println` builtin
+- interpreter execution result model
 - GoogleTest test setup
 
 ## Build
@@ -36,7 +40,9 @@ The project can now:
 - build minimal AST
 - parse the first executable Velo program shape
 - run minimal semantic validation
-- print AST from the CLI
+- lower AST into minimal IR
+- execute minimal IR through the interpreter
+- call registered builtin functions through the runtime registry
 
 Current semantic checks:
 - `main` must exist
