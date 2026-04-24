@@ -11,6 +11,8 @@ namespace Velo::Runtime {
         [[nodiscard]] auto find(const std::string &name) const -> const BuiltinFunction*;
         [[nodiscard]] auto contains(const std::string &name) const -> bool;
 
+        [[nodiscard]] auto all() const -> const std::unordered_map<std::string, BuiltinFunction>&;
+
     private:
         std::unordered_map<std::string, BuiltinFunction> _functions {};
     };

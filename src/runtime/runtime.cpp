@@ -15,6 +15,7 @@ namespace Velo::Runtime {
 
     Runtime::Runtime() {
         registerStdConsole();
+        buildModulesFromBuiltins();
     }
 
     auto Runtime::builtins() const -> const BuiltinRegistry& {
@@ -27,6 +28,26 @@ namespace Velo::Runtime {
 
     auto Runtime::modules() const -> const Module::ModuleRegistry& {
         return _modules;
+    }
+
+    void Runtime::buildModulesFromBuiltins() {
+        for (const auto &[name, func] : _registry.all()) {
+            const std::string moduleName = func.moduleName();
+            const std::string functionName = func.functionName();
+
+            if (moduleName.empty()) {
+                continue;
+            }
+
+            auto *module = _modules.find(moduleName);
+            if (module == nullptr) {
+                Module::ModuleSymbol newModule(moduleName);
+                newModule.addFunction(functionName);
+                _modules.registerModule(std::move(newModule));
+            } else {
+                const_cast<Module::ModuleSymbol*>(module)->addFunction(functionName);
+            }
+        }
     }
 
     void Runtime::registerStdConsole() {
@@ -49,9 +70,5 @@ namespace Velo::Runtime {
                 }
             }
         );
-
-        Module::ModuleSymbol consoleModule("console");
-        consoleModule.addFunction("println");
-        _modules.registerModule(std::move(consoleModule));
     }
 }

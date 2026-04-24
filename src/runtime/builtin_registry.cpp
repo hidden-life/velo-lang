@@ -18,4 +18,8 @@ namespace Velo::Runtime {
     auto BuiltinRegistry::contains(const std::string &name) const -> bool {
         return _functions.contains(name);
     }
+
+    auto BuiltinRegistry::all() const -> const std::unordered_map<std::string, BuiltinFunction>& {
+        return _functions;
+    }
 }

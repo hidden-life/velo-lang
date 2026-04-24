@@ -17,4 +17,22 @@ namespace Velo::Runtime {
     auto BuiltinFunction::call(const std::vector<Value> &arguments) const -> ExecutionResult {
         return _handler(arguments);
     }
+
+    auto BuiltinFunction::moduleName() const -> const std::string {
+        const auto pos = _name.find("::");
+        if (pos == std::string::npos) {
+            return {};
+        }
+
+        return _name.substr(0, pos);
+    }
+
+    auto BuiltinFunction::functionName() const -> const std::string {
+        const auto pos = _name.find("::");
+        if (pos == std::string::npos) {
+            return _name;
+        }
+
+        return _name.substr(pos + 2);
+    }
 }

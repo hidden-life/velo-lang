@@ -14,6 +14,8 @@ namespace Velo::Runtime {
 
         [[nodiscard]] auto modules() const -> const Module::ModuleRegistry&;
 
+        void buildModulesFromBuiltins();
+
     private:
         void registerStdConsole();
 

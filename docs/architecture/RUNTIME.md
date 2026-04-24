@@ -22,3 +22,12 @@ This keeps the interpreter generic and prepares the project for future modules s
 - `http::request`
 - `http::response`
 - `crypto::hash`
+
+## Module generation
+ModuleRegistry is automatically derived from BuiltinRegistry.
+Each builtin function defines:
+- module name
+- function name
+
+Example:
+`console::println -> module: console, function: println`

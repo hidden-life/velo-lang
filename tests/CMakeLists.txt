@@ -16,6 +16,7 @@ add_executable(velo_smoke_tests
         unit/semantic/semantic_analyzer_test.cpp
         unit/semantic/semantic_module_test.cpp
         unit/runtime/builtin_registry_test.cpp
+        unit/runtime/runtime_module_sync_test.cpp
         unit/interpreter/interpreter_test.cpp
         unit/driver/driver_test.cpp
         unit/ast/ast_printer_test.cpp

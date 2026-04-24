@@ -17,6 +17,9 @@ namespace Velo::Runtime {
         [[nodiscard]] auto arity() const -> std::size_t;
         [[nodiscard]] auto call(const std::vector<Value> &arguments) const -> ExecutionResult;
 
+        [[nodiscard]] auto moduleName() const -> const std::string;
+        [[nodiscard]] auto functionName() const -> const std::string;
+
     private:
         std::string _name;
         std::size_t _arity {0};
