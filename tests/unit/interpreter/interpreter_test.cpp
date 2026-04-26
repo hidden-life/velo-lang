@@ -110,3 +110,54 @@ TEST(InterpreterTest, ReportsWrongBuiltinArgumentCount) {
     EXPECT_EQ(result.exitCode, 1);
     EXPECT_FALSE(result.error.empty());
 }
+
+TEST(InterpreterTest, ExecutesUserDefinedFunctionCall) {
+    Module module;
+    Function helperFunc;
+    helperFunc.name = "helper";
+    helperFunc.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .stringOperand = {},
+        .intOperand = 0,
+        .argsCount = 0U
+    });
+    helperFunc.instructions.push_back(Instruction {
+        .code = OpCode::Return,
+        .stringOperand = {},
+        .intOperand = 0,
+        .argsCount = 0U
+    });
+
+    Function mainFunc;
+    mainFunc.name = "main";
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::CallFunction,
+        .stringOperand = "helper",
+        .intOperand = 0,
+        .argsCount = 0U
+    });
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .stringOperand = {},
+        .intOperand = 0,
+        .argsCount = 0U
+    });
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::Return,
+        .stringOperand = {},
+        .intOperand = 0,
+        .argsCount = 0U
+    });
+
+    module.functions.push_back(std::move(helperFunc));
+    module.functions.push_back(std::move(mainFunc));
+
+    Runtime runtime;
+    Interpreter interpreter(runtime);
+
+    const auto result = interpreter.execute(module);
+
+    EXPECT_TRUE(result.success);
+    EXPECT_EQ(result.exitCode, 0);
+    EXPECT_TRUE(result.error.empty());
+}

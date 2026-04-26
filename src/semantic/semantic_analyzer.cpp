@@ -127,7 +127,18 @@ namespace Velo::Semantic {
 
         const std::string &firstSegment = name.segments.front();
         if (name.segments.size() == 1U) {
-            if (_functions.contains(firstSegment)) {
+            if (const auto funcIterator = _functions.find(firstSegment); funcIterator != _functions.end()) {
+                if (const auto *f = funcIterator->second; isCallable && f->parameters.size() != argsCount) {
+                    _engine.error(
+                        "SEM011",
+                        "Function '" + firstSegment + "' expects " +
+                        std::to_string(f->parameters.size()) +
+                        " argument(s), but "
+                        + std::to_string(argsCount)
+                        + " provded.",
+                        name.range
+                    );
+                }
                 return;
             }
 

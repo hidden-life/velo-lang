@@ -17,6 +17,7 @@ Implemented so far:
 - builtin function registry
 - registered `console::println` builtin
 - interpreter execution result model
+- user-defined function calls without parameters
 - GoogleTest test setup
 
 ## Build
@@ -43,6 +44,8 @@ The project can now:
 - lower AST into minimal IR
 - execute minimal IR through the interpreter
 - call registered builtin functions through the runtime registry
+- lower user-defined function calls into IR
+- execute user-defined function calls through the interpreter
 
 Current semantic checks:
 - `main` must exist
@@ -64,6 +67,12 @@ Program
                 String "Hello, Velo!"
         Return
             Integer 0
+```
+
+## Examples
+```bash
+./build/debug/apps/velo/velo ./examples/hello_world/main.velo
+./build/debug/apps/velo/velo ./examples/user_funtion/main.velo
 ```
 
 ## Next milestone

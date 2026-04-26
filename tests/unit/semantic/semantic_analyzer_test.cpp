@@ -24,7 +24,7 @@ namespace {
     }
 }
 
-TEST(SemanticAnalyzerTests, AcceptsValidHelloWorldProgram) {
+TEST(SemanticAnalyzerTest, AcceptsValidHelloWorldProgram) {
     DiagnosticEngine engine;
     const auto program = parseProgram(
         R"(module app;
@@ -46,7 +46,7 @@ fn main(): int {
     EXPECT_FALSE(engine.hasErrors());
 }
 
-TEST(SemanticAnalyzerTests, ReportMissingMainFunction) {
+TEST(SemanticAnalyzerTest, ReportMissingMainFunction) {
     DiagnosticEngine engine;
     const auto program = parseProgram(
         R"(module app;
@@ -69,7 +69,7 @@ fn run(): int {
     EXPECT_EQ(engine.diagnostics().front().code(), "SEM003");
 }
 
-TEST(SemanticAnalyzerTests, ReportsUnknownModuleQualifier) {
+TEST(SemanticAnalyzerTest, ReportsUnknownModuleQualifier) {
     DiagnosticEngine engine;
     const auto program = parseProgram(
         R"(module app;
@@ -92,7 +92,7 @@ fn main(): int {
     EXPECT_EQ(engine.diagnostics().front().code(), "SEM008");
 }
 
-TEST(SemanticAnalyzerTests, ReportsDuplicateVisibleImportName) {
+TEST(SemanticAnalyzerTest, ReportsDuplicateVisibleImportName) {
     DiagnosticEngine engine;
     const auto program = parseProgram(
         R"(module app;
@@ -116,4 +116,55 @@ fn main(): int {
 
     ASSERT_TRUE(engine.hasErrors());
     ASSERT_EQ(engine.diagnostics().front().code(), "SEM001");
+}
+
+TEST(SemanticAnalyzerTest, AcceptsUserDefinedFunctionCall) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+    R"(module app;
+fn helper(): int {
+    return 0;
+}
+
+fn main(): int {
+    helper();
+    return 0;
+}
+)",
+    engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, ReportsUnknownUserDefinedFunctionCall) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+    R"(module app;
+fn main(): int {
+    missing();
+    return 0;
+}
+)",
+    engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+
+    ASSERT_TRUE(engine.hasErrors());
+    ASSERT_EQ(engine.size(), 1U);
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM007");
 }

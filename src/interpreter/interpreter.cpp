@@ -8,6 +8,7 @@ namespace Velo::Interpreter {
     }
 
     auto Interpreter::execute(const IR::Module &module) -> Runtime::ExecutionResult {
+        _currentModule = &module;
         const auto it = std::ranges::find_if(
             module.functions,
             [](const IR::Function &function) {
@@ -53,6 +54,8 @@ namespace Velo::Interpreter {
                 return {};
             case OpCode::CallBuiltin:
                 return callBuiltin(inst.stringOperand, inst.argsCount);
+            case OpCode::CallFunction:
+                return callFunction(inst.stringOperand, inst.argsCount);
             case OpCode::Return:
                 if (!_stack.empty() && std::holds_alternative<int>(_stack.back())) {
                     return Runtime::ExecutionResult {
@@ -109,5 +112,43 @@ namespace Velo::Interpreter {
         _stack.erase(first, _stack.end());
 
         return func->call(arguments);
+    }
+
+    auto Interpreter::callFunction(const std::string &name, std::size_t argsCount) -> Runtime::ExecutionResult {
+        if (_currentModule == nullptr) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "No IR module is currently loaded."
+            };
+        }
+
+        if (argsCount != 0U) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "User-defined function calls with arguments are not supported yet: " + name
+            };
+        }
+
+        const auto it = std::ranges::find_if(
+            _currentModule->functions,
+            [&name](const IR::Function &function) {
+                return function.name == name;
+            }
+        );
+
+        if (it == _currentModule->functions.end()) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "Unknown user-defined function:" + name
+            };
+        }
+
+        // At this stage user-defined functions have no parameters.
+        // Therefor a separate frame object is not required yet: recursive
+        // executeFunc already gives us a minimal call stack through the C++ stack.
+        return executeFunc(*it);
     }
 }

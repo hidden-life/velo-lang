@@ -70,7 +70,9 @@ namespace Velo::IR {
                 }
 
                 Instruction i;
-                i.code = OpCode::CallBuiltin;
+                // Qualified calls like console::println() are treated as builtin calls.
+                // Single-segment calls like message() are treated as user-defined function calls.
+                i.code = call.callee.segments.size() > 1U ? OpCode::CallBuiltin : OpCode::CallFunction;
                 i.argsCount = call.arguments.size();
 
                 // concat names currently

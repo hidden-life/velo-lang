@@ -1,0 +1,13 @@
+module app;
+
+use std::console;
+
+fn helper(): int {
+    console::println("Hello from helper!");
+    return 0;
+}
+
+fn main(): int {
+    helper();
+    return 0;
+}

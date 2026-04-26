@@ -9,6 +9,7 @@ namespace Velo::IR {
         PushInt,
         PushString,
         CallBuiltin,
+        CallFunction,
         Return,
     };
 
@@ -17,7 +18,7 @@ namespace Velo::IR {
 
         std::string stringOperand {};
         int intOperand {0};
-        // Argument count for CallBuiltin.
+        // Argument count for CallBuiltin/CallFunction.
         std::size_t argsCount {0};
     };
 }

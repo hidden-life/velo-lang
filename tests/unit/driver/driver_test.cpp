@@ -69,3 +69,30 @@ TEST(DriverTest, ReturnsErrorMessageWhenFileCannotBeLoaded) {
     ASSERT_FALSE(result.success);
     ASSERT_FALSE(result.error.empty());
 }
+
+TEST(DriverTest, ExecutesUserDefinedFunctionCall) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "functions.velo",
+        R"(module app;
+use std::console;
+
+fn helper(): int {
+    console::println("from helper");
+    return 0;
+}
+
+fn main(): int {
+    helper();
+    return 0;
+}
+)"
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.error.empty());
+    ASSERT_TRUE(result.diagnostics.empty());
+
+    EXPECT_NE(result.astText.find("Function helper -> int"), std::string::npos);
+    EXPECT_NE(result.astText.find("Call helper"), std::string::npos);
+}

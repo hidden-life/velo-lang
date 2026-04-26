@@ -32,3 +32,5 @@ source text
 - The AST is intentionally minimal and only covers the first executable program shape.
 - The semantic layer is intentionally small and currently validates only the entry point and import-based name resolution.
 - Bytecode generation and execution are not implemented yet.
+- The interpreter can now execute user-defined function calls without parameters.
+- Calls with arguments are still limited to builtins.

@@ -41,5 +41,20 @@ return 0;
 - `main` must not have parameters
 - qualified module calls must resolve through `use`
 
+## User-defined function calls
+```velo
+fn helper(): int {
+    return 0;
+}
+
+fn main(): int {
+    helper();
+    return 0;
+}
+```
+
+## Current limitation
+- user-defined function calls do not support arguments yet
+
 ## Notes
 This document describes only the syntax and the semantic rules implemented in the current codebase.
