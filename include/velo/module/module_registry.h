@@ -11,6 +11,8 @@ namespace Velo::Module {
         void registerModule(ModuleSymbol module);
 
         [[nodiscard]] auto find(const std::string &name) const -> const ModuleSymbol*;
+        // Returns mutable pointer to a module.
+        [[nodiscard]] auto findMutable(const std::string &name) -> ModuleSymbol*;
 
     private:
         std::unordered_map<std::string, ModuleSymbol> _modules {};

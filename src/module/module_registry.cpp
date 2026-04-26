@@ -14,4 +14,13 @@ namespace Velo::Module {
 
         return &it->second;
     }
+
+    auto ModuleRegistry::findMutable(const std::string &name) -> ModuleSymbol* {
+        const auto it = _modules.find(name);
+        if (it == _modules.end()) {
+            return nullptr;
+        }
+
+        return &it->second;
+    }
 }

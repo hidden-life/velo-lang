@@ -41,3 +41,8 @@ Example:
 ```text
 console::println(value) -> arity: 1
 ```
+
+## Module registry mutability
+ModuleRegistry now provides a mutable API (`findMutable`) for safe updates during runtime initialization.
+
+This removes previous unsafe `const_cast` usage.
