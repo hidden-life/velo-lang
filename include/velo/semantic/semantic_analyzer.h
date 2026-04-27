@@ -9,6 +9,12 @@
 #include "velo/module/module_registry.h"
 
 namespace Velo::Semantic {
+    enum class ExpressionType {
+        Unknown,
+        Int,
+        String,
+    };
+
     // Minimal semantic analyzer for the first executable Velo program shape.
     class SemanticAnalyzer final {
     public:
@@ -28,6 +34,8 @@ namespace Velo::Semantic {
         [[nodiscard]] static auto visibleImportName(const AST::UseDeclaration &useDecl) -> std::string;
         [[nodiscard]] static auto isBuiltinInt(const AST::TypeName &typeName) -> bool;
 
+        [[nodiscard]] auto analyzeExpressionType(const AST::Expression &expression) -> ExpressionType;
+
         const AST::Program &_program;
         Diagnostic::DiagnosticEngine &_engine;
 
@@ -36,6 +44,7 @@ namespace Velo::Semantic {
 
         const Module::ModuleRegistry &_modules;
         std::unordered_set<std::string> _currentParameters {};
+        std::string _currentFunctionReturnType {};
     };
 }
 

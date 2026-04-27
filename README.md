@@ -57,6 +57,9 @@ The project can now:
 - parse binary addition expressions
 - lower integer addition into `AddInt`
 - execute integer addition in the interpreter
+- semantic type checking for expressions
+- integer-only validation for binary `+`
+- return type validation
 
 Current semantic checks:
 - `main` must exist

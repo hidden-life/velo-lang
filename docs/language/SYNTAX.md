@@ -71,6 +71,19 @@ fn add(a: int, b: int): int {
 }
 ```
 
+## Type checking
+```velo
+"a" + 1 // ❌ invalid
+1 + 2 // ✔️ valid
+```
+
+Return type must match function signature:
+```velo
+fn broken(): int {
+    return "Hello"; // ❌
+}
+```
+
 ## Current limitations
 - parameters are immutable
 - there are no local variable declarations yet

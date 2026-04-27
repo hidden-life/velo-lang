@@ -23,3 +23,10 @@ The current semantic layer does not yet implement:
 - full expression type checking
 - user-defined function call validation
 - local variable declarations
+
+## Type checking
+The semantic analyzer now performs basic type validation:
+- integer literals -> `int`
+- string literals -> `string`
+- binary '+' -> `int` + `int` only
+- return expressions must match function return type

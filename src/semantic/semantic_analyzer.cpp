@@ -77,6 +77,7 @@ namespace Velo::Semantic {
     }
 
     void SemanticAnalyzer::analyzeFunction(const AST::FunctionDeclaration &func) {
+        _currentFunctionReturnType = func.returnType.name.segments[0];
         _currentParameters.clear();
 
         for (const auto &param : func.parameters) {
@@ -95,6 +96,7 @@ namespace Velo::Semantic {
         }
 
         _currentParameters.clear();
+        _currentFunctionReturnType.clear();
     }
 
     void SemanticAnalyzer::analyzeStatement(const AST::Statement &stmt) {
@@ -106,7 +108,23 @@ namespace Velo::Semantic {
             }
             case AST::StatementKind::Return: {
                 const auto &returnStmt = static_cast<const AST::ReturnStatement&>(stmt);
-                analyzeExpression(*returnStmt.expression);
+
+                const auto actualType = analyzeExpressionType(*returnStmt.expression);
+                ExpressionType expectedType = ExpressionType::Unknown;
+                if (_currentFunctionReturnType == "int") {
+                    expectedType = ExpressionType::Int;
+                } else if (_currentFunctionReturnType == "string") {
+                    expectedType = ExpressionType::String;
+                }
+
+                if (expectedType != ExpressionType::Unknown && actualType != expectedType) {
+                    _engine.error(
+                        "SEM014",
+                        "Return type mismatch: expected 'int'.",
+                        returnStmt.range
+                    );
+                }
+
                 break;
             }
         }
@@ -138,6 +156,10 @@ namespace Velo::Semantic {
 
                 analyzeExpression(*binaryExpr.left);
                 analyzeExpression(*binaryExpr.right);
+
+                // Binary expressions must be checked not only in return statements,
+                // but also inside call arguments, expression statements, etc.
+                static_cast<void>(analyzeExpressionType(binaryExpr));
 
                 return;
             }
@@ -248,5 +270,59 @@ namespace Velo::Semantic {
 
     auto SemanticAnalyzer::isBuiltinInt(const AST::TypeName &typeName) -> bool {
         return typeName.name.segments.size() == 1U && typeName.name.segments[0] == "int";
+    }
+
+    auto SemanticAnalyzer::analyzeExpressionType(const AST::Expression &expression) -> ExpressionType {
+        using namespace AST;
+
+        switch (expression.kind) {
+            case ExpressionKind::IntegerLiteral:
+                return ExpressionType::Int;
+
+            case ExpressionKind::StringLiteral:
+                return ExpressionType::String;
+
+            case ExpressionKind::Name: {
+                const auto &nameExpr = static_cast<const NameExpression&>(expression);
+                if (nameExpr.name.segments.size() == 1U) {
+                    const std::string &name = nameExpr.name.segments.front();
+                    if (_currentParameters.contains(name)) {
+                        return ExpressionType::Int; // currently INT
+                    }
+                }
+
+                return ExpressionType::Unknown;
+            }
+
+            case ExpressionKind::Binary: {
+                const auto &binaryExpr = static_cast<const BinaryExpression&>(expression);
+                const auto left = analyzeExpressionType(*binaryExpr.left);
+                const auto right = analyzeExpressionType(*binaryExpr.right);
+
+                if (binaryExpr.op == BinaryOperator::Add) {
+                    if (left == ExpressionType::Int && right == ExpressionType::Int) {
+                        return ExpressionType::Int;
+                    }
+
+                    _engine.error(
+                        "SEM013",
+                        "Operator '+' requires integer operands.",
+                        binaryExpr.range
+                    );
+
+                    return ExpressionType::Unknown;
+                }
+
+                return ExpressionType::Unknown;
+            }
+
+            case ExpressionKind::Call: {
+                // temporary all functions returns 'int'
+                // will change in future
+                return ExpressionType::Int;
+            }
+        }
+
+        return ExpressionType::Unknown;
     }
 }
