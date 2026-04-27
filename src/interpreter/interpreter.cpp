@@ -132,14 +132,14 @@ namespace Velo::Interpreter {
             return Runtime::ExecutionResult {
                 .success = false,
                 .exitCode = 1,
-                .error = "User-defined function calls with arguments are not supported yet: " + name
+                .error = "User-defined functions with arguments are not supported yet: " + name
             };
         }
 
         const auto it = std::ranges::find_if(
             _currentModule->functions,
-            [&name](const IR::Function &function) {
-                return function.name == name;
+            [&name](const IR::Function &func) {
+                return func.name == name;
             }
         );
 
@@ -147,13 +147,29 @@ namespace Velo::Interpreter {
             return Runtime::ExecutionResult {
                 .success = false,
                 .exitCode = 1,
-                .error = "Unknown user-defined function:" + name
+                .error = "Unknown user-defined function: " + name
             };
         }
 
-        // At this stage user-defined functions have no parameters.
-        // Therefor a separate frame object is not required yet: recursive
-        // executeFunc already gives us a minimal call stack through the C++ stack.
-        return executeFunc(*it);
+        // save current stack
+        std::vector<Runtime::Value> callerStack = std::move(_stack);
+        // new stack
+        _stack.clear();
+        // execute a function
+        auto result = executeFunc(*it);
+        if (!result.success) {
+            return result;
+        }
+
+        Runtime::Value returnValue {};
+        if (!_stack.empty()) {
+            returnValue = _stack.back();
+        }
+
+        // recover caller stack
+        _stack = std::move(callerStack);
+        _stack.push_back(returnValue);
+
+        return {};
     }
 }

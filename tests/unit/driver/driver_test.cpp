@@ -118,3 +118,23 @@ fn main(): int {
     ASSERT_TRUE(result.success);
     ASSERT_TRUE(result.error.empty());
 }
+
+TEST(DriverTest, ReturnsValueFromUserFunction) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "return.velo",
+        R"(module app;
+
+fn value(): int {
+    return 42;
+}
+
+fn main(): int {
+    return value();
+}
+)"
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.error.empty());
+}

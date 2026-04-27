@@ -47,6 +47,8 @@ The project can now:
 - lower user-defined function calls into IR
 - execute user-defined function calls through the interpreter
 - prevents stack pollution via Pop instruction
+- correct return value propagation between functions
+- isolated stack frames for user-defined calls
 
 Current semantic checks:
 - `main` must exist

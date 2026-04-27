@@ -54,3 +54,11 @@ The interpreter follows a simple rule:
 - return statements consume the top value as exit code
 
 This prevents stack pollution during execution.
+
+## Function call frames
+Each user-defined function call creates an isolated stack frame:
+- the caller stack is saved
+- a new stack is used for the callee
+- the return value is transferred back to the caller stack
+
+This ensures proper return value propagation and prevents stack interference.

@@ -202,3 +202,43 @@ TEST(InterpreterTest, CLeansStackAfterExpressionStatement) {
     EXPECT_TRUE(result.success);
     EXPECT_EQ(result.exitCode, 0);
 }
+
+TEST(InterpreterTest, PropagatesReturnValueFromFunction) {
+    Module module;
+    // value() -> return 42
+    Function valueFn;
+    valueFn.name = "value";
+    valueFn.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .intOperand = 42,
+        .argsCount = 0U
+    });
+    valueFn.instructions.push_back(Instruction {
+        .code = OpCode::Return,
+        .argsCount = 0U
+    });
+
+    // main() -> return value()
+    Function mainFunc;
+    mainFunc.name = "main";
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::CallFunction,
+        .stringOperand = "value",
+        .argsCount = 0U
+    });
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::Return,
+        .argsCount = 0U
+    });
+
+    module.functions.push_back(std::move(valueFn));
+    module.functions.push_back(std::move(mainFunc));
+
+    Runtime runtime;
+    Interpreter interpreter(runtime);
+
+    const auto result = interpreter.execute(module);
+
+    EXPECT_TRUE(result.success);
+    EXPECT_EQ(result.exitCode, 42);
+}
