@@ -173,8 +173,41 @@ namespace Velo::Parser {
             return std::nullopt;
         }
 
-        if (consume(TokenKind::OpenParen, "PAR009", "Expected '('.") == nullptr) {
+        std::vector<AST::Parameter> params;
+        const Token *openParam = consume(TokenKind::OpenParen, "PAR009", "Expected '('.");
+        if (openParam == nullptr) {
             return std::nullopt;
+        }
+
+        if (!check(TokenKind::CloseParen)) {
+            while (true) {
+                const Token *paramName = consume(TokenKind::Identifier, "PAR020", "Expected parameter name.");
+                if (paramName == nullptr) {
+                    return std::nullopt;
+                }
+
+                if (consume(TokenKind::Colon, "PAR021", "Expected ':' after parameter name.") == nullptr) {
+                    return std::nullopt;
+                }
+
+                const auto paramType = parseTypeName();
+                if (!paramType.has_value()) {
+                    return std::nullopt;
+                }
+
+                params.push_back(AST::Parameter {
+                    .name = std::string(paramName->text()),
+                    .type = *paramType,
+                    .range = Source::SourceRange(
+                        paramName->range().begin(),
+                        paramType->range.end()
+                    )
+                });
+
+                if (!match(TokenKind::Comma)) {
+                    break;
+                }
+            }
         }
 
         if (consume(TokenKind::CloseParen, "PAR010", "Expected ')'.") == nullptr) {
@@ -214,7 +247,7 @@ namespace Velo::Parser {
         return AST::FunctionDeclaration {
             .isPublic = isPublic,
             .name = std::string(nameToken->text()),
-            .parameters = {},
+            .parameters = std::move(params),
             .returnType = std::move(*returnType),
             .statements = std::move(statements),
             .range = makeRangeFromTokens(*fnKeyword, *closeBrace),

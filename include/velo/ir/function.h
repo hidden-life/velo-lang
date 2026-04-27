@@ -10,6 +10,7 @@ namespace Velo::IR {
     struct Function final {
         std::string name;
         std::vector<Instruction> instructions {};
+        std::vector<std::string> parameters {};
     };
 }
 

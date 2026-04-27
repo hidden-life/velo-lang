@@ -127,3 +127,43 @@ fn main(): int {
     ASSERT_GE(engine.size(), 1U);
     EXPECT_EQ(engine.diagnostics().front().code(), "PAR006");
 }
+
+TEST(ParserTest, ParsesFunctionParameters) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+fn add(a: int, b: int): int {
+    return 0;
+}
+
+fn main(): int {
+    add(1, 2);
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    if (engine.hasErrors()) {
+        for (const auto &diag : engine.diagnostics()) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_FALSE(engine.hasErrors());
+    ASSERT_EQ(program->functions.size(), 2U);
+
+    const auto &addFunc = program->functions[0];
+    EXPECT_EQ(addFunc.name, "add");
+
+    ASSERT_EQ(addFunc.parameters.size(), 2U);
+
+    ASSERT_EQ(addFunc.parameters[0].name, "a");
+    ASSERT_EQ(addFunc.parameters[0].type.name.segments.size(), 1U);
+    EXPECT_EQ(addFunc.parameters[0].type.name.segments[0], "int");
+
+    ASSERT_EQ(addFunc.parameters[1].name, "b");
+    ASSERT_EQ(addFunc.parameters[1].type.name.segments.size(), 1U);
+    EXPECT_EQ(addFunc.parameters[1].type.name.segments[0], "int");
+}

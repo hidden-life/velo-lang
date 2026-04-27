@@ -128,14 +128,6 @@ namespace Velo::Interpreter {
             };
         }
 
-        if (argsCount != 0U) {
-            return Runtime::ExecutionResult {
-                .success = false,
-                .exitCode = 1,
-                .error = "User-defined functions with arguments are not supported yet: " + name
-            };
-        }
-
         const auto it = std::ranges::find_if(
             _currentModule->functions,
             [&name](const IR::Function &func) {
@@ -151,10 +143,43 @@ namespace Velo::Interpreter {
             };
         }
 
+        const auto &f = *it;
+        if (argsCount != f.parameters.size()) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "Function '" + name + "' expects " +
+                    std::to_string(f.parameters.size()) +
+                    " argument(s), but " +
+                    std::to_string(argsCount) +
+                    " provided."
+            };
+        }
+
+        std::vector<Runtime::Value> arguments;
+        if (_stack.size() < argsCount) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "Not enough values on stack for function call: " + name
+            };
+        }
+
+        const auto first = _stack.end() - static_cast<std::ptrdiff_t>(argsCount);
+        arguments.insert(arguments.end(), first, _stack.end());
+        _stack.erase(first, _stack.end());
+
         // save current stack
         std::vector<Runtime::Value> callerStack = std::move(_stack);
         // new stack
         _stack.clear();
+
+        // At this stage parameters are placed onto the callee stack.
+        // Later this will be replaced with a real frame with local slots.
+        for (auto &arg : arguments) {
+            _stack.push_back(std::move(arg));
+        }
+
         // execute a function
         auto result = executeFunc(*it);
         if (!result.success) {

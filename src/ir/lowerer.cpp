@@ -15,6 +15,10 @@ namespace Velo::IR {
         Function f;
         f.name = func.name;
 
+        for (const auto &param : func.parameters) {
+            f.parameters.push_back(param.name);
+        }
+
         for (const auto &stmt : func.statements) {
             lowerStatement(*stmt, f);
         }
