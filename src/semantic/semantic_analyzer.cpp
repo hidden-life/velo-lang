@@ -77,9 +77,24 @@ namespace Velo::Semantic {
     }
 
     void SemanticAnalyzer::analyzeFunction(const AST::FunctionDeclaration &func) {
+        _currentParameters.clear();
+
+        for (const auto &param : func.parameters) {
+            const auto [it, inserted] = _currentParameters.insert(param.name);
+            if (!inserted) {
+                _engine.error(
+                    "SEM012",
+                    "Duplicate parameter '" + param.name + "'.",
+                    param.range
+                );
+            }
+        }
+
         for (const auto &stmt : func.statements) {
             analyzeStatement(*stmt);
         }
+
+        _currentParameters.clear();
     }
 
     void SemanticAnalyzer::analyzeStatement(const AST::Statement &stmt) {
@@ -139,6 +154,10 @@ namespace Velo::Semantic {
                         name.range
                     );
                 }
+                return;
+            }
+
+            if (!isCallable && _currentParameters.contains(firstSegment)) {
                 return;
             }
 

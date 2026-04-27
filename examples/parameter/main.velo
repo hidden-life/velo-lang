@@ -1,0 +1,12 @@
+module app;
+
+use std::console;
+
+fn identity(val: int): int {
+    return val;
+}
+
+fn main(): int {
+    console::println(identity(42));
+    return 0;
+}

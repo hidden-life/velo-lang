@@ -8,6 +8,7 @@ namespace Velo::IR {
     enum class OpCode {
         PushInt,
         PushString,
+        LoadLocal,
         CallBuiltin,
         CallFunction,
         Pop,
@@ -21,6 +22,8 @@ namespace Velo::IR {
         int intOperand {0};
         // Argument count for CallBuiltin/CallFunction.
         std::size_t argsCount {0};
+        // Local value index, for example a function parameter.
+        std::size_t indexOperand {0};
     };
 }
 

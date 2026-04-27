@@ -15,13 +15,19 @@ namespace Velo::IR {
         Function f;
         f.name = func.name;
 
-        for (const auto &param : func.parameters) {
+        _locals.clear();
+
+        for (std::size_t idx = 0; idx < func.parameters.size(); ++idx) {
+            const auto &param = func.parameters[idx];
             f.parameters.push_back(param.name);
+            _locals.emplace(param.name, idx);
         }
 
         for (const auto &stmt : func.statements) {
             lowerStatement(*stmt, f);
         }
+
+        _locals.clear();
 
         return f;
     }
@@ -54,21 +60,37 @@ namespace Velo::IR {
         switch (expr.kind) {
             case ExpressionKind::IntegerLiteral: {
                 const auto &literal = static_cast<const IntegerLiteralExpression&>(expr);
-                Instruction i;
-                i.code = OpCode::PushInt;
-                i.intOperand = std::stoi(literal.value);
 
-                func.instructions.push_back(i);
+                func.instructions.push_back(Instruction{
+                    .code = OpCode::PushInt,
+                    .intOperand = std::stoi(literal.value),
+                });
                 return;
             }
 
             case ExpressionKind::StringLiteral: {
                 const auto &literal = static_cast<const StringLiteralExpression&>(expr);
-                Instruction i;
-                i.code = OpCode::PushString;
-                i.stringOperand = literal.value;
 
-                func.instructions.push_back(i);
+                func.instructions.push_back(Instruction {
+                    .code = OpCode::PushString,
+                    .stringOperand = literal.value
+                });
+                return;
+            }
+
+            case ExpressionKind::Name: {
+                const auto &nameExp = static_cast<const NameExpression&>(expr);
+                if (nameExp.name.segments.size() == 1U) {
+                    const std::string &name = nameExp.name.segments.front();
+                    const auto &localIdx = findLocalIndex(name);
+
+                    if (localIdx != nullptr) {
+                        func.instructions.push_back(Instruction {
+                            .code = OpCode::LoadLocal,
+                            .indexOperand = *localIdx,
+                        });
+                    }
+                }
                 return;
             }
 
@@ -86,9 +108,9 @@ namespace Velo::IR {
 
                 // concat names currently
                 std::string name;
-                for (size_t it = 0; it < call.callee.segments.size(); ++it) {
-                    if (it > 0U) name += "::";
-                    name += call.callee.segments[it];
+                for (std::size_t idx = 0; idx < call.callee.segments.size(); ++idx) {
+                    if (idx > 0U) name += "::";
+                    name += call.callee.segments[idx];
                 }
 
                 i.stringOperand = name;
@@ -96,9 +118,15 @@ namespace Velo::IR {
                 func.instructions.push_back(i);
                 return;
             }
-
-            default:
-                return;
         }
+    }
+
+    auto Lowerer::findLocalIndex(const std::string &name) const -> const std::size_t* {
+        const auto it = _locals.find(name);
+        if (it == _locals.end()) {
+            return nullptr;
+        }
+
+        return &it->second;
     }
 }

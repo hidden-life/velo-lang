@@ -168,3 +168,56 @@ fn main(): int {
     ASSERT_EQ(engine.size(), 1U);
     EXPECT_EQ(engine.diagnostics().front().code(), "SEM007");
 }
+
+TEST(SemanticAnalyzerTest, AcceptsParameterReference) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn identity(value: int): int {
+    return value;
+}
+
+fn main(): int {
+    return identity(42);
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, ReportsDeuplicateParameterName) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn broken(v: int, v: int): int {
+    return v;
+}
+
+fn main(): int {
+    return broken(1, 2);
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+    ASSERT_EQ(engine.diagnostics().front().code(), "SEM012");
+}

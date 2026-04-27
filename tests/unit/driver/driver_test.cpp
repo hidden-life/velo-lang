@@ -138,3 +138,24 @@ fn main(): int {
     ASSERT_TRUE(result.success);
     ASSERT_TRUE(result.error.empty());
 }
+
+TEST(DriverTest, ReturnsFunctionParameterValue) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "identity.velo",
+        R"(module app;
+
+fn identity(val: int): int {
+    return val;
+}
+
+fn main(): int {
+    return identity(42);
+}
+)"
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.error.empty());
+    ASSERT_TRUE(result.diagnostics.empty());
+}

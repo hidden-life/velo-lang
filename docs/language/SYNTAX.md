@@ -53,8 +53,20 @@ fn main(): int {
 }
 ```
 
+## Parameter references
+```velo
+fn identity(value: int): int {
+    return value;
+}
+
+fn main(): int {
+    return identity(42);
+}
+```
+
 ## Current limitation
-- user-defined function calls do not support arguments yet
+- parameters are immutable
+- there are no local variable declarations yet
 
 ## Notes
 This document describes only the syntax and the semantic rules implemented in the current codebase.

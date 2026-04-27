@@ -18,6 +18,7 @@ Implemented so far:
 - registered `console::println` builtin
 - interpreter execution result model
 - user-defined function calls without parameters
+- function parameter references through local loading
 - GoogleTest test setup
 
 ## Build
@@ -49,6 +50,9 @@ The project can now:
 - prevents stack pollution via Pop instruction
 - correct return value propagation between functions
 - isolated stack frames for user-defined calls
+- parse typed function parameters
+- pass arguments to user-defined functions
+- read parameter values through `LoadLocal`
 
 Current semantic checks:
 - `main` must exist
@@ -76,6 +80,7 @@ Program
 ```bash
 ./build/debug/apps/velo/velo ./examples/hello_world/main.velo
 ./build/debug/apps/velo/velo ./examples/user_funtion/main.velo
+./build/debug/apps/velo/velo ./examples/parameter/main.velo
 ```
 
 ## Next milestone

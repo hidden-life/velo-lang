@@ -2,6 +2,7 @@
 #define INC_VELO_SEMANTIC_SEMATIC_ANALYZER_H
 
 #include <unordered_map>
+#include <unordered_set>
 
 #include "velo/ast/ast.h"
 #include "velo/diagnostic/diagnostic_engine.h"
@@ -34,6 +35,7 @@ namespace Velo::Semantic {
         std::unordered_map<std::string, const AST::FunctionDeclaration*> _functions {};
 
         const Module::ModuleRegistry &_modules;
+        std::unordered_set<std::string> _currentParameters {};
     };
 }
 

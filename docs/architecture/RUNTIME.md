@@ -62,3 +62,14 @@ Each user-defined function call creates an isolated stack frame:
 - the return value is transferred back to the caller stack
 
 This ensures proper return value propagation and prevents stack interference.
+
+## Local loading
+Function parameters are currently represented as local values inside the callee stack frame.
+
+The `LoadLocal` instruction copies a local value from the current frame onto the stack.
+
+Example:
+```text
+parameter value at local slot 0
+LoadLocal 0
+```

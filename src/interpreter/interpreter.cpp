@@ -70,6 +70,17 @@ namespace Velo::Interpreter {
                     _stack.pop_back();
                 }
                 return {};
+            case OpCode::LoadLocal:
+                if (inst.indexOperand >= _stack.size()) {
+                    return Runtime::ExecutionResult {
+                        .success = false,
+                        .exitCode = 1,
+                        .error = "Local index is out of range."
+                    };
+                }
+
+                _stack.push_back(_stack[inst.indexOperand]);
+                return {};
         }
 
         return Runtime::ExecutionResult {

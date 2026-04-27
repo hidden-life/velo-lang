@@ -242,3 +242,45 @@ TEST(InterpreterTest, PropagatesReturnValueFromFunction) {
     EXPECT_TRUE(result.success);
     EXPECT_EQ(result.exitCode, 42);
 }
+
+TEST(InterpreterTest, LoadsFunctionParameterAsLocalValue) {
+    Module module;
+
+    Function identityFunc;
+    identityFunc.name = "identity";
+    identityFunc.parameters = {"value"};
+    identityFunc.instructions.push_back(Instruction {
+        .code = OpCode::LoadLocal,
+        .indexOperand = 0U
+    });
+    identityFunc.instructions.push_back(Instruction {
+        .code = OpCode::Return
+    });
+
+    Function mainFunc;
+    mainFunc.name = "main";
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .intOperand = 42,
+    });
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::CallFunction,
+        .stringOperand = "identity",
+        .argsCount = 1U
+    });
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::Return,
+    });
+
+    module.functions.push_back(std::move(identityFunc));
+    module.functions.push_back(std::move(mainFunc));
+
+    Runtime runtime;
+    Interpreter interpreter(runtime);
+
+    const auto result = interpreter.execute(module);
+
+    EXPECT_TRUE(result.success);
+    EXPECT_EQ(result.exitCode, 42);
+    EXPECT_TRUE(result.error.empty());
+}
