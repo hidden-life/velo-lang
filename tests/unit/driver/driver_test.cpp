@@ -96,3 +96,25 @@ fn main(): int {
     EXPECT_NE(result.astText.find("Function helper -> int"), std::string::npos);
     EXPECT_NE(result.astText.find("Call helper"), std::string::npos);
 }
+
+TEST(DriverTest, DoesNotPolluteStackAfterFunctionCall) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "stack.velo",
+        R"(module app;
+use std::console;
+
+fn helper(): int {
+    return 123;
+}
+
+fn main(): int {
+    helper(); // should not break stack
+    return 0;
+}
+)"
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.error.empty());
+}

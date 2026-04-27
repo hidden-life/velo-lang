@@ -46,3 +46,11 @@ console::println(value) -> arity: 1
 ModuleRegistry now provides a mutable API (`findMutable`) for safe updates during runtime initialization.
 
 This removes previous unsafe `const_cast` usage.
+
+## Stack discipline
+The interpreter follows a simple rule:
+- expressions push values onto the stack
+- expression statements remove their result via `Pop`
+- return statements consume the top value as exit code
+
+This prevents stack pollution during execution.

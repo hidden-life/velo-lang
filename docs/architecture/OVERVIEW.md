@@ -34,3 +34,4 @@ source text
 - Bytecode generation and execution are not implemented yet.
 - The interpreter can now execute user-defined function calls without parameters.
 - Calls with arguments are still limited to builtins.
+- Expressions statements now emit a Pop instruction to prevent stack pollution.

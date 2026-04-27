@@ -35,6 +35,11 @@ namespace Velo::IR {
         if (stmt.kind == StatementKind::Expression) {
             const auto &expr = static_cast<const ExpressionStatement&>(stmt);
             lowerExpression(*expr.expression, func);
+            // Expression statement result is unused -> remove it from the stack.
+            func.instructions.push_back({
+                .code = OpCode::Pop,
+            });
+
             return;
         }
     }

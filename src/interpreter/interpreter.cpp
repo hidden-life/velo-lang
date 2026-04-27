@@ -65,6 +65,11 @@ namespace Velo::Interpreter {
                     };
                 }
                 return {};
+            case OpCode::Pop:
+                if (!_stack.empty()) {
+                    _stack.pop_back();
+                }
+                return {};
         }
 
         return Runtime::ExecutionResult {

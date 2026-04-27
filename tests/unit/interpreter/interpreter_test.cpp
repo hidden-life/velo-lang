@@ -161,3 +161,44 @@ TEST(InterpreterTest, ExecutesUserDefinedFunctionCall) {
     EXPECT_EQ(result.exitCode, 0);
     EXPECT_TRUE(result.error.empty());
 }
+
+TEST(InterpreterTest, CLeansStackAfterExpressionStatement) {
+    Module module;
+    Function mainFunc;
+    mainFunc.name = "main";
+
+    // helper-like call
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .intOperand = 42,
+        .argsCount = 0U
+    });
+
+    // pop should remove this value
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::Pop,
+        .argsCount = 0U
+    });
+
+    // return normal code
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .intOperand = 0,
+        .argsCount = 0U
+    });
+
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::Return,
+        .argsCount = 0U
+    });
+
+    module.functions.push_back(std::move(mainFunc));
+
+    Runtime runtime;
+    Interpreter interpreter(runtime);
+
+    const auto result = interpreter.execute(module);
+
+    EXPECT_TRUE(result.success);
+    EXPECT_EQ(result.exitCode, 0);
+}

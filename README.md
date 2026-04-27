@@ -46,6 +46,7 @@ The project can now:
 - call registered builtin functions through the runtime registry
 - lower user-defined function calls into IR
 - execute user-defined function calls through the interpreter
+- prevents stack pollution via Pop instruction
 
 Current semantic checks:
 - `main` must exist

@@ -10,6 +10,7 @@ namespace Velo::IR {
         PushString,
         CallBuiltin,
         CallFunction,
+        Pop,
         Return,
     };
 
