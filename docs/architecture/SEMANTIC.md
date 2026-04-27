@@ -10,6 +10,7 @@ The current semantic layer performs only a minimal set of checks:
 7. validates builtin function argument count
 8. validates parameter references
 9. rejects duplicate parameter name
+10. recursively validates binary expression operands structurally
 
 ## Current limitations
 The current semantic layer does not yet implement:

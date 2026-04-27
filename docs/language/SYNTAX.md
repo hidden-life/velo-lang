@@ -64,9 +64,19 @@ fn main(): int {
 }
 ```
 
-## Current limitation
+## Integer addition
+```velo
+fn add(a: int, b: int): int {
+    return a + b;
+}
+```
+
+## Current limitations
 - parameters are immutable
 - there are no local variable declarations yet
+- only `+` is supported
+- only integer addition is supported
+- operator precedence is still minimal
 
 ## Notes
 This document describes only the syntax and the semantic rules implemented in the current codebase.

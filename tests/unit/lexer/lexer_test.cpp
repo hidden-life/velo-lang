@@ -155,3 +155,22 @@ TEST(LexerTest, ReportsUnterminatedStringLiteral) {
     ASSERT_EQ(engine.size(), 1U);
     EXPECT_EQ(engine.diagnostics().front().code(), "LEX002");
 }
+
+TEST(LexerTest, LexesPlusToken) {
+    const SourceFile file("plus.velo", "a + b");
+    DiagnosticEngine engine;
+    Lexer lexer(file, engine);
+
+    const auto tokens = lexer.lexAll();
+    const auto kinds = collectKinds(tokens);
+
+    const std::vector<TokenKind> expected {
+        TokenKind::Identifier,
+        TokenKind::Plus,
+        TokenKind::Identifier,
+        TokenKind::EndOfFile,
+    };
+
+    EXPECT_EQ(kinds, expected);
+    EXPECT_FALSE(engine.hasErrors());
+}

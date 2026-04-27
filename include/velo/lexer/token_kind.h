@@ -28,6 +28,8 @@ namespace Velo::Lexer {
         CloseParen, // )
         OpenBrace, // {
         CloseBrace, // }
+
+        Plus,
     };
 
     [[nodiscard]] auto toString(TokenKind kind) -> std::string_view;

@@ -167,3 +167,37 @@ fn main(): int {
     ASSERT_EQ(addFunc.parameters[1].type.name.segments.size(), 1U);
     EXPECT_EQ(addFunc.parameters[1].type.name.segments[0], "int");
 }
+
+TEST(ParserTest, ParsesBinaryAddExpression) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn add(a: int, b: int): int {
+    return a + b;
+}
+
+fn main(): int {
+    return add(20, 22);
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    ASSERT_EQ(program->functions.size(), 2U);
+
+    const auto &addFunc = program->functions[0];
+    ASSERT_EQ(addFunc.statements.size(), 1U);
+
+    const auto *returnStmt = dynamic_cast<ReturnStatement*>(addFunc.statements[0].get());
+    ASSERT_NE(returnStmt, nullptr);
+
+    ASSERT_EQ(returnStmt->expression->kind, ExpressionKind::Binary);
+
+    const auto *binaryExpr = dynamic_cast<Velo::AST::BinaryExpression*>(returnStmt->expression.get());
+    ASSERT_NE(binaryExpr, nullptr);
+    EXPECT_EQ(binaryExpr->op, Velo::AST::BinaryOperator::Add);
+}

@@ -159,3 +159,24 @@ fn main(): int {
     ASSERT_TRUE(result.error.empty());
     ASSERT_TRUE(result.diagnostics.empty());
 }
+
+TEST(DriverTest, ExecutesIntegerAdditionThroughUserFunction) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "add.velo",
+        R"(module app;
+
+fn add(a: int, b: int): int {
+    return a + b;
+}
+
+fn main(): int {
+    return add(20, 22);
+}
+)"
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.error.empty());
+    ASSERT_TRUE(result.diagnostics.empty());
+}

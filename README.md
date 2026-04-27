@@ -19,6 +19,7 @@ Implemented so far:
 - interpreter execution result model
 - user-defined function calls without parameters
 - function parameter references through local loading
+- binary `+` expressions for integers
 - GoogleTest test setup
 
 ## Build
@@ -53,6 +54,9 @@ The project can now:
 - parse typed function parameters
 - pass arguments to user-defined functions
 - read parameter values through `LoadLocal`
+- parse binary addition expressions
+- lower integer addition into `AddInt`
+- execute integer addition in the interpreter
 
 Current semantic checks:
 - `main` must exist
@@ -81,6 +85,7 @@ Program
 ./build/debug/apps/velo/velo ./examples/hello_world/main.velo
 ./build/debug/apps/velo/velo ./examples/user_funtion/main.velo
 ./build/debug/apps/velo/velo ./examples/parameter/main.velo
+./build/debug/apps/velo/velo ./examples/add/main.velo
 ```
 
 ## Next milestone

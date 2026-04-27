@@ -81,6 +81,31 @@ namespace Velo::Interpreter {
 
                 _stack.push_back(_stack[inst.indexOperand]);
                 return {};
+            case OpCode::AddInt:
+                if (_stack.size() < 2U) {
+                    return Runtime::ExecutionResult {
+                        .success = false,
+                        .exitCode = 1,
+                        .error = "Not enough values on stack for AddInt."
+                    };
+                }
+
+                const auto right = _stack.back();
+                _stack.pop_back();
+                const auto left = _stack.back();
+                _stack.pop_back();
+
+                if (!std::holds_alternative<int>(left) || !std::holds_alternative<int>(right)) {
+                    return Runtime::ExecutionResult {
+                        .success = false,
+                        .exitCode = 1,
+                        .error = "AddInt expects integer operands."
+                    };
+                }
+
+                _stack.emplace_back(std::get<int>(left) + std::get<int>(right));
+
+                return {};
         }
 
         return Runtime::ExecutionResult {

@@ -80,6 +80,15 @@ namespace Velo::AST {
 
                     break;
                 }
+
+                case ExpressionKind::Binary: {
+                    const auto &binaryExpression = static_cast<const BinaryExpression&>(expression);
+                    writeIndent(stream, indentLevel);
+                    stream << "Binary: +\n";
+
+                    printExpression(stream, *binaryExpression.left, indentLevel + 1U);
+                    printExpression(stream, *binaryExpression.right, indentLevel + 1U);
+                }
             }
         }
     }

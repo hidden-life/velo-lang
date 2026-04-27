@@ -132,6 +132,15 @@ namespace Velo::Semantic {
 
                 return;
             }
+
+            case AST::ExpressionKind::Binary: {
+                const auto &binaryExpr = static_cast<const AST::BinaryExpression&>(expr);
+
+                analyzeExpression(*binaryExpr.left);
+                analyzeExpression(*binaryExpr.right);
+
+                return;
+            }
         }
     }
 

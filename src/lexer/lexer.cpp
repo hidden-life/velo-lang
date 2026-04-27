@@ -33,6 +33,10 @@ namespace Velo::Lexer {
                 advance();
                 return makeToken(TokenKind::Comma, ",", beginOffset, beginOffset);
 
+            case '+':
+                advance();
+                return makeToken(TokenKind::Plus, "+", beginOffset, beginOffset);
+
             case '(':
                 advance();
                 return makeToken(TokenKind::OpenParen, "(", beginOffset, beginOffset);

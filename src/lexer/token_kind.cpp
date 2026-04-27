@@ -41,6 +41,8 @@ namespace Velo::Lexer {
                 return "OpenBrace";
             case TokenKind::CloseBrace:
                 return "CloseBrace";
+            case TokenKind::Plus:
+                return "Plus";
         }
 
         return "Unknown";

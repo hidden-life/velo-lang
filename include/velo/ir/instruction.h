@@ -13,6 +13,8 @@ namespace Velo::IR {
         CallFunction,
         Pop,
         Return,
+
+        AddInt,
     };
 
     struct Instruction final {

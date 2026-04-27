@@ -94,6 +94,21 @@ namespace Velo::IR {
                 return;
             }
 
+            case ExpressionKind::Binary: {
+                const auto &binaryExp = static_cast<const BinaryExpression&>(expr);
+
+                lowerExpression(*binaryExp.left, func);
+                lowerExpression(*binaryExp.right, func);
+
+                if (binaryExp.op == BinaryOperator::Add) {
+                    func.instructions.push_back(Instruction {
+                        .code = OpCode::AddInt,
+                    });
+                }
+
+                return;
+            }
+
             case ExpressionKind::Call: {
                 const auto &call = static_cast<const CallExpression&>(expr);
                 for (const auto &arg : call.arguments) {

@@ -329,7 +329,31 @@ namespace Velo::Parser {
     }
 
     auto Parser::parseExpression() -> std::unique_ptr<AST::Expression> {
-        return parsePrimaryExpression();
+        auto left = parsePrimaryExpression();
+        if (left == nullptr) {
+            return nullptr;
+        }
+
+        while (match(TokenKind::Plus)) {
+            auto right = parsePrimaryExpression();
+            if (right == nullptr) {
+                return nullptr;
+            }
+
+            const auto range = Source::SourceRange(
+                    left->range.begin(),
+                    right->range.end()
+                );
+
+            left = std::make_unique<AST::BinaryExpression>(
+                std::move(left),
+                AST::BinaryOperator::Add,
+                std::move(right),
+                range
+            );
+        }
+
+        return left;
     }
 
     auto Parser::parsePrimaryExpression() -> std::unique_ptr<AST::Expression> {

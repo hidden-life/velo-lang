@@ -23,6 +23,11 @@ namespace Velo::AST {
         StringLiteral,
         Name,
         Call,
+        Binary,
+    };
+
+    enum class BinaryOperator {
+        Add
     };
 
     struct Expression {
@@ -64,6 +69,22 @@ namespace Velo::AST {
 
         QualifiedName callee;
         std::vector<std::unique_ptr<Expression>> arguments {};
+    };
+
+    struct BinaryExpression final : Expression {
+        BinaryExpression(
+            std::unique_ptr<Expression> expressionLeft,
+            BinaryOperator expressionOperator,
+            std::unique_ptr<Expression> expressionRight,
+            Source::SourceRange expressionRange
+        ) : Expression(ExpressionKind::Binary, expressionRange),
+            left(std::move(expressionLeft)),
+            op(expressionOperator),
+            right(std::move(expressionRight)) {}
+
+        std::unique_ptr<Expression> left;
+        BinaryOperator op;
+        std::unique_ptr<Expression> right;
     };
 
     enum class StatementKind {

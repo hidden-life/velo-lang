@@ -73,3 +73,12 @@ Example:
 parameter value at local slot 0
 LoadLocal 0
 ```
+
+## Integer addition
+The `AddInt` instruction consumes two integer values from the stack and pushes their sum back.
+```text
+PushInt 20
+PushInt 22
+AddInt
+Return
+```
