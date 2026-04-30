@@ -6,10 +6,10 @@ namespace Velo::Module {
     ModuleSymbol::ModuleSymbol(std::string name) : _name(std::move(name)) {
     }
 
-    void ModuleSymbol::addFunction(std::string funcName, std::size_t arity) {
+    void ModuleSymbol::addFunction(std::string funcName, std::size_t arity, std::string returnType) {
         const std::string key = funcName;
 
-        _functions.insert_or_assign(key, FunctionSymbol{ funcName, arity });
+        _functions.insert_or_assign(key, FunctionSymbol{ funcName, arity, std::move(returnType) });
     }
 
     auto ModuleSymbol::findFunction(const std::string &name) const -> const FunctionSymbol* {

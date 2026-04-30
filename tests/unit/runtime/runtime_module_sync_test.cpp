@@ -15,4 +15,5 @@ TEST(RuntimeTest, BuildsModulesFromBuiltins) {
 
     EXPECT_EQ(println->name, "println");
     EXPECT_EQ(println->arity, 1U);
+    EXPECT_EQ(println->returnType, "void");
 }

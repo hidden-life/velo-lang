@@ -14,6 +14,7 @@ TEST(BuiltinRegistryTest, RegistersAndFindsFunction) {
         BuiltinFunction {
             "test::echo",
             1U,
+            "void",
             [](const std::vector<Value>&) -> ExecutionResult {
                 return {};
             }

@@ -40,6 +40,10 @@ namespace Velo::Semantic {
         [[nodiscard]] auto typeFromTypeName(const AST::TypeName &typeName) -> ExpressionType;
         [[nodiscard]] auto analyzeCallExpressionType(const AST::CallExpression &callExpr) -> ExpressionType;
 
+        [[nodiscard]] auto typeFromString(const std::string &typeName) -> ExpressionType;
+
+        [[nodiscard]] static auto importedModuleName(const AST::UseDeclaration &useDecl) -> std::string;
+
         const AST::Program &_program;
         Diagnostic::DiagnosticEngine &_engine;
 

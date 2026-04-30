@@ -82,3 +82,13 @@ PushInt 22
 AddInt
 Return
 ```
+
+## Builtin return types
+Builtin functions now store their return type in metadata.
+
+This metadata is mirrored into `ModuleRegistry`, so semantic analysis can resolve builtin call types without hardcoded checks.
+
+Example:
+```text
+console::println(value) -> void
+```

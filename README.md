@@ -20,6 +20,8 @@ Implemented so far:
 - user-defined function calls without parameters
 - function parameter references through local loading
 - binary `+` expressions for integers
+- builtin return types are stored in module metadata
+- import aliases are respected during builtin call type resolution
 - GoogleTest test setup
 
 ## Build

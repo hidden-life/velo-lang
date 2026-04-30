@@ -223,7 +223,9 @@ namespace Velo::Semantic {
             return;
         }
 
-        const auto *module = _modules.find(firstSegment);
+        const auto *imported = it->second;
+        const std::string actual = importedModuleName(*imported);
+        const auto *module = _modules.find(actual);
         if (module == nullptr) {
             _engine.error(
                 "SEM008",
@@ -333,21 +335,7 @@ namespace Velo::Semantic {
             return ExpressionType::Unknown;
         }
 
-        const std::string &type = typeName.name.segments.front();
-
-        if (type == "int") {
-            return ExpressionType::Int;
-        }
-
-        if (type == "string") {
-            return ExpressionType::String;
-        }
-
-        if (type == "void") {
-            return ExpressionType::Void;
-        }
-
-        return ExpressionType::Unknown;
+        return typeFromString(typeName.name.segments.front());
     }
 
     auto SemanticAnalyzer::analyzeCallExpressionType(const AST::CallExpression &callExpr) -> ExpressionType {
@@ -371,10 +359,48 @@ namespace Velo::Semantic {
         const std::string &moduleName = callExpr.callee.segments[0];
         const std::string &funcName = callExpr.callee.segments[1];
 
-        if (moduleName == "console" && funcName == "println") {
+        const auto importIt = _visibleImports.find(moduleName);
+        if (importIt == _visibleImports.end()) {
+            return ExpressionType::Unknown;
+        }
+
+        const std::string actual = importedModuleName(*importIt->second);
+        const auto *module = _modules.find(actual);
+        if (module == nullptr) {
+            return ExpressionType::Unknown;
+        }
+
+        const auto *func = module->findFunction(funcName);
+        if (func == nullptr) {
+            return ExpressionType::Unknown;
+        }
+
+        // Builtin function types is now read from ModuleRegistry metadata.
+        return typeFromString(func->returnType);
+    }
+
+    auto SemanticAnalyzer::typeFromString(const std::string &typeName) -> ExpressionType {
+        if (typeName == "int") {
+            return ExpressionType::Int;
+        }
+
+        if (typeName == "string") {
+            return ExpressionType::String;
+        }
+
+        if (typeName == "void") {
             return ExpressionType::Void;
         }
 
         return ExpressionType::Unknown;
+    }
+
+    auto SemanticAnalyzer::importedModuleName(const AST::UseDeclaration &useDecl) -> std::string {
+        if (useDecl.path.segments.empty()) {
+            return {};
+        }
+
+        // use std::console as out; visible name = out, actual module = console
+        return useDecl.path.segments.back();
     }
 }

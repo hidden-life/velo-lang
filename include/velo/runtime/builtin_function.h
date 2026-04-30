@@ -11,18 +11,20 @@ namespace Velo::Runtime {
 
     class BuiltinFunction final {
     public:
-        BuiltinFunction(std::string name, std::size_t arity, BuiltinHandler handler);
+        BuiltinFunction(std::string name, std::size_t arity, std::string returnType, BuiltinHandler handler);
 
         [[nodiscard]] auto name() const -> const std::string&;
         [[nodiscard]] auto arity() const -> std::size_t;
+        [[nodiscard]] auto returnType() const -> const std::string&;
         [[nodiscard]] auto call(const std::vector<Value> &arguments) const -> ExecutionResult;
 
-        [[nodiscard]] auto moduleName() const -> const std::string;
-        [[nodiscard]] auto functionName() const -> const std::string;
+        [[nodiscard]] auto moduleName() const -> std::string;
+        [[nodiscard]] auto functionName() const -> std::string;
 
     private:
         std::string _name;
         std::size_t _arity {0};
+        std::string _returnType;
         BuiltinHandler _handler;
     };
 }

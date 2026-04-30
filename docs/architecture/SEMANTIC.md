@@ -37,3 +37,18 @@ Call expression types are now resolved from declarations:
 - `console::println(...)` is treated as `void`
 
 This removes the previous temporary behavior where every call expression was treated as `int`
+
+## Builtin call metadata
+Semantic analysis now reads builtin function return types from `ModuleRegistry`.
+
+This removes hardcoded knowledge such as:
+```text
+console::println -> void
+```
+
+Import aliases are resolved through the original `use` declaration:
+```velo
+use std::console as out;
+
+out::println("hello");
+```

@@ -322,3 +322,27 @@ fn main(): int {
     ASSERT_TRUE(engine.hasErrors());
     EXPECT_EQ(engine.diagnostics().front().code(), "SEM014");
 }
+
+TEST(SemanticAnalyzerTest, UsesBuiltinReturnTypeThroughImportAlias) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+use std::console as out;
+
+fn main(): int {
+    return out::println("hello");
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+    ASSERT_EQ(engine.diagnostics().front().code(), "SEM014");
+}

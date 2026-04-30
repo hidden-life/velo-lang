@@ -2,8 +2,8 @@
 #include <utility>
 
 namespace Velo::Runtime {
-    BuiltinFunction::BuiltinFunction(std::string name, std::size_t arity, BuiltinHandler handler) :
-        _name(std::move(name)), _arity(arity), _handler(std::move(handler)) {
+    BuiltinFunction::BuiltinFunction(std::string name, std::size_t arity, std::string returnType, BuiltinHandler handler) :
+        _name(std::move(name)), _arity(arity), _returnType(std::move(returnType)), _handler(std::move(handler)) {
     }
 
     auto BuiltinFunction::name() const -> const std::string& {
@@ -18,7 +18,7 @@ namespace Velo::Runtime {
         return _handler(arguments);
     }
 
-    auto BuiltinFunction::moduleName() const -> const std::string {
+    auto BuiltinFunction::moduleName() const -> std::string {
         const auto pos = _name.find("::");
         if (pos == std::string::npos) {
             return {};
@@ -27,12 +27,16 @@ namespace Velo::Runtime {
         return _name.substr(0, pos);
     }
 
-    auto BuiltinFunction::functionName() const -> const std::string {
+    auto BuiltinFunction::functionName() const -> std::string {
         const auto pos = _name.find("::");
         if (pos == std::string::npos) {
             return _name;
         }
 
-        return _name.substr(pos + 2);
+        return _name.substr(pos + 2U);
+    }
+
+    auto BuiltinFunction::returnType() const -> const std::string& {
+        return _returnType;
     }
 }
