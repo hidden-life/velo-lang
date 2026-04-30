@@ -37,7 +37,9 @@ namespace Velo::IR {
 
         if (stmt.kind == StatementKind::Return) {
             const auto &r = static_cast<const ReturnStatement&>(stmt);
-            lowerExpression(*r.expression, func);
+            if (r.expression != nullptr) {
+                lowerExpression(*r.expression, func);
+            }
             func.instructions.push_back({OpCode::Return});
             return;
         }

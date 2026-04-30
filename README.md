@@ -22,6 +22,8 @@ Implemented so far:
 - binary `+` expressions for integers
 - builtin return types are stored in module metadata
 - import aliases are respected during builtin call type resolution
+- `void` function return validation
+- `return;` without expression
 - GoogleTest test setup
 
 ## Build
@@ -93,6 +95,7 @@ Program
 ./build/debug/apps/velo/velo ./examples/user_funtion/main.velo
 ./build/debug/apps/velo/velo ./examples/parameter/main.velo
 ./build/debug/apps/velo/velo ./examples/add/main.velo
+./build/debug/apps/velo/velo ./examples/void_function/main.velo
 ```
 
 ## Next milestone

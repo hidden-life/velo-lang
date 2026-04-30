@@ -1,0 +1,13 @@
+module app;
+
+use std::console;
+
+fn log(): void {
+    console::println("Hello from void function!");
+    return;
+}
+
+fn main(): int {
+    log();
+    return 0;
+}

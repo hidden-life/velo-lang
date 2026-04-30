@@ -108,9 +108,9 @@ namespace Velo::AST {
     };
 
     struct ReturnStatement final : Statement {
-        explicit ReturnStatement(std::unique_ptr<Expression> statementExpression, Source::SourceRange statementRange) :
+        ReturnStatement(std::unique_ptr<Expression> statementExpression, Source::SourceRange statementRange) :
             Statement(StatementKind::Return, statementRange), expression(std::move(statementExpression)) {}
-
+        // nullptr means `return;` without a value
         std::unique_ptr<Expression> expression;
     };
 

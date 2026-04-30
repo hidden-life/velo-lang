@@ -201,3 +201,31 @@ fn main(): int {
     ASSERT_NE(binaryExpr, nullptr);
     EXPECT_EQ(binaryExpr->op, Velo::AST::BinaryOperator::Add);
 }
+
+TEST(ParserTest, ParsesReturnWithoutExpression) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+fn log(): void {
+    return;
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    ASSERT_EQ(program->functions.size(), 2U);
+
+    const auto &logFunc = program->functions[0];
+    ASSERT_EQ(logFunc.statements.size(), 1U);
+
+    const auto *returnStmt = dynamic_cast<ReturnStatement*>(logFunc.statements[0].get());
+    ASSERT_NE(returnStmt, nullptr);
+    EXPECT_EQ(returnStmt->expression, nullptr);
+}

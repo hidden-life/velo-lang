@@ -108,21 +108,32 @@ namespace Velo::Semantic {
             }
             case AST::StatementKind::Return: {
                 const auto &returnStmt = static_cast<const AST::ReturnStatement&>(stmt);
-
-                const auto actualType = analyzeExpressionType(*returnStmt.expression);
-                ExpressionType expectedType = ExpressionType::Unknown;
-                if (_currentFunctionReturnType == "int") {
-                    expectedType = ExpressionType::Int;
-                } else if (_currentFunctionReturnType == "string") {
-                    expectedType = ExpressionType::String;
-                } else if (_currentFunctionReturnType == "void") {
-                    expectedType = ExpressionType::Void;
+                const auto expectedType = typeFromString(_currentFunctionReturnType);
+                if (returnStmt.expression == nullptr) {
+                    if (expectedType != ExpressionType::Void) {
+                        _engine.error(
+                            "SEM015",
+                            "non-void function must return a value.",
+                            returnStmt.range
+                        );
+                    }
+                    return;
                 }
 
-                if (expectedType != ExpressionType::Unknown && actualType != expectedType) {
+                const auto actual = analyzeExpressionType(*returnStmt.expression);
+                if (expectedType == ExpressionType::Void) {
+                    _engine.error(
+                        "SEM016",
+                        "Void function must return a value.",
+                        returnStmt.range
+                    );
+                    return;
+                }
+
+                if (expectedType != ExpressionType::Unknown && actual != expectedType) {
                     _engine.error(
                         "SEM014",
-                        "Return type mismatch: expected 'int'.",
+                        "Return type mismatch.",
                         returnStmt.range
                     );
                 }

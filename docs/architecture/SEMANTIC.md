@@ -52,3 +52,9 @@ use std::console as out;
 
 out::println("hello");
 ```
+
+## Void return validation
+The semantic analyzer validates empty and value returns:
+- `return;` is valid only in `void` functions
+- `return value;` is invalid in `void` functions
+- non-void functions must return a value

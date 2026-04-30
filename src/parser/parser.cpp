@@ -294,10 +294,15 @@ namespace Velo::Parser {
 
     auto Parser::parseStatement() -> std::unique_ptr<AST::Statement> {
         if (match(TokenKind::KwReturn)) {
-            const Token &returnKeyword = previous();
-            auto expression = parseExpression();
-            if (expression == nullptr) {
-                return nullptr;
+            const Token &returnKw = previous();
+            std::unique_ptr<AST::Expression> expr;
+
+            // Support both forms: `return value;` and `return;`
+            if (!check(TokenKind::Semicolon)) {
+                expr = parseExpression();
+                if (expr == nullptr) {
+                    return nullptr;
+                }
             }
 
             const Token *semicolon = consume(TokenKind::Semicolon, "PAR016", "Expected ';' after return statement.");
@@ -306,8 +311,8 @@ namespace Velo::Parser {
             }
 
             return std::make_unique<AST::ReturnStatement>(
-                std::move(expression),
-                makeRangeFromTokens(returnKeyword, *semicolon)
+                std::move(expr),
+                makeRangeFromTokens(returnKw, *semicolon)
             );
         }
 

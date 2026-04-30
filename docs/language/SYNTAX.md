@@ -97,6 +97,17 @@ fn main(): int {
 
 Builtin `console::println(...)` is currently treated as `void`
 
+## Void functions
+```velo
+fn log(): void {
+    return;
+}
+```
+Rules:
+- `void` functions may use `return;`
+- `void` functions must not return a value
+- non-void functions must return a value
+
 ## Current limitations
 - parameters are immutable
 - there are no local variable declarations yet

@@ -40,7 +40,9 @@ namespace Velo::AST {
                     const auto &returnStatement = static_cast<const ReturnStatement&>(statement);
                     writeIndent(stream, indentLevel);
                     stream << "Return\n";
-                    printExpression(stream, *returnStatement.expression, indentLevel + 1U);
+                    if (returnStatement.expression != nullptr) {
+                        printExpression(stream, *returnStatement.expression, indentLevel + 1U);
+                    }
                     break;
                 }
             }
