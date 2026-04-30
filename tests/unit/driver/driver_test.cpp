@@ -180,3 +180,24 @@ fn main(): int {
     ASSERT_TRUE(result.error.empty());
     ASSERT_TRUE(result.diagnostics.empty());
 }
+
+TEST(DriverTest, ReturnsMissingReturnInNonVoidFunction) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "missing_return.velo" ,
+        R"(module app;
+fn broken(): int {
+    42;
+}
+
+fn main(): int {
+    return 0;
+}
+)"
+    );
+
+    ASSERT_FALSE(result.success);
+    ASSERT_FALSE(result.diagnostics.empty());
+
+    EXPECT_EQ(result.diagnostics.front().code(), "SEM017");
+}

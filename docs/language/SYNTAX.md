@@ -108,6 +108,18 @@ Rules:
 - `void` functions must not return a value
 - non-void functions must return a value
 
+## Required return in non-void functions
+```velo
+fn broken(): int {
+    console::println("oops");
+}
+```
+Invalid because `int` functions must end with `return ...;`.
+
+Current implementation:
+- final statement must be `return`
+- full control-flow analysis is not implemented yet
+
 ## Current limitations
 - parameters are immutable
 - there are no local variable declarations yet

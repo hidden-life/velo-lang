@@ -424,3 +424,63 @@ fn main(): int {
     ASSERT_TRUE(engine.hasErrors());
     ASSERT_EQ(engine.diagnostics().front().code(), "SEM015");
 }
+
+TEST(SemanticAnalyzerTest, ReportsMissingFinalReturnInNonVoidFunction) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+use std::console;
+
+fn broken(): int {
+    console::println("missing return");
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    if (engine.hasErrors()) {
+        for (const auto &diag : engine.diagnostics()) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM017");
+}
+
+TEST(SemanticAnalyzerTest, AcceptsFinalReturnInNonVoidFunction) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+fn valid(): int {
+    return 42;
+}
+
+fn main(): int {
+    return valid();
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}

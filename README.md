@@ -24,6 +24,7 @@ Implemented so far:
 - import aliases are respected during builtin call type resolution
 - `void` function return validation
 - `return;` without expression
+- non-void functions must end with a return statement
 - GoogleTest test setup
 
 ## Build

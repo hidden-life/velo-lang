@@ -58,3 +58,14 @@ The semantic analyzer validates empty and value returns:
 - `return;` is valid only in `void` functions
 - `return value;` is invalid in `void` functions
 - non-void functions must return a value
+
+## Final return requirement
+For MVP semantic validation:
+- non-void functions must end with `return`
+- void functions are exempt
+
+This is currently a structural check based on the final statement only.
+
+Future work:
+- branch-aware control-flow analysis
+- guaranteed return path analysis

@@ -95,6 +95,25 @@ namespace Velo::Semantic {
             analyzeStatement(*stmt);
         }
 
+        if (_currentFunctionReturnType != "void") {
+            if (func.statements.empty()) {
+                _engine.error(
+                    "SEM017",
+                    "Non-void function must end with a return statement.",
+                    func.range
+                );
+            } else {
+                const auto &lastStmt = func.statements.back();
+                if (lastStmt->kind != AST::StatementKind::Return) {
+                    _engine.error(
+                        "SEM017",
+                        "Non-void function must end with a return statement.",
+                        func.range
+                    );
+                }
+            }
+        }
+
         _currentParameters.clear();
         _currentFunctionReturnType.clear();
     }

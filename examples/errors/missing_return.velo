@@ -1,0 +1,11 @@
+module app;
+
+use std::console;
+
+fn broken(): int {
+    console::println("i forgot return");
+}
+
+fn main(): int {
+    return 0;
+}
