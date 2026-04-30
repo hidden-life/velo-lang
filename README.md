@@ -69,6 +69,8 @@ Current semantic checks:
 - function names must be unique
 - qualified call roots must resolve through `use`
 - builtin function argument count must match module metadata
+- user-defined call expressions use declared function return types
+- `console::println` is treated as `void`
 
 Example output:
 ```

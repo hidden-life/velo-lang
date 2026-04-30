@@ -115,6 +115,8 @@ namespace Velo::Semantic {
                     expectedType = ExpressionType::Int;
                 } else if (_currentFunctionReturnType == "string") {
                     expectedType = ExpressionType::String;
+                } else if (_currentFunctionReturnType == "void") {
+                    expectedType = ExpressionType::Void;
                 }
 
                 if (expectedType != ExpressionType::Unknown && actualType != expectedType) {
@@ -317,10 +319,60 @@ namespace Velo::Semantic {
             }
 
             case ExpressionKind::Call: {
-                // temporary all functions returns 'int'
-                // will change in future
-                return ExpressionType::Int;
+                const auto &callExpr = static_cast<const CallExpression&>(expression);
+                // Call type must be derived from a user function declaration or builtin module metadata.
+                return analyzeCallExpressionType(callExpr);
             }
+        }
+
+        return ExpressionType::Unknown;
+    }
+
+    auto SemanticAnalyzer::typeFromTypeName(const AST::TypeName &typeName) -> ExpressionType {
+        if (typeName.name.segments.size() != 1U) {
+            return ExpressionType::Unknown;
+        }
+
+        const std::string &type = typeName.name.segments.front();
+
+        if (type == "int") {
+            return ExpressionType::Int;
+        }
+
+        if (type == "string") {
+            return ExpressionType::String;
+        }
+
+        if (type == "void") {
+            return ExpressionType::Void;
+        }
+
+        return ExpressionType::Unknown;
+    }
+
+    auto SemanticAnalyzer::analyzeCallExpressionType(const AST::CallExpression &callExpr) -> ExpressionType {
+        if (callExpr.callee.segments.empty()) {
+            return ExpressionType::Unknown;
+        }
+
+        // Single-segment call is a user-defined function call: helper().
+        if (callExpr.callee.segments.size() == 1U) {
+            const std::string &funcName = callExpr.callee.segments.front();
+            const auto it = _functions.find(funcName);
+            if (it == _functions.end()) {
+                return ExpressionType::Unknown;
+            }
+
+            return typeFromTypeName(it->second->returnType);
+        }
+
+        // At this stage builtins only support console::println.
+        // It does not return a useful value, so we treat it as void.
+        const std::string &moduleName = callExpr.callee.segments[0];
+        const std::string &funcName = callExpr.callee.segments[1];
+
+        if (moduleName == "console" && funcName == "println") {
+            return ExpressionType::Void;
         }
 
         return ExpressionType::Unknown;

@@ -11,6 +11,7 @@
 namespace Velo::Semantic {
     enum class ExpressionType {
         Unknown,
+        Void,
         Int,
         String,
     };
@@ -35,6 +36,9 @@ namespace Velo::Semantic {
         [[nodiscard]] static auto isBuiltinInt(const AST::TypeName &typeName) -> bool;
 
         [[nodiscard]] auto analyzeExpressionType(const AST::Expression &expression) -> ExpressionType;
+
+        [[nodiscard]] auto typeFromTypeName(const AST::TypeName &typeName) -> ExpressionType;
+        [[nodiscard]] auto analyzeCallExpressionType(const AST::CallExpression &callExpr) -> ExpressionType;
 
         const AST::Program &_program;
         Diagnostic::DiagnosticEngine &_engine;

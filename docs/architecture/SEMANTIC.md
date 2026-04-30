@@ -30,3 +30,10 @@ The semantic analyzer now performs basic type validation:
 - string literals -> `string`
 - binary '+' -> `int` + `int` only
 - return expressions must match function return type
+
+## Call expression types
+Call expression types are now resolved from declarations:
+- user-defined function calls use the function return type
+- `console::println(...)` is treated as `void`
+
+This removes the previous temporary behavior where every call expression was treated as `int`

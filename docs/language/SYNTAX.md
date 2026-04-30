@@ -84,6 +84,19 @@ fn broken(): int {
 }
 ```
 
+## Function call return types
+```velo
+fn text(): string {
+    return "hello";
+}
+
+fn main(): int {
+    return text(); // ❌ invalid: string returned from int function
+}
+```
+
+Builtin `console::println(...)` is currently treated as `void`
+
 ## Current limitations
 - parameters are immutable
 - there are no local variable declarations yet
