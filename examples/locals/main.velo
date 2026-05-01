@@ -1,0 +1,10 @@
+module app;
+
+use std::console;
+
+fn main(): int {
+    let x: int = 42;
+    console::println(x);
+
+    return x;
+}

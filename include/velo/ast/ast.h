@@ -90,6 +90,7 @@ namespace Velo::AST {
     enum class StatementKind {
         Expression,
         Return,
+        VariableDeclaration,
     };
 
     struct Statement {
@@ -112,6 +113,20 @@ namespace Velo::AST {
             Statement(StatementKind::Return, statementRange), expression(std::move(statementExpression)) {}
         // nullptr means `return;` without a value
         std::unique_ptr<Expression> expression;
+    };
+
+    struct VariableDeclarationStatement final : Statement {
+        VariableDeclarationStatement(
+            std::string variableName,
+            TypeName variableType,
+            std::unique_ptr<Expression> initExpression,
+            Source::SourceRange statementRange) : Statement(StatementKind::VariableDeclaration, statementRange),
+            name(std::move(variableName)), type(std::move(variableType)), initializer(std::move(initExpression))
+        {}
+
+        std::string name;
+        TypeName type;
+        std::unique_ptr<Expression> initializer;
     };
 
     struct Parameter final {

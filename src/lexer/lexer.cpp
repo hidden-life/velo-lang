@@ -56,6 +56,10 @@ namespace Velo::Lexer {
             case '"':
                 return lexStringLiteral();
 
+            case '=':
+                advance();
+                return makeToken(TokenKind::Equal, "=", beginOffset, beginOffset);
+
             default:
                 break;
         }
@@ -290,6 +294,10 @@ namespace Velo::Lexer {
 
         if (text == "pub") {
             return TokenKind::KwPub;
+        }
+
+        if (text == "let") {
+            return TokenKind::KwLet;
         }
 
         return TokenKind::Identifier;

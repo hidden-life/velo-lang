@@ -77,6 +77,7 @@ namespace Velo::Semantic {
     }
 
     void SemanticAnalyzer::analyzeFunction(const AST::FunctionDeclaration &func) {
+        _currentLocals.clear();
         _currentFunctionReturnType = func.returnType.name.segments[0];
         _currentParameters.clear();
 
@@ -116,6 +117,7 @@ namespace Velo::Semantic {
 
         _currentParameters.clear();
         _currentFunctionReturnType.clear();
+        _currentLocals.clear();
     }
 
     void SemanticAnalyzer::analyzeStatement(const AST::Statement &stmt) {
@@ -156,6 +158,33 @@ namespace Velo::Semantic {
                         returnStmt.range
                     );
                 }
+
+                break;
+            }
+            case AST::StatementKind::VariableDeclaration: {
+                const auto &varDecl = static_cast<const AST::VariableDeclarationStatement&>(stmt);
+                if (_currentLocals.contains(varDecl.name)) {
+                    _engine.error(
+                        "SEM018",
+                        "Duplicate local variable '" + varDecl.name + "'.",
+                        varDecl.range
+                    );
+
+                    return;
+                }
+
+                const auto declType = typeFromTypeName(varDecl.type);
+                const auto initType = analyzeExpressionType(*varDecl.initializer);
+
+                if (declType != ExpressionType::Unknown && initType != declType) {
+                    _engine.error(
+                        "SEM019",
+                        "Local variable initializer type mismatch.",
+                        varDecl.range
+                    );
+                }
+
+                _currentLocals.emplace(varDecl.name, declType);
 
                 break;
             }
@@ -221,6 +250,10 @@ namespace Velo::Semantic {
             }
 
             if (!isCallable && _currentParameters.contains(firstSegment)) {
+                return;
+            }
+
+            if (!isCallable && _currentLocals.contains(firstSegment)) {
                 return;
             }
 
@@ -322,6 +355,11 @@ namespace Velo::Semantic {
                     const std::string &name = nameExpr.name.segments.front();
                     if (_currentParameters.contains(name)) {
                         return ExpressionType::Int; // currently INT
+                    }
+
+                    const auto localIt = _currentLocals.find(name);
+                    if (localIt != _currentLocals.end()) {
+                        return localIt->second;
                     }
                 }
 

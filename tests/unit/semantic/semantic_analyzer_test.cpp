@@ -484,3 +484,24 @@ fn main(): int {
     EXPECT_TRUE(analyzer.analyze());
     EXPECT_FALSE(engine.hasErrors());
 }
+
+TEST(SemanticAnalyzerTest, AcceptsLocalVariableDeclaration) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+fn main(): int {
+    let x: int = 42;
+    return x;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}

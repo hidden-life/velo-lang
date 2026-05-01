@@ -9,6 +9,9 @@ namespace Velo::Interpreter {
 
     auto Interpreter::execute(const IR::Module &module) -> Runtime::ExecutionResult {
         _currentModule = &module;
+        _stack.clear();
+        _locals.clear();
+        
         const auto it = std::ranges::find_if(
             module.functions,
             [](const IR::Function &function) {
@@ -71,7 +74,7 @@ namespace Velo::Interpreter {
                 }
                 return {};
             case OpCode::LoadLocal:
-                if (inst.indexOperand >= _stack.size()) {
+                if (inst.indexOperand >= _locals.size()) {
                     return Runtime::ExecutionResult {
                         .success = false,
                         .exitCode = 1,
@@ -79,8 +82,32 @@ namespace Velo::Interpreter {
                     };
                 }
 
-                _stack.push_back(_stack[inst.indexOperand]);
+                _stack.push_back(_locals[inst.indexOperand]);
                 return {};
+            case OpCode::StoreLocal: {
+                if (_stack.empty()) {
+                    return Runtime::ExecutionResult {
+                        .success = false,
+                        .exitCode = 1,
+                        .error = "StoreLocal requires a value on the stack."
+                    };
+                }
+
+                const auto value = _stack.back();
+                _stack.pop_back();
+
+                if (inst.indexOperand > _locals.size()) {
+                    _locals.resize(inst.indexOperand);
+                }
+
+                if (inst.indexOperand == _locals.size()) {
+                    _locals.push_back(value);
+                } else {
+                    _locals[inst.indexOperand] = value;
+                }
+
+                return {};
+            }
             case OpCode::AddInt:
                 if (_stack.size() < 2U) {
                     return Runtime::ExecutionResult {
@@ -207,13 +234,15 @@ namespace Velo::Interpreter {
 
         // save current stack
         std::vector<Runtime::Value> callerStack = std::move(_stack);
+        std::vector<Runtime::Value> callerLocals = std::move(_locals);
         // new stack
         _stack.clear();
+        _locals.clear();
 
         // At this stage parameters are placed onto the callee stack.
         // Later this will be replaced with a real frame with local slots.
         for (auto &arg : arguments) {
-            _stack.push_back(std::move(arg));
+            _locals.push_back(std::move(arg));
         }
 
         // execute a function
@@ -229,6 +258,7 @@ namespace Velo::Interpreter {
 
         // recover caller stack
         _stack = std::move(callerStack);
+        _locals = std::move(callerLocals);
         _stack.push_back(returnValue);
 
         return {};

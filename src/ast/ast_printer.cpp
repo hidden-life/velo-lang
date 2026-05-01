@@ -45,6 +45,25 @@ namespace Velo::AST {
                     }
                     break;
                 }
+
+                case StatementKind::VariableDeclaration: {
+                    const auto &varDecl = static_cast<const VariableDeclarationStatement&>(statement);
+                    writeIndent(stream, indentLevel);
+                    stream << "Let " << varDecl.name << " : ";
+
+                    for (std::size_t idx = 0; idx < varDecl.type.name.segments.size(); ++idx) {
+                        if (idx > 0U) {
+                            stream << "::";
+                        }
+
+                        stream << varDecl.type.name.segments[idx];
+                    }
+
+                    stream << "\n";
+
+                    printExpression(stream, *varDecl.initializer, indentLevel + 1U);
+                    break;
+                }
             }
         }
 

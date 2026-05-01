@@ -9,6 +9,7 @@ namespace Velo::IR {
         PushInt,
         PushString,
         LoadLocal,
+        StoreLocal,
         CallBuiltin,
         CallFunction,
         Pop,

@@ -120,6 +120,19 @@ Current implementation:
 - final statement must be `return`
 - full control-flow analysis is not implemented yet
 
+## Local variables
+```velo
+fn main(): int {
+    let x: int = 42;
+    return x;
+}
+```
+
+Current limitations:
+- immutable only
+- function scope only
+- initializer required
+
 ## Current limitations
 - parameters are immutable
 - there are no local variable declarations yet

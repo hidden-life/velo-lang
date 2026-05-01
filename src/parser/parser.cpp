@@ -316,6 +316,54 @@ namespace Velo::Parser {
             );
         }
 
+        if (match(TokenKind::KwLet)) {
+            const Token &letKw = previous();
+            const Token *varName = consume(
+                TokenKind::Identifier,
+                "PAR030",
+                "Expected variable name after 'let'."
+            );
+
+            if (varName == nullptr) {
+                return nullptr;
+            }
+
+            if (consume(TokenKind::Colon, "PAR031", "Expected ':' after variable name.") == nullptr) {
+                return nullptr;
+            }
+
+            const auto varType = parseTypeName();
+            if (!varType.has_value()) {
+                return nullptr;
+            }
+
+            if (consume(TokenKind::Equal, "PAR032", "Expected '=' after variable type.") == nullptr) {
+                return nullptr;
+            }
+
+            auto initializer = parseExpression();
+            if (initializer == nullptr) {
+                return nullptr;
+            }
+
+            const Token *semicolon = consume(
+                TokenKind::Semicolon,
+                "PAR033",
+                "Expected ';' after variable declaration."
+            );
+
+            if (semicolon == nullptr) {
+                return nullptr;
+            }
+
+            return std::make_unique<AST::VariableDeclarationStatement>(
+                std::string(varName->text()),
+                *varType,
+                std::move(initializer),
+                makeRangeFromTokens(letKw, *semicolon)
+            );
+        }
+
         auto expression = parseExpression();
         if (expression == nullptr) {
             return nullptr;

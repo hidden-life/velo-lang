@@ -54,6 +54,19 @@ namespace Velo::IR {
 
             return;
         }
+
+        if (stmt.kind == StatementKind::VariableDeclaration) {
+            const auto &varDecl = static_cast<const VariableDeclarationStatement&>(stmt);
+            lowerExpression(*varDecl.initializer, func);
+
+            const std::size_t localIdx = _locals.size();
+            _locals.emplace(varDecl.name, localIdx);
+
+            func.instructions.push_back(Instruction {
+                .code = OpCode::StoreLocal,
+                .indexOperand = localIdx,
+            });
+        }
     }
 
     void Lowerer::lowerExpression(const AST::Expression &expr, Function &func) {

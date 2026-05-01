@@ -229,3 +229,24 @@ fn main(): int {
     ASSERT_NE(returnStmt, nullptr);
     EXPECT_EQ(returnStmt->expression, nullptr);
 }
+
+TEST(ParserTest, ParsesLocalVariableDeclaration) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+fn main(): int {
+    let x: int = 42;
+    return x;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    ASSERT_EQ(program->functions.size(), 1U);
+
+    const auto &mainFunc = program->functions[0];
+    ASSERT_EQ(mainFunc.statements.size(), 2U);
+    EXPECT_EQ(mainFunc.statements[0]->kind, Velo::AST::StatementKind::VariableDeclaration);
+}

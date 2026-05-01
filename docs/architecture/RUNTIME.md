@@ -92,3 +92,13 @@ Example:
 ```text
 console::println(value) -> void
 ```
+
+## Local storage
+`StoreLocal` stores a value from the stack into a local slot.
+
+`LoadLocal` reads from a local slot.
+
+Current implementation:
+- locals share the current function frame
+- parameters occupy initial slots
+- `let` variables append new slots

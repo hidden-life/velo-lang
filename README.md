@@ -25,6 +25,7 @@ Implemented so far:
 - `void` function return validation
 - `return;` without expression
 - non-void functions must end with a return statement
+- local variable declarations via `let`
 - GoogleTest test setup
 
 ## Build
@@ -97,6 +98,7 @@ Program
 ./build/debug/apps/velo/velo ./examples/parameter/main.velo
 ./build/debug/apps/velo/velo ./examples/add/main.velo
 ./build/debug/apps/velo/velo ./examples/void_function/main.velo
+./build/debug/apps/velo/velo ./examples/locals/main.velo
 ```
 
 ## Next milestone

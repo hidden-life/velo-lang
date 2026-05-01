@@ -201,3 +201,19 @@ fn main(): int {
 
     EXPECT_EQ(result.diagnostics.front().code(), "SEM017");
 }
+
+TEST(DriverTest, ExecutesLocalVariableProgram) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "locals.velo",
+        R"(module app;
+fn main(): int {
+    let x: int = 42;
+    return x;
+}
+)"
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+}

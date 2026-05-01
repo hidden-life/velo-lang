@@ -20,7 +20,10 @@ namespace Velo::Interpreter {
         [[nodiscard]] auto callBuiltin(const std::string &name, std::size_t argsCount) -> Runtime::ExecutionResult;
         [[nodiscard]] auto callFunction(const std::string &name, std::size_t argsCount) -> Runtime::ExecutionResult;
 
+        // Operand stack for temporary expression values.
         std::vector<Runtime::Value> _stack {};
+        // Local slots of the current frame: parameters and let variables.
+        std::vector<Runtime::Value> _locals {};
         Runtime::Runtime &_runtime;
         const IR::Module *_currentModule = nullptr;
     };
