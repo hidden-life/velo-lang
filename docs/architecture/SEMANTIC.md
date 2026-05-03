@@ -66,6 +66,16 @@ For MVP semantic validation:
 
 This is currently a structural check based on the final statement only.
 
+## Local mutability
+Local symbols now track:
+- type
+- mutability
+
+This enables:
+- immutable `let`
+- mutable `var`
+- reassignment validation
+
 Future work:
 - branch-aware control-flow analysis
 - guaranteed return path analysis

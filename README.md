@@ -26,6 +26,8 @@ Implemented so far:
 - `return;` without expression
 - non-void functions must end with a return statement
 - local variable declarations via `let`
+- mutable local variables via `var`
+- reassignment support
 - GoogleTest test setup
 
 ## Build

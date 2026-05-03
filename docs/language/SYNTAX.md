@@ -133,6 +133,19 @@ Current limitations:
 - function scope only
 - initializer required
 
+## Mutable variables
+```velo
+fn main(): int {
+    var x: int = 1;
+    x = x + 41;
+    
+    return x;
+}
+```
+Rules:
+- `let` -> immutable
+- `var` -> mutable
+
 ## Current limitations
 - parameters are immutable
 - there are no local variable declarations yet

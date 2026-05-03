@@ -41,6 +41,8 @@ namespace Velo::Parser {
 
         [[nodiscard]] auto makeFallbackRange() const -> Source::SourceRange;
 
+        [[nodiscard]] auto peekNext() const -> const Lexer::Token&;
+
         void sync();
         void reportCurrent(const char *code, const char *message);
 

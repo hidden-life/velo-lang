@@ -11,7 +11,7 @@ namespace Velo::Interpreter {
         _currentModule = &module;
         _stack.clear();
         _locals.clear();
-        
+
         const auto it = std::ranges::find_if(
             module.functions,
             [](const IR::Function &function) {

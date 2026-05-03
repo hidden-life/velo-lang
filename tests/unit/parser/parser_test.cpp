@@ -250,3 +250,24 @@ fn main(): int {
     ASSERT_EQ(mainFunc.statements.size(), 2U);
     EXPECT_EQ(mainFunc.statements[0]->kind, Velo::AST::StatementKind::VariableDeclaration);
 }
+
+TEST(ParserTest, ParsesMutableVariableAssignment) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+fn main(): int {
+    var x: int = 1;
+    x = x + 41;
+    return x;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    const auto &mainFunc = program->functions[0];
+    ASSERT_EQ(mainFunc.statements.size(), 3U);
+    EXPECT_EQ(mainFunc.statements[1]->kind, Velo::AST::StatementKind::Assignment);
+}

@@ -49,7 +49,7 @@ namespace Velo::AST {
                 case StatementKind::VariableDeclaration: {
                     const auto &varDecl = static_cast<const VariableDeclarationStatement&>(statement);
                     writeIndent(stream, indentLevel);
-                    stream << "Let " << varDecl.name << " : ";
+                    stream << (varDecl.isMutable ? "Var " : "Let ") << varDecl.name << " : ";
 
                     for (std::size_t idx = 0; idx < varDecl.type.name.segments.size(); ++idx) {
                         if (idx > 0U) {
@@ -62,6 +62,15 @@ namespace Velo::AST {
                     stream << "\n";
 
                     printExpression(stream, *varDecl.initializer, indentLevel + 1U);
+                    break;
+                }
+
+                case StatementKind::Assignment: {
+                    const auto &assignment = static_cast<const AssignmentStatement&>(statement);
+                    writeIndent(stream, indentLevel);
+                    stream << "Assign " << assignment.name << "\n";
+
+                    printExpression(stream, *assignment.value, indentLevel + 1U);
                     break;
                 }
             }

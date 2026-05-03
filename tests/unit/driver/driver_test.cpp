@@ -217,3 +217,20 @@ fn main(): int {
     ASSERT_TRUE(result.success);
     ASSERT_TRUE(result.diagnostics.empty());
 }
+
+TEST(DriverTest, ExecutesMutableVariableProgram) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "var.velo",
+        R"(module app;
+fn main(): int {
+    var x: int = 1;
+    x = x + 41;
+    return x;
+}
+)"
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+}

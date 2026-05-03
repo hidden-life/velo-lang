@@ -184,7 +184,42 @@ namespace Velo::Semantic {
                     );
                 }
 
-                _currentLocals.emplace(varDecl.name, declType);
+                _currentLocals.emplace(varDecl.name, LocalSymbol {
+                    .type = declType,
+                    .isMutable = varDecl.isMutable,
+                });
+
+                break;
+            }
+            case AST::StatementKind::Assignment: {
+                const auto &assignment = static_cast<const AST::AssignmentStatement&>(stmt);
+                const auto localIt = _currentLocals.find(assignment.name);
+                if (localIt == _currentLocals.end()) {
+                    _engine.error(
+                        "SEM020",
+                        "Unknown local variable '" + assignment.name + "'.",
+                        assignment.range
+                    );
+                    return;
+                }
+
+                if (!localIt->second.isMutable) {
+                    _engine.error(
+                        "SEM021",
+                        "Cannot assign to immutable local variable '" + assignment.name + "'.",
+                        assignment.range
+                    );
+                }
+
+                const auto valueType = analyzeExpressionType(*assignment.value);
+
+                if (valueType != localIt->second.type) {
+                    _engine.error(
+                        "SEM022",
+                        "Assignment type mismatch.",
+                        assignment.range
+                    );
+                }
 
                 break;
             }
@@ -359,7 +394,7 @@ namespace Velo::Semantic {
 
                     const auto localIt = _currentLocals.find(name);
                     if (localIt != _currentLocals.end()) {
-                        return localIt->second;
+                        return localIt->second.type;
                     }
                 }
 

@@ -316,8 +316,9 @@ namespace Velo::Parser {
             );
         }
 
-        if (match(TokenKind::KwLet)) {
+        if (match(TokenKind::KwLet) || match(TokenKind::KwVar)) {
             const Token &letKw = previous();
+            const bool isMutable = letKw.kind() == TokenKind::KwVar;
             const Token *varName = consume(
                 TokenKind::Identifier,
                 "PAR030",
@@ -357,10 +358,47 @@ namespace Velo::Parser {
             }
 
             return std::make_unique<AST::VariableDeclarationStatement>(
+                isMutable,
                 std::string(varName->text()),
                 *varType,
                 std::move(initializer),
                 makeRangeFromTokens(letKw, *semicolon)
+            );
+        }
+
+        if (check(TokenKind::Identifier) && peekNext().kind() == TokenKind::Equal) {
+            const Token *variableName = consume(
+                TokenKind::Identifier,
+                "PAR040",
+                "Expected assignment target."
+            );
+
+            if (consume(TokenKind::Equal, "PAR041", "Expected '=' in assignment.") == nullptr) {
+                return nullptr;
+            }
+
+            auto valueExpr = parseExpression();
+            if (valueExpr == nullptr) {
+                return nullptr;
+            }
+
+            const Token *semicolon = consume(
+                TokenKind::Semicolon,
+                "PAR042",
+                "Expected ';' after assignment."
+            );
+
+            if (semicolon == nullptr) {
+                return nullptr;
+            }
+
+            return std::make_unique<AST::AssignmentStatement>(
+                std::string(variableName->text()),
+                std::move(valueExpr),
+                Source::SourceRange(
+                    variableName->range().begin(),
+                    semicolon->range().end()
+                )
             );
         }
 
@@ -492,5 +530,13 @@ namespace Velo::Parser {
 
     void Parser::reportCurrent(const char *code, const char *message) {
         _engine.error(code, message, makeFallbackRange());
+    }
+
+    auto Parser::peekNext() const -> const Token& {
+        if (_position + 1U >= _tokens.size()) {
+            return _tokens.back();
+        }
+
+        return _tokens[_position + 1U];
     }
 }

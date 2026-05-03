@@ -1,0 +1,12 @@
+module app;
+
+use std::console;
+
+fn main(): int {
+    var x: int = 1;
+    x = x + 41;
+
+    console::println(x);
+
+    return x;
+}

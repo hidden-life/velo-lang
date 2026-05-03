@@ -47,6 +47,8 @@ namespace Velo::Lexer {
                 return "KwLet";
             case TokenKind::Equal:
                 return "Equal";
+            case TokenKind::KwVar:
+                return "KwVar";
         }
 
         return "Unknown";

@@ -91,6 +91,7 @@ namespace Velo::AST {
         Expression,
         Return,
         VariableDeclaration,
+        Assignment,
     };
 
     struct Statement {
@@ -117,16 +118,31 @@ namespace Velo::AST {
 
     struct VariableDeclarationStatement final : Statement {
         VariableDeclarationStatement(
+            bool variableIsMutable,
             std::string variableName,
             TypeName variableType,
             std::unique_ptr<Expression> initExpression,
             Source::SourceRange statementRange) : Statement(StatementKind::VariableDeclaration, statementRange),
-            name(std::move(variableName)), type(std::move(variableType)), initializer(std::move(initExpression))
+            isMutable(variableIsMutable), name(std::move(variableName)), type(std::move(variableType)), initializer(std::move(initExpression))
         {}
 
+        bool isMutable {false};
         std::string name;
         TypeName type;
         std::unique_ptr<Expression> initializer;
+    };
+
+    struct AssignmentStatement final : Statement {
+        AssignmentStatement(
+            std::string variableName,
+            std::unique_ptr<Expression> valueExpression,
+            Source::SourceRange statementRange
+        ): Statement(StatementKind::Assignment, statementRange),
+            name(std::move(variableName)), value(std::move(valueExpression))
+        {}
+
+        std::string name;
+        std::unique_ptr<Expression> value;
     };
 
     struct Parameter final {

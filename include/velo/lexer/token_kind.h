@@ -33,6 +33,7 @@ namespace Velo::Lexer {
         Equal,
 
         KwLet, // variables
+        KwVar,
     };
 
     [[nodiscard]] auto toString(TokenKind kind) -> std::string_view;

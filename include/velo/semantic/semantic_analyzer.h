@@ -49,7 +49,11 @@ namespace Velo::Semantic {
 
         std::unordered_map<std::string, const AST::UseDeclaration*> _visibleImports {};
         std::unordered_map<std::string, const AST::FunctionDeclaration*> _functions {};
-        std::unordered_map<std::string, ExpressionType> _currentLocals {};
+        struct LocalSymbol final {
+            ExpressionType type {ExpressionType::Unknown};
+            bool isMutable {false};
+        };
+        std::unordered_map<std::string, LocalSymbol> _currentLocals {};
 
         const Module::ModuleRegistry &_modules;
         std::unordered_set<std::string> _currentParameters {};

@@ -67,6 +67,20 @@ namespace Velo::IR {
                 .indexOperand = localIdx,
             });
         }
+
+        if (stmt.kind == StatementKind::Assignment) {
+            const auto &assign = static_cast<const AssignmentStatement&>(stmt);
+            lowerExpression(*assign.value, func);
+            const auto *localIdx = findLocalIndex(assign.name);
+            if (localIdx != nullptr) {
+                func.instructions.push_back(Instruction {
+                    .code = OpCode::StoreLocal,
+                    .indexOperand = *localIdx,
+                });
+            }
+
+            return;
+        }
     }
 
     void Lowerer::lowerExpression(const AST::Expression &expr, Function &func) {

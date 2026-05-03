@@ -300,6 +300,10 @@ namespace Velo::Lexer {
             return TokenKind::KwLet;
         }
 
+        if (text == "var") {
+            return TokenKind::KwVar;
+        }
+
         return TokenKind::Identifier;
     }
 }
