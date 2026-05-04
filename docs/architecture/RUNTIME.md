@@ -102,3 +102,12 @@ Current implementation:
 - locals share the current function frame
 - parameters occupy initial slots
 - `let` variables append new slots
+
+## Conditional jumps
+The interpreter now executes functions through an instruction pointer.
+
+Supported jump instructions:
+- `JumpIfFalse`
+- `Jump`
+
+This enables basic `if/else` execution.

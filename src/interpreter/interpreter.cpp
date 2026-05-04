@@ -31,7 +31,9 @@ namespace Velo::Interpreter {
     }
 
     auto Interpreter::executeFunc(const IR::Function &func) -> Runtime::ExecutionResult {
-        for (const auto &inst : func.instructions) {
+        std::size_t instructionPointer = 0U;
+        while (instructionPointer < func.instructions.size()) {
+            const auto &inst = func.instructions[instructionPointer];
             auto result = executeInstruction(inst);
             if (!result.success) {
                 return result;
@@ -40,6 +42,21 @@ namespace Velo::Interpreter {
             if (inst.code == IR::OpCode::Return) {
                 return result;
             }
+
+            if (inst.code == IR::OpCode::Jump) {
+                instructionPointer = inst.targetOperand;
+                continue;
+            }
+
+            if (inst.code == IR::OpCode::JumpIfFalse) {
+                if (_lastJumpTaken) {
+                    instructionPointer = inst.targetOperand;
+                    _lastJumpTaken = false;
+                    continue;
+                }
+            }
+
+            ++instructionPointer;
         }
 
         return Runtime::ExecutionResult {};
@@ -108,6 +125,35 @@ namespace Velo::Interpreter {
 
                 return {};
             }
+            case OpCode::PushBool: {
+                _stack.emplace_back(inst.boolOperand);
+                return {};
+            }
+            case OpCode::JumpIfFalse: {
+                if (_stack.empty()) {
+                    return Runtime::ExecutionResult {
+                        .success = false,
+                        .exitCode = 1,
+                        .error = "JumpIfFalse requires a condition value."
+                    };
+                }
+
+                const auto condition = _stack.back();
+                _stack.pop_back();
+
+                if (!std::holds_alternative<bool>(condition)) {
+                    return Runtime::ExecutionResult {
+                        .success = false,
+                        .exitCode = 1,
+                        .error = "JumpIfFalse condition must be bool."
+                    };
+                }
+
+                _lastJumpTaken = !std::get<bool>(condition);
+                return {};
+            }
+            case OpCode::Jump:
+                return {};
             case OpCode::AddInt:
                 if (_stack.size() < 2U) {
                     return Runtime::ExecutionResult {

@@ -73,6 +73,31 @@ namespace Velo::AST {
                     printExpression(stream, *assignment.value, indentLevel + 1U);
                     break;
                 }
+
+                case StatementKind::If: {
+                    const auto &ifStmt = static_cast<const IfStatement&>(statement);
+                    writeIndent(stream, indentLevel);
+                    stream << "If\n";
+                    writeIndent(stream, indentLevel + 1U);
+                    stream << "Condition\n";
+                    printExpression(stream, *ifStmt.condition, indentLevel + 2U);
+                    writeIndent(stream, indentLevel + 1U);
+                    stream << "Then\n";
+
+                    for (const auto &nested : ifStmt.thenBranch) {
+                        printStatement(stream, *nested, indentLevel + 2U);
+                    }
+
+                    if (!ifStmt.elseBranch.empty()) {
+                        writeIndent(stream, indentLevel + 1U);
+                        stream << "Else\n";
+                        for (const auto &nested : ifStmt.elseBranch) {
+                            printStatement(stream, *nested, indentLevel + 2U);
+                        }
+                    }
+
+                    break;
+                }
             }
         }
 
@@ -89,6 +114,13 @@ namespace Velo::AST {
                     const auto &stringLiteral = static_cast<const StringLiteralExpression&>(expression);
                     writeIndent(stream, indentLevel);
                     stream << "String \"" << stringLiteral.value << "\"\n";
+                    break;
+                }
+
+                case ExpressionKind::BooleanLiteral: {
+                    const auto &booleanLiteral = static_cast<const BooleanLiteralExpression&>(expression);
+                    writeIndent(stream, indentLevel);
+                    stream << "Bool " << (booleanLiteral.value ? "true" : "false") << "\n";
                     break;
                 }
 

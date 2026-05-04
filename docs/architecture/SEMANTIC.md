@@ -79,3 +79,8 @@ This enables:
 Future work:
 - branch-aware control-flow analysis
 - guaranteed return path analysis
+
+## If / else validation
+The semantic analyzer validates:
+- if condition type must be `bool`
+- if/else can satisfy final return requirement when both branches guarantee return

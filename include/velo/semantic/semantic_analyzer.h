@@ -14,6 +14,7 @@ namespace Velo::Semantic {
         Void,
         Int,
         String,
+        Bool,
     };
 
     // Minimal semantic analyzer for the first executable Velo program shape.
@@ -43,6 +44,8 @@ namespace Velo::Semantic {
         [[nodiscard]] auto typeFromString(const std::string &typeName) -> ExpressionType;
 
         [[nodiscard]] static auto importedModuleName(const AST::UseDeclaration &useDecl) -> std::string;
+
+        [[nodiscard]] static auto statementGuaranteesReturn(const AST::Statement &statement) -> bool;
 
         const AST::Program &_program;
         Diagnostic::DiagnosticEngine &_engine;

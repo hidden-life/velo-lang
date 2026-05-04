@@ -16,6 +16,10 @@ namespace Velo::IR {
         Return,
 
         AddInt,
+
+        PushBool,
+        JumpIfFalse,
+        Jump,
     };
 
     struct Instruction final {
@@ -23,10 +27,13 @@ namespace Velo::IR {
 
         std::string stringOperand {};
         int intOperand {0};
+        bool boolOperand {false};
         // Argument count for CallBuiltin/CallFunction.
         std::size_t argsCount {0};
         // Local value index, for example a function parameter.
         std::size_t indexOperand {0};
+        // Target instruction index for jump instructions.
+        std::size_t targetOperand {0};
     };
 }
 

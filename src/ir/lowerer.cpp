@@ -81,6 +81,38 @@ namespace Velo::IR {
 
             return;
         }
+
+        if (stmt.kind == StatementKind::If) {
+            const auto &ifStmt = static_cast<const IfStatement&>(stmt);
+            lowerExpression(*ifStmt.condition, func);
+
+            const std::size_t jumpIfFalseIdx = func.instructions.size();
+            func.instructions.push_back(Instruction {
+                .code = OpCode::JumpIfFalse
+            });
+
+            for (const auto &nested : ifStmt.thenBranch) {
+                lowerStatement(*nested, func);
+            }
+
+            const std::size_t jumpOverElseIdx = func.instructions.size();
+            func.instructions.push_back(Instruction {
+                .code = OpCode::Jump
+            });
+
+            const std::size_t elseStartIdx = func.instructions.size();
+            for (const auto &nested : ifStmt.elseBranch) {
+                lowerStatement(*nested, func);
+            }
+
+            const std::size_t endIdx = func.instructions.size();
+            // If condition is false, jump to the else branch.
+            func.instructions[jumpIfFalseIdx].targetOperand = elseStartIdx;
+            // After then branch, skip the else branch.
+            func.instructions[jumpOverElseIdx].targetOperand = endIdx;
+
+            return;
+        }
     }
 
     void Lowerer::lowerExpression(const AST::Expression &expr, Function &func) {
@@ -160,6 +192,15 @@ namespace Velo::IR {
                 i.stringOperand = name;
 
                 func.instructions.push_back(i);
+                return;
+            }
+
+            case ExpressionKind::BooleanLiteral: {
+                const auto &literal = static_cast<const BooleanLiteralExpression&>(expr);
+                func.instructions.push_back(Instruction {
+                    .code = OpCode::PushBool,
+                    .boolOperand = literal.value
+                });
                 return;
             }
         }

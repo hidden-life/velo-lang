@@ -21,6 +21,7 @@ namespace Velo::AST {
     enum class ExpressionKind {
         IntegerLiteral,
         StringLiteral,
+        BooleanLiteral,
         Name,
         Call,
         Binary,
@@ -51,6 +52,13 @@ namespace Velo::AST {
             Expression(ExpressionKind::StringLiteral, literalRange), value(std::move(literalValue)) {}
 
         std::string value;
+    };
+
+    struct BooleanLiteralExpression final : Expression {
+        explicit BooleanLiteralExpression(bool literalValue, Source::SourceRange literalRange):
+            Expression(ExpressionKind::BooleanLiteral, literalRange), value(literalValue) {}
+
+        bool value {false};
     };
 
     struct NameExpression final : Expression {
@@ -92,6 +100,7 @@ namespace Velo::AST {
         Return,
         VariableDeclaration,
         Assignment,
+        If,
     };
 
     struct Statement {
@@ -143,6 +152,22 @@ namespace Velo::AST {
 
         std::string name;
         std::unique_ptr<Expression> value;
+    };
+
+    struct IfStatement final : Statement {
+        IfStatement(std::unique_ptr<Expression> conditionExpression,
+            std::vector<std::unique_ptr<Statement>> thenStatements,
+            std::vector<std::unique_ptr<Statement>> elseStatements,
+            Source::SourceRange statementRange
+            ) :
+            Statement(StatementKind::If, statementRange),
+            condition(std::move(conditionExpression)),
+            thenBranch(std::move(thenStatements)), elseBranch(std::move(elseStatements))
+        {}
+
+        std::unique_ptr<Expression> condition;
+        std::vector<std::unique_ptr<Statement>> thenBranch {};
+        std::vector<std::unique_ptr<Statement>> elseBranch {};
     };
 
     struct Parameter final {

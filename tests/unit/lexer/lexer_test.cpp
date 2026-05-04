@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-
+#include <algorithm>
 #include "velo/lexer/lexer.h"
 #include "velo/diagnostic/diagnostic_engine.h"
 
@@ -172,5 +172,19 @@ TEST(LexerTest, LexesPlusToken) {
     };
 
     EXPECT_EQ(kinds, expected);
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(LexerTest, LexesIfElseAndBooleanLiterals) {
+    const SourceFile file("if.velo", "if (true) { return 1; } else { return 0; }");
+    DiagnosticEngine engine;
+    Lexer lexer(file, engine);
+
+    const auto tokens = lexer.lexAll();
+    const auto kinds = collectKinds(tokens);
+
+    EXPECT_NE(std::find(kinds.begin(), kinds.end(), TokenKind::KwIf), kinds.end());
+    EXPECT_NE(std::find(kinds.begin(), kinds.end(), TokenKind::KwElse), kinds.end());
+    EXPECT_NE(std::find(kinds.begin(), kinds.end(), TokenKind::BooleanLiteral), kinds.end());
     EXPECT_FALSE(engine.hasErrors());
 }

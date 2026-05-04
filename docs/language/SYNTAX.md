@@ -146,6 +146,21 @@ Rules:
 - `let` -> immutable
 - `var` -> mutable
 
+## If / else
+```velo
+fn main(): int {
+    if (true) {
+        return 42;
+    } else {
+        return 0;
+    }
+}
+```
+Rules:
+- condition must be `bool`
+- `else` is optional
+- non-void functions can satisfy return requirement through if/else branches
+
 ## Current limitations
 - parameters are immutable
 - there are no local variable declarations yet

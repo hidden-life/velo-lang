@@ -234,3 +234,22 @@ fn main(): int {
     ASSERT_TRUE(result.success);
     ASSERT_TRUE(result.diagnostics.empty());
 }
+
+TEST(DriverTest, ExecutesIfElseProgram) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "if.velo",
+        R"(module app;
+fn main(): int {
+    if (true) {
+        return 42;
+    } else {
+        return 0;
+    }
+}
+)"
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+}

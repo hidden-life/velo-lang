@@ -28,6 +28,9 @@ Implemented so far:
 - local variable declarations via `let`
 - mutable local variables via `var`
 - reassignment support
+- boolean literals
+- `if/else` statements
+- basic conditional jumps in IR
 - GoogleTest test setup
 
 ## Build

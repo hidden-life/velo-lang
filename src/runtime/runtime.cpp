@@ -9,6 +9,10 @@ namespace Velo::Runtime {
                 return std::to_string(std::get<int>(value));
             }
 
+            if (std::holds_alternative<bool>(value)) {
+                return std::get<bool>(value) ? "true" : "false";
+            }
+
             return std::get<std::string>(value);
         }
     }

@@ -43,6 +43,8 @@ namespace Velo::Parser {
 
         [[nodiscard]] auto peekNext() const -> const Lexer::Token&;
 
+        [[nodiscard]] auto parseBlockStatements() -> std::vector<std::unique_ptr<AST::Statement>>;
+
         void sync();
         void reportCurrent(const char *code, const char *message);
 

@@ -1,0 +1,13 @@
+module app;
+
+use std::console;
+
+fn main(): int {
+    if (true) {
+        console::println(42);
+        return 42;
+    } else {
+        console::println(0);
+        return 0;
+    }
+}

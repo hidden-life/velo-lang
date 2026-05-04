@@ -78,8 +78,13 @@ namespace Velo::Semantic {
 
     void SemanticAnalyzer::analyzeFunction(const AST::FunctionDeclaration &func) {
         _currentLocals.clear();
-        _currentFunctionReturnType = func.returnType.name.segments[0];
         _currentParameters.clear();
+
+        if (!func.returnType.name.segments.empty()) {
+            _currentFunctionReturnType = func.returnType.name.segments.front();
+        } else {
+            _currentFunctionReturnType.clear();
+        }
 
         for (const auto &param : func.parameters) {
             const auto [it, inserted] = _currentParameters.insert(param.name);
@@ -96,6 +101,8 @@ namespace Velo::Semantic {
             analyzeStatement(*stmt);
         }
 
+        // Guaranteed return check must run only after all statements are analyzed.
+        // Otherwise a function with console::println(...); return 0; would incorrectly get SEM017 on the first statement.
         if (_currentFunctionReturnType != "void") {
             if (func.statements.empty()) {
                 _engine.error(
@@ -105,7 +112,7 @@ namespace Velo::Semantic {
                 );
             } else {
                 const auto &lastStmt = func.statements.back();
-                if (lastStmt->kind != AST::StatementKind::Return) {
+                if (!statementGuaranteesReturn(*lastStmt)) {
                     _engine.error(
                         "SEM017",
                         "Non-void function must end with a return statement.",
@@ -116,8 +123,8 @@ namespace Velo::Semantic {
         }
 
         _currentParameters.clear();
-        _currentFunctionReturnType.clear();
         _currentLocals.clear();
+        _currentFunctionReturnType.clear();
     }
 
     void SemanticAnalyzer::analyzeStatement(const AST::Statement &stmt) {
@@ -223,6 +230,28 @@ namespace Velo::Semantic {
 
                 break;
             }
+
+            case AST::StatementKind::If: {
+                const auto &ifStmt = static_cast<const AST::IfStatement&>(stmt);
+                const auto conditionType = analyzeExpressionType(*ifStmt.condition);
+                if (conditionType != ExpressionType::Bool) {
+                    _engine.error(
+                        "SEM023",
+                        "If condition must be bool.",
+                        ifStmt.condition->range
+                    );
+                }
+
+                for (const auto &nested : ifStmt.thenBranch) {
+                    analyzeStatement(*nested);
+                }
+
+                for (const auto &nested : ifStmt.elseBranch) {
+                    analyzeStatement(*nested);
+                }
+
+                break;
+            }
         }
     }
 
@@ -230,6 +259,7 @@ namespace Velo::Semantic {
         switch (expr.kind) {
             case AST::ExpressionKind::IntegerLiteral:
             case AST::ExpressionKind::StringLiteral:
+            case AST::ExpressionKind::BooleanLiteral:
                 return;
             case AST::ExpressionKind::Name: {
                 const auto &nameExpr = static_cast<const AST::NameExpression&>(expr);
@@ -428,6 +458,10 @@ namespace Velo::Semantic {
                 // Call type must be derived from a user function declaration or builtin module metadata.
                 return analyzeCallExpressionType(callExpr);
             }
+
+            case ExpressionKind::BooleanLiteral: {
+                return ExpressionType::Bool;
+            }
         }
 
         return ExpressionType::Unknown;
@@ -495,6 +529,10 @@ namespace Velo::Semantic {
             return ExpressionType::Void;
         }
 
+        if (typeName == "bool") {
+            return ExpressionType::Bool;
+        }
+
         return ExpressionType::Unknown;
     }
 
@@ -505,5 +543,22 @@ namespace Velo::Semantic {
 
         // use std::console as out; visible name = out, actual module = console
         return useDecl.path.segments.back();
+    }
+
+    auto SemanticAnalyzer::statementGuaranteesReturn(const AST::Statement &statement) -> bool {
+        if (statement.kind == AST::StatementKind::Return) {
+            return true;
+        }
+
+        if (statement.kind != AST::StatementKind::If) {
+            return false;
+        }
+
+        const auto &ifStmt = static_cast<const AST::IfStatement&>(statement);
+        if (ifStmt.thenBranch.empty() || ifStmt.elseBranch.empty()) {
+            return false;
+        }
+
+        return statementGuaranteesReturn(*ifStmt.thenBranch.back()) && statementGuaranteesReturn(*ifStmt.elseBranch.back());
     }
 }

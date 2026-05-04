@@ -316,6 +316,55 @@ namespace Velo::Parser {
             );
         }
 
+        if (match(TokenKind::KwIf)) {
+            const Token &ifKw = previous();
+            if (consume(TokenKind::OpenParen, "PAR050", "Expected '(' after 'if'.") == nullptr) {
+                return nullptr;
+            }
+
+            auto condition = parseExpression();
+            if (condition == nullptr) {
+                return nullptr;
+            }
+
+            if (consume(TokenKind::CloseParen, "PAR051", "Expected ')' after if condition.") == nullptr) {
+                return nullptr;
+            }
+
+            if (consume(TokenKind::OpenBrace, "PAR052", "Expected '{' before if body.") == nullptr) {
+                return nullptr;
+            }
+
+            auto thenBranch = parseBlockStatements();
+            const Token *thenCloseBrace = consume(TokenKind::CloseBrace, "PAR053", "Expected '}' after if body.");
+            if (thenCloseBrace == nullptr) {
+                return nullptr;
+            }
+
+            std::vector<std::unique_ptr<AST::Statement>> elseBranch;
+            const Token *endToken = thenCloseBrace;
+
+            if (match(TokenKind::KwElse)) {
+                if (consume(TokenKind::OpenBrace, "PAR054", "Expected '{' before else body.") == nullptr) {
+                    return nullptr;
+                }
+                elseBranch = parseBlockStatements();
+
+                const Token *elseCloseBrace = consume(TokenKind::CloseBrace, "PAR055", "Expected '}' after else body.");
+                if (elseCloseBrace == nullptr) {
+                    return nullptr;
+                }
+                endToken = elseCloseBrace;
+            }
+
+            return std::make_unique<AST::IfStatement>(
+                std::move(condition),
+                std::move(thenBranch),
+                std::move(elseBranch),
+                makeRangeFromTokens(ifKw, *endToken)
+            );
+        }
+
         if (match(TokenKind::KwLet) || match(TokenKind::KwVar)) {
             const Token &letKw = previous();
             const bool isMutable = letKw.kind() == TokenKind::KwVar;
@@ -458,6 +507,11 @@ namespace Velo::Parser {
             return std::make_unique<AST::IntegerLiteralExpression>(std::string(token.text()), token.range());
         }
 
+        if (check(TokenKind::BooleanLiteral)) {
+            const Token &token = advance();
+            return std::make_unique<AST::BooleanLiteralExpression>(token.text() == "true", token.range());
+        }
+
         if (check(TokenKind::Identifier)) {
             return parseCallExpressionOrName();
         }
@@ -538,5 +592,20 @@ namespace Velo::Parser {
         }
 
         return _tokens[_position + 1U];
+    }
+
+    auto Parser::parseBlockStatements() -> std::vector<std::unique_ptr<AST::Statement>> {
+        std::vector<std::unique_ptr<AST::Statement>> statements;
+        while (!check(TokenKind::CloseBrace) && !isAtEnd()) {
+            auto stmt = parseStatement();
+            if (stmt == nullptr) {
+                sync();
+                continue;
+            }
+
+            statements.push_back(std::move(stmt));
+        }
+
+        return statements;
     }
 }

@@ -49,6 +49,12 @@ namespace Velo::Lexer {
                 return "Equal";
             case TokenKind::KwVar:
                 return "KwVar";
+            case TokenKind::BooleanLiteral:
+                return "BooleanLiteral";
+            case TokenKind::KwIf:
+                return "KwIf";
+            case TokenKind::KwElse:
+                return "KwElse";
         }
 
         return "Unknown";

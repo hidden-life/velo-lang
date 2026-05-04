@@ -26,6 +26,8 @@ namespace Velo::Interpreter {
         std::vector<Runtime::Value> _locals {};
         Runtime::Runtime &_runtime;
         const IR::Module *_currentModule = nullptr;
+
+        bool _lastJumpTaken {false};
     };
 }
 

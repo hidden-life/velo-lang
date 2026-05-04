@@ -304,6 +304,18 @@ namespace Velo::Lexer {
             return TokenKind::KwVar;
         }
 
+        if (text == "if") {
+            return TokenKind::KwIf;
+        }
+
+        if (text == "else") {
+            return TokenKind::KwElse;
+        }
+
+        if (text == "true" || text == "false") {
+            return TokenKind::BooleanLiteral;
+        }
+
         return TokenKind::Identifier;
     }
 }

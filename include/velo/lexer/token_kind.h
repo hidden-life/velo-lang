@@ -12,6 +12,7 @@ namespace Velo::Lexer {
         Identifier,
         IntegerLiteral, // <int>
         StringLiteral, // <string>
+        BooleanLiteral, // <bool>
 
         KwModule, // "module"
         KwUse, // "use"
@@ -34,6 +35,9 @@ namespace Velo::Lexer {
 
         KwLet, // variables
         KwVar,
+
+        KwIf,
+        KwElse,
     };
 
     [[nodiscard]] auto toString(TokenKind kind) -> std::string_view;
