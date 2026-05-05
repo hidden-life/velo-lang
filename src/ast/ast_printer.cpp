@@ -146,10 +146,38 @@ namespace Velo::AST {
                 case ExpressionKind::Binary: {
                     const auto &binaryExpression = static_cast<const BinaryExpression&>(expression);
                     writeIndent(stream, indentLevel);
-                    stream << "Binary: +\n";
+                    stream << "Binary: ";
+
+                    switch (binaryExpression.op) {
+                        case BinaryOperator::Add:
+                            stream << "+";
+                            break;
+                        case BinaryOperator::Equal:
+                            stream << "==";
+                            break;
+                        case BinaryOperator::NotEqual:
+                            stream << "!=";
+                            break;
+                        case BinaryOperator::Less:
+                            stream << "<";
+                            break;
+                        case BinaryOperator::LessEqual:
+                            stream << "<=";
+                            break;
+                        case BinaryOperator::Greater:
+                            stream << ">";
+                            break;
+                        case BinaryOperator::GreaterEqual:
+                            stream << ">=";
+                            break;
+                    }
+
+                    stream << "\n";
 
                     printExpression(stream, *binaryExpression.left, indentLevel + 1U);
                     printExpression(stream, *binaryExpression.right, indentLevel + 1U);
+
+                    break;
                 }
             }
         }

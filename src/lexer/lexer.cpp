@@ -58,7 +58,37 @@ namespace Velo::Lexer {
 
             case '=':
                 advance();
+                if (match('=')) {
+                    return makeToken(TokenKind::EqualEqual, "==", beginOffset, _offset - 1U);
+                }
+
                 return makeToken(TokenKind::Equal, "=", beginOffset, beginOffset);
+
+            case '!':
+                advance();
+                if (match('=')) {
+                    return makeToken(TokenKind::BangEqual, "!=", beginOffset, _offset - 1U);
+                }
+
+                reportInvalidCharacter(beginOffset);
+                return makeToken(TokenKind::Invalid, "!", beginOffset, beginOffset);
+
+            case '<':
+                advance();
+                if (match('=')) {
+                    return makeToken(TokenKind::LessEqual, "<=", beginOffset, _offset - 1U);
+                }
+
+                return makeToken(TokenKind::Less, "<", beginOffset, beginOffset);
+
+            case '>':
+                advance();
+
+                if (match('=')) {
+                    return makeToken(TokenKind::GreaterEqual, ">=", beginOffset, _offset - 1U);
+                }
+
+                return makeToken(TokenKind::Greater, ">", beginOffset, beginOffset);
 
             default:
                 break;
@@ -317,5 +347,18 @@ namespace Velo::Lexer {
         }
 
         return TokenKind::Identifier;
+    }
+
+    auto Lexer::match(char expected) -> bool {
+        if (isAtEnd()) {
+            return false;
+        }
+
+        if (peek() != expected) {
+            return false;
+        }
+
+        advance();
+        return true;
     }
 }

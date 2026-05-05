@@ -572,3 +572,50 @@ fn main(): int {
     ASSERT_TRUE(engine.hasErrors());
     EXPECT_EQ(engine.diagnostics().front().code(), "SEM023");
 }
+
+TEST(SemanticAnalyzerTest, AcceptsIntegerComparisonCondition) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+fn main(): int {
+    if (42 > 10) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, ReportsInvalidComparisonOperands) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+fn main(): int {
+    if ("a" > 10) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM024");
+}

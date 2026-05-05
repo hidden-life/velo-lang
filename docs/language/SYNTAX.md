@@ -161,6 +161,23 @@ Rules:
 - `else` is optional
 - non-void functions can satisfy return requirement through if/else branches
 
+## Comparisons
+```velo
+if (x > 10) {
+    return 1;
+}
+```
+Supported operators:
+- `==`
+- `!=`
+- `>`
+- `<`
+- `<=`
+- `>=`
+
+Current limitation:
+- comparisons currently support `int` operands only
+
 ## Current limitations
 - parameters are immutable
 - there are no local variable declarations yet

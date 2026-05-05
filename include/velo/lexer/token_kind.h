@@ -32,6 +32,13 @@ namespace Velo::Lexer {
 
         Plus,
         Equal,
+        // comparison
+        EqualEqual,
+        BangEqual,
+        Less,
+        Greater,
+        LessEqual,
+        GreaterEqual,
 
         KwLet, // variables
         KwVar,

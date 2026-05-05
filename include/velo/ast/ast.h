@@ -28,7 +28,13 @@ namespace Velo::AST {
     };
 
     enum class BinaryOperator {
-        Add
+        Add,
+        Equal,
+        NotEqual,
+        Less,
+        Greater,
+        LessEqual,
+        GreaterEqual,
     };
 
     struct Expression {

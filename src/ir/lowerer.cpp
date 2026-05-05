@@ -156,15 +156,47 @@ namespace Velo::IR {
             }
 
             case ExpressionKind::Binary: {
-                const auto &binaryExp = static_cast<const BinaryExpression&>(expr);
+                const auto &binaryExpr = static_cast<const BinaryExpression&>(expr);
 
-                lowerExpression(*binaryExp.left, func);
-                lowerExpression(*binaryExp.right, func);
+                lowerExpression(*binaryExpr.left, func);
+                lowerExpression(*binaryExpr.right, func);
 
-                if (binaryExp.op == BinaryOperator::Add) {
-                    func.instructions.push_back(Instruction {
-                        .code = OpCode::AddInt,
-                    });
+                switch (binaryExpr.op) {
+                    case BinaryOperator::Add:
+                        func.instructions.push_back(Instruction {
+                            .code = OpCode::AddInt,
+                        });
+                        return;
+                    case BinaryOperator::Equal:
+                        func.instructions.push_back(Instruction {
+                            .code = OpCode::CompareEqualInt,
+                        });
+                        return;
+                    case BinaryOperator::NotEqual:
+                        func.instructions.push_back(Instruction {
+                            .code = OpCode::CompareNotEqualInt,
+                        });
+                        return;
+                    case BinaryOperator::Less:
+                        func.instructions.push_back(Instruction {
+                            .code = OpCode::CompareLessInt,
+                        });
+                        return;
+                    case BinaryOperator::Greater:
+                        func.instructions.push_back(Instruction {
+                            .code = OpCode::CompareGreaterInt,
+                        });
+                        return;
+                    case BinaryOperator::LessEqual:
+                        func.instructions.push_back(Instruction {
+                            .code = OpCode::CompareLessEqualInt,
+                        });
+                        return;
+                    case BinaryOperator::GreaterEqual:
+                        func.instructions.push_back(Instruction {
+                            .code = OpCode::CompareGreaterEqualInt,
+                        });
+                        return;
                 }
 
                 return;

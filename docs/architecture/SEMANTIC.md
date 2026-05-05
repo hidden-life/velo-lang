@@ -84,3 +84,12 @@ Future work:
 The semantic analyzer validates:
 - if condition type must be `bool`
 - if/else can satisfy final return requirement when both branches guarantee return
+
+## Comparison type validation
+Comparison operators currently require integer operands and produce `bool`.
+
+Examples:
+```velo
+1 < 2 // bool
+"a" > 1 // semantic error
+```

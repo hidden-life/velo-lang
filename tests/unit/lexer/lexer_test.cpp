@@ -188,3 +188,31 @@ TEST(LexerTest, LexesIfElseAndBooleanLiterals) {
     EXPECT_NE(std::find(kinds.begin(), kinds.end(), TokenKind::BooleanLiteral), kinds.end());
     EXPECT_FALSE(engine.hasErrors());
 }
+
+TEST(LexerTest, LexesComparisonTokens) {
+    const SourceFile file("comparison.velo", "a == b != c < d > e <= f >= g");
+    DiagnosticEngine engine;
+    Lexer lexer(file, engine);
+    const auto tokens = lexer.lexAll();
+    const auto kinds = collectKinds(tokens);
+
+    const std::vector<TokenKind> expected {
+        TokenKind::Identifier,
+        TokenKind::EqualEqual,
+        TokenKind::Identifier,
+        TokenKind::BangEqual,
+        TokenKind::Identifier,
+        TokenKind::Less,
+        TokenKind::Identifier,
+        TokenKind::Greater,
+        TokenKind::Identifier,
+        TokenKind::LessEqual,
+        TokenKind::Identifier,
+        TokenKind::GreaterEqual,
+        TokenKind::Identifier,
+        TokenKind::EndOfFile,
+    };
+
+    EXPECT_EQ(kinds, expected);
+    EXPECT_FALSE(engine.hasErrors());
+}

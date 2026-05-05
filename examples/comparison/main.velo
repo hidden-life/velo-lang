@@ -1,0 +1,15 @@
+module app;
+
+use std::console;
+
+fn main(): int {
+    let x: int = 42;
+
+    if (x > 10) {
+        console::println(1);
+        return 1;
+    } else {
+        console::println(0);
+        return 0;
+    }
+}

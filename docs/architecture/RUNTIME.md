@@ -111,3 +111,12 @@ Supported jump instructions:
 - `Jump`
 
 This enables basic `if/else` execution.
+
+## Comparison instructions
+The IR supports integer comparison instructions that produce `bool` values:
+- `CompareEqualInt`
+- `CompareNotEqualInt`
+- `CompareLessInt`
+- `CompareGreaterInt`
+- `CompareLessEqualInt`
+- `CompareGreaterEqualInt`

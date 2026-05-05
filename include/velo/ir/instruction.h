@@ -16,6 +16,12 @@ namespace Velo::IR {
         Return,
 
         AddInt,
+        CompareEqualInt,
+        CompareNotEqualInt,
+        CompareLessInt,
+        CompareGreaterInt,
+        CompareLessEqualInt,
+        CompareGreaterEqualInt,
 
         PushBool,
         JumpIfFalse,

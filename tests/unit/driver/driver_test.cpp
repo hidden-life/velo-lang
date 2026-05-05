@@ -253,3 +253,23 @@ fn main(): int {
     ASSERT_TRUE(result.success);
     ASSERT_TRUE(result.diagnostics.empty());
 }
+
+TEST(DriverTest, ExecutesComparisonProgram) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "comparison.velo",
+        R"(module app;
+fn main(): int {
+    if (42 > 10) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+)"
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+}

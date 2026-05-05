@@ -34,6 +34,9 @@ namespace Velo::Parser {
         [[nodiscard]] auto parseExpression() -> std::unique_ptr<AST::Expression>;
         [[nodiscard]] auto parsePrimaryExpression() -> std::unique_ptr<AST::Expression>;
         [[nodiscard]] auto parseCallExpressionOrName() -> std::unique_ptr<AST::Expression>;
+        [[nodiscard]] auto parseEquality() -> std::unique_ptr<AST::Expression>;
+        [[nodiscard]] auto parseComparison() -> std::unique_ptr<AST::Expression>;
+        [[nodiscard]] auto parseAddition() -> std::unique_ptr<AST::Expression>;
 
         [[nodiscard]] auto makeRangeFromTokens(
             const Lexer::Token &begin, const Lexer::Token &end

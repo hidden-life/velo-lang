@@ -19,6 +19,8 @@ namespace Velo::Lexer {
         [[nodiscard]] auto peek() const -> char;
         [[nodiscard]] auto peekNext() const -> char;
         auto advance() -> char;
+        // If the current character equals expected, consumes it and returns true.
+        [[nodiscard]] auto match(char expected) -> bool;
 
         void skipTrivia();
 

@@ -469,31 +469,7 @@ namespace Velo::Parser {
     }
 
     auto Parser::parseExpression() -> std::unique_ptr<AST::Expression> {
-        auto left = parsePrimaryExpression();
-        if (left == nullptr) {
-            return nullptr;
-        }
-
-        while (match(TokenKind::Plus)) {
-            auto right = parsePrimaryExpression();
-            if (right == nullptr) {
-                return nullptr;
-            }
-
-            const auto range = Source::SourceRange(
-                    left->range.begin(),
-                    right->range.end()
-                );
-
-            left = std::make_unique<AST::BinaryExpression>(
-                std::move(left),
-                AST::BinaryOperator::Add,
-                std::move(right),
-                range
-            );
-        }
-
-        return left;
+        return parseEquality();
     }
 
     auto Parser::parsePrimaryExpression() -> std::unique_ptr<AST::Expression> {
@@ -607,5 +583,109 @@ namespace Velo::Parser {
         }
 
         return statements;
+    }
+
+    auto Parser::parseEquality() -> std::unique_ptr<AST::Expression> {
+        auto left = parseComparison();
+        if (left == nullptr) {
+            return nullptr;
+        }
+
+        while (match(TokenKind::EqualEqual) || match(TokenKind::BangEqual)) {
+            const Token &operatorToken = previous();
+            auto right = parseComparison();
+            if (right == nullptr) {
+                return nullptr;
+            }
+
+            const auto range = Source::SourceRange(left->range.begin(), right->range.end());
+            const auto binaryOperator = operatorToken.kind() == TokenKind::EqualEqual ?
+                AST::BinaryOperator::Equal :
+                AST::BinaryOperator::NotEqual;
+            left = std::make_unique<AST::BinaryExpression>(
+                std::move(left),
+                binaryOperator,
+                std::move(right),
+                range
+            );
+        }
+
+        return left;
+    }
+
+    auto Parser::parseComparison() -> std::unique_ptr<AST::Expression> {
+        auto left = parseAddition();
+        if (left == nullptr) {
+            return nullptr;
+        }
+
+        while (
+            match(TokenKind::Less) ||
+            match(TokenKind::LessEqual) ||
+            match(TokenKind::Greater) ||
+            match(TokenKind::GreaterEqual)
+        ) {
+            const Token &operatorToken = previous();
+            auto right = parseAddition();
+            if (right == nullptr) {
+                return nullptr;
+            }
+
+            AST::BinaryOperator binaryOperator;
+            switch (operatorToken.kind()) {
+                case TokenKind::Less:
+                    binaryOperator = AST::BinaryOperator::Less;
+                    break;
+                case TokenKind::Greater:
+                    binaryOperator = AST::BinaryOperator::Greater;
+                    break;
+                case TokenKind::LessEqual:
+                    binaryOperator = AST::BinaryOperator::LessEqual;
+                    break;
+                case TokenKind::GreaterEqual:
+                    binaryOperator = AST::BinaryOperator::GreaterEqual;
+                    break;
+                default:
+                    reportCurrent("PAR060", "Expected comparison operator.");
+                    return nullptr;
+            }
+
+            const auto range = Source::SourceRange(
+                left->range.begin(), right->range.end()
+            );
+
+            left = std::make_unique<AST::BinaryExpression>(
+                std::move(left),
+                binaryOperator,
+                std::move(right),
+                range
+            );
+        }
+
+        return left;
+    }
+
+    auto Parser::parseAddition() -> std::unique_ptr<AST::Expression> {
+        auto left = parsePrimaryExpression();
+        if (left == nullptr) {
+            return nullptr;
+        }
+
+        while (match(TokenKind::Plus)) {
+            auto right = parsePrimaryExpression();
+            if (right == nullptr) {
+                return nullptr;
+            }
+
+            const auto range = Source::SourceRange(left->range.begin(), right->range.end());
+            left = std::make_unique<AST::BinaryExpression>(
+                std::move(left),
+                AST::BinaryOperator::Add,
+                std::move(right),
+                range
+            );
+        }
+
+        return left;
     }
 }

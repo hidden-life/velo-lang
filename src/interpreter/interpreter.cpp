@@ -3,6 +3,39 @@
 #include <iostream>
 #include <ostream>
 
+namespace {
+    template <typename Predicate>
+    auto compareIntegerValues(
+        std::vector<Velo::Runtime::Value> &stack,
+        Predicate predicate
+    ) -> Velo::Runtime::ExecutionResult {
+        if (stack.size() < 2U) {
+            return Velo::Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "Comparison requires two values on the stack."
+            };
+        }
+
+        const auto right = stack.back();
+        stack.pop_back();
+        const auto left = stack.back();
+        stack.pop_back();
+
+        if (!std::holds_alternative<int>(left) || !std::holds_alternative<int>(right)) {
+            return Velo::Runtime::ExecutionResult{
+                .success = false,
+                .exitCode = 1,
+                .error = "Comparison expects integer operands."
+            };
+        }
+
+        stack.emplace_back(predicate(std::get<int>(left), std::get<int>(right)));
+
+        return {};
+    }
+}
+
 namespace Velo::Interpreter {
     Interpreter::Interpreter(Runtime::Runtime &runtime) : _runtime(runtime) {
     }
@@ -154,6 +187,19 @@ namespace Velo::Interpreter {
             }
             case OpCode::Jump:
                 return {};
+            case OpCode::CompareEqualInt:
+                return compareIntegerValues(_stack, [](int left, int right) { return left == right; });
+
+            case OpCode::CompareNotEqualInt:
+                return compareIntegerValues(_stack, [](int left, int right) { return left != right; });
+            case OpCode::CompareLessInt:
+                return compareIntegerValues(_stack, [](int left, int right) { return left < right;});
+            case OpCode::CompareGreaterInt:
+                return compareIntegerValues(_stack, [](int left, int right) { return left > right; });
+            case OpCode::CompareLessEqualInt:
+                return compareIntegerValues(_stack, [](int left, int right) { return left <= right; });
+            case OpCode::CompareGreaterEqualInt:
+                return compareIntegerValues(_stack, [](int left, int right) { return left >= right; });
             case OpCode::AddInt:
                 if (_stack.size() < 2U) {
                     return Runtime::ExecutionResult {

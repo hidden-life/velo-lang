@@ -315,3 +315,47 @@ TEST(InterpreterTest, ExecutesIntegerAddition) {
     EXPECT_EQ(result.exitCode, 42);
     EXPECT_TRUE(result.error.empty());
 }
+
+TEST(InterpreterTest, ExecutesIntegerGreaterComparison) {
+    Module module;
+    Function mainFunc;
+    mainFunc.name = "main";
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .intOperand = 42,
+    });
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .intOperand = 10,
+    });
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::CompareGreaterInt,
+    });
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::JumpIfFalse,
+        .targetOperand = 6U,
+    });
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .intOperand = 1,
+    });
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::Return,
+    });
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .intOperand = 0,
+    });
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::Return,
+    });
+
+    module.functions.push_back(std::move(mainFunc));
+    Runtime runtime;
+    Interpreter interpreter(runtime);
+    const auto result = interpreter.execute(module);
+
+    EXPECT_TRUE(result.success);
+    EXPECT_EQ(result.exitCode, 1);
+    EXPECT_TRUE(result.error.empty());
+}

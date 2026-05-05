@@ -450,6 +450,17 @@ namespace Velo::Semantic {
                     return ExpressionType::Unknown;
                 }
 
+                // At this stage all comparison/equality operators support int operands only.
+                if (left == ExpressionType::Int && right == ExpressionType::Int) {
+                    return ExpressionType::Bool;
+                }
+
+                _engine.error(
+                    "SEM024",
+                    "Comparison operators require integer operands.",
+                    binaryExpr.range
+                );
+
                 return ExpressionType::Unknown;
             }
 

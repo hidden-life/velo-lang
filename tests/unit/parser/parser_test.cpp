@@ -271,3 +271,35 @@ fn main(): int {
     ASSERT_EQ(mainFunc.statements.size(), 3U);
     EXPECT_EQ(mainFunc.statements[1]->kind, Velo::AST::StatementKind::Assignment);
 }
+
+TEST(ParserTest, ParsesComparisonExpression) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+fn main(): int {
+    if (42 > 10) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    const auto &mainFunc = program->functions[0];
+    ASSERT_EQ(mainFunc.statements.size(), 1U);
+    ASSERT_EQ(mainFunc.statements[0]->kind, Velo::AST::StatementKind::If);
+
+    const auto *ifStmt = dynamic_cast<Velo::AST::IfStatement*>(mainFunc.statements[0].get());
+    ASSERT_NE(ifStmt, nullptr);
+    ASSERT_EQ(ifStmt->condition->kind, Velo::AST::ExpressionKind::Binary);
+
+    const auto *cond = dynamic_cast<Velo::AST::BinaryExpression*>(ifStmt->condition.get());
+    ASSERT_NE(cond, nullptr);
+
+    EXPECT_EQ(cond->op, Velo::AST::BinaryOperator::Greater);
+}
