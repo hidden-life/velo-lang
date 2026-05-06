@@ -47,20 +47,28 @@ namespace Velo::Semantic {
 
         [[nodiscard]] static auto statementGuaranteesReturn(const AST::Statement &statement) -> bool;
 
+        void pushScope();
+        void popScope();
+
         const AST::Program &_program;
         Diagnostic::DiagnosticEngine &_engine;
 
         std::unordered_map<std::string, const AST::UseDeclaration*> _visibleImports {};
         std::unordered_map<std::string, const AST::FunctionDeclaration*> _functions {};
+
         struct LocalSymbol final {
             ExpressionType type {ExpressionType::Unknown};
             bool isMutable {false};
         };
-        std::unordered_map<std::string, LocalSymbol> _currentLocals {};
+        // Scope of stack for local variables.
+        std::vector<std::unordered_map<std::string, LocalSymbol>> _scopeStack {};
 
         const Module::ModuleRegistry &_modules;
         std::unordered_set<std::string> _currentParameters {};
         std::string _currentFunctionReturnType {};
+
+        [[nodiscard]] auto declareLocal(const std::string &name, const LocalSymbol &symbol) -> bool;
+        [[nodiscard]] auto resolveLocal(const std::string &name) const -> const LocalSymbol*;
     };
 }
 

@@ -195,6 +195,16 @@ Rules:
 - loop body is a statement block
 - `while` does not currently guarantee function return for non-void functions
 
+## Scope
+Variables declared inside `{...}` are scoped to that block.
+```velo
+if (true) {
+    let x: int = 42;
+}
+
+return x; // ❌ error
+```
+
 ## Current limitations
 - parameters are immutable
 - there are no local variable declarations yet

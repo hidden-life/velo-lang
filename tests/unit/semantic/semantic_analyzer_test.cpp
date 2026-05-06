@@ -668,3 +668,57 @@ fn main(): int {
     ASSERT_TRUE(engine.hasErrors());
     EXPECT_EQ(engine.diagnostics().front().code(), "SEM025");
 }
+
+TEST(SemanticAnalyzerTest, ReportsUseOfVariableOutsideScope) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+fn main(): int {
+    if (true) {
+        let x: int = 42;
+    }
+
+    return x;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, AllowsShadowingInInnerScope) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+fn main(): int {
+    let x: int = 1;
+    if (true) {
+        let x: int = 2;
+        return x;
+    }
+
+    return x;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    const bool ok = analyzer.analyze();
+    if (!ok) {
+        for (const auto &diag : engine.diagnostics()) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+    EXPECT_TRUE(ok);
+}

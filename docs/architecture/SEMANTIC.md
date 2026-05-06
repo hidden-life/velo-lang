@@ -101,3 +101,9 @@ The semantic analyzer validates:
 
 Current limitation:
 - while statement do not count as guaranteed return statements
+
+## Scope system
+The semantic analyzer uses a scope stack:
+- each block creates a new scope
+- variables are resolved from inner to outer scopes
+- shadowing is allowed

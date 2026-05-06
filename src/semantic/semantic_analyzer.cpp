@@ -77,14 +77,15 @@ namespace Velo::Semantic {
     }
 
     void SemanticAnalyzer::analyzeFunction(const AST::FunctionDeclaration &func) {
-        _currentLocals.clear();
         _currentParameters.clear();
+        _scopeStack.clear();
 
         if (!func.returnType.name.segments.empty()) {
             _currentFunctionReturnType = func.returnType.name.segments.front();
         } else {
             _currentFunctionReturnType.clear();
         }
+        pushScope();
 
         for (const auto &param : func.parameters) {
             const auto [it, inserted] = _currentParameters.insert(param.name);
@@ -104,26 +105,17 @@ namespace Velo::Semantic {
         // Guaranteed return check must run only after all statements are analyzed.
         // Otherwise a function with console::println(...); return 0; would incorrectly get SEM017 on the first statement.
         if (_currentFunctionReturnType != "void") {
-            if (func.statements.empty()) {
+            if (func.statements.empty() || !statementGuaranteesReturn(*func.statements.back())) {
                 _engine.error(
                     "SEM017",
                     "Non-void function must end with a return statement.",
                     func.range
                 );
-            } else {
-                const auto &lastStmt = func.statements.back();
-                if (!statementGuaranteesReturn(*lastStmt)) {
-                    _engine.error(
-                        "SEM017",
-                        "Non-void function must end with a return statement.",
-                        func.range
-                    );
-                }
             }
         }
 
         _currentParameters.clear();
-        _currentLocals.clear();
+        _scopeStack.clear();
         _currentFunctionReturnType.clear();
     }
 
@@ -170,16 +162,6 @@ namespace Velo::Semantic {
             }
             case AST::StatementKind::VariableDeclaration: {
                 const auto &varDecl = static_cast<const AST::VariableDeclarationStatement&>(stmt);
-                if (_currentLocals.contains(varDecl.name)) {
-                    _engine.error(
-                        "SEM018",
-                        "Duplicate local variable '" + varDecl.name + "'.",
-                        varDecl.range
-                    );
-
-                    return;
-                }
-
                 const auto declType = typeFromTypeName(varDecl.type);
                 const auto initType = analyzeExpressionType(*varDecl.initializer);
 
@@ -191,17 +173,26 @@ namespace Velo::Semantic {
                     );
                 }
 
-                _currentLocals.emplace(varDecl.name, LocalSymbol {
-                    .type = declType,
-                    .isMutable = varDecl.isMutable,
-                });
+                if (!declareLocal(
+                    varDecl.name,
+                    LocalSymbol {
+                        .type = declType,
+                        .isMutable = varDecl.isMutable
+                    }
+                )) {
+                    _engine.error(
+                        "SEM018",
+                        "Duplicate local variable '" + varDecl.name + "'.",
+                        varDecl.range
+                    );
+                }
 
                 break;
             }
             case AST::StatementKind::Assignment: {
                 const auto &assignment = static_cast<const AST::AssignmentStatement&>(stmt);
-                const auto localIt = _currentLocals.find(assignment.name);
-                if (localIt == _currentLocals.end()) {
+                const auto *local = resolveLocal(assignment.name);
+                if (local == nullptr) {
                     _engine.error(
                         "SEM020",
                         "Unknown local variable '" + assignment.name + "'.",
@@ -210,7 +201,7 @@ namespace Velo::Semantic {
                     return;
                 }
 
-                if (!localIt->second.isMutable) {
+                if (!local->isMutable) {
                     _engine.error(
                         "SEM021",
                         "Cannot assign to immutable local variable '" + assignment.name + "'.",
@@ -220,7 +211,7 @@ namespace Velo::Semantic {
 
                 const auto valueType = analyzeExpressionType(*assignment.value);
 
-                if (valueType != localIt->second.type) {
+                if (valueType != local->type) {
                     _engine.error(
                         "SEM022",
                         "Assignment type mismatch.",
@@ -242,13 +233,17 @@ namespace Velo::Semantic {
                     );
                 }
 
+                pushScope();
                 for (const auto &nested : ifStmt.thenBranch) {
                     analyzeStatement(*nested);
                 }
+                popScope();
 
+                pushScope();
                 for (const auto &nested : ifStmt.elseBranch) {
                     analyzeStatement(*nested);
                 }
+                popScope();
 
                 break;
             }
@@ -264,9 +259,11 @@ namespace Velo::Semantic {
                     );
                 }
 
+                pushScope();
                 for (const auto &nested : whileStmt.body) {
                     analyzeStatement(*nested);
                 }
+                popScope();
 
                 break;
             }
@@ -336,7 +333,7 @@ namespace Velo::Semantic {
                 return;
             }
 
-            if (!isCallable && _currentLocals.contains(firstSegment)) {
+            if (!isCallable && resolveLocal(firstSegment) != nullptr) {
                 return;
             }
 
@@ -440,9 +437,9 @@ namespace Velo::Semantic {
                         return ExpressionType::Int; // currently INT
                     }
 
-                    const auto localIt = _currentLocals.find(name);
-                    if (localIt != _currentLocals.end()) {
-                        return localIt->second.type;
+                    const auto *local = resolveLocal(name);
+                    if (local != nullptr) {
+                        return local->type;
                     }
                 }
 
@@ -589,5 +586,42 @@ namespace Velo::Semantic {
         }
 
         return statementGuaranteesReturn(*ifStmt.thenBranch.back()) && statementGuaranteesReturn(*ifStmt.elseBranch.back());
+    }
+
+    void SemanticAnalyzer::pushScope() {
+        _scopeStack.emplace_back();
+    }
+
+    void SemanticAnalyzer::popScope() {
+        if (!_scopeStack.empty()) {
+            _scopeStack.pop_back();
+        }
+    }
+
+    auto SemanticAnalyzer::declareLocal(const std::string &name, const LocalSymbol &symbol) -> bool {
+        if (_scopeStack.empty()) {
+            pushScope();
+        }
+
+        auto &current = _scopeStack.back();
+        // Duplicate declaration is forbidden only inside the current scope.
+        // Shadowing a variable from an outer scope is allowed.
+        if (current.contains(name)) {
+            return false;
+        }
+
+        current.emplace(name, symbol);
+        return true;
+    }
+
+    auto SemanticAnalyzer::resolveLocal(const std::string &name) const -> const LocalSymbol* {
+        for (auto it = _scopeStack.rbegin(); it != _scopeStack.rend(); ++it) {
+            const auto found = it->find(name);
+            if (found != it->end()) {
+                return &found->second;
+            }
+        }
+
+        return nullptr;
     }
 }

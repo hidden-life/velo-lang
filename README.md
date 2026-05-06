@@ -33,6 +33,7 @@ Implemented so far:
 - basic conditional jumps in IR
 - integer comparison operators: `==`, `!=`, `<`, `>`, `<=`, `>=`
 - `while` loops
+- block scoping for local variables
 - GoogleTest test setup
 
 ## Build
