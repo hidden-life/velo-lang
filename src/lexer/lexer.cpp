@@ -346,6 +346,10 @@ namespace Velo::Lexer {
             return TokenKind::BooleanLiteral;
         }
 
+        if (text == "while") {
+            return TokenKind::KwWhile;
+        }
+
         return TokenKind::Identifier;
     }
 

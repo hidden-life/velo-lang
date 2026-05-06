@@ -32,6 +32,7 @@ Implemented so far:
 - `if/else` statements
 - basic conditional jumps in IR
 - integer comparison operators: `==`, `!=`, `<`, `>`, `<=`, `>=`
+- `while` loops
 - GoogleTest test setup
 
 ## Build
@@ -106,6 +107,7 @@ Program
 ./build/debug/apps/velo/velo ./examples/void_function/main.velo
 ./build/debug/apps/velo/velo ./examples/locals/main.velo
 ./build/debug/apps/velo/velo ./examples/comparison/main.velo
+./build/debug/apps/velo/velo ./examples/while_loop/main.velo
 ```
 
 ## Next milestone

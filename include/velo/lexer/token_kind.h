@@ -20,6 +20,7 @@ namespace Velo::Lexer {
         KwFn, // "fn"
         KwReturn, // "return"
         KwPub, // "pub"
+        KwWhile, // "while"
 
         DoubleColon, // ::
         Colon, // :

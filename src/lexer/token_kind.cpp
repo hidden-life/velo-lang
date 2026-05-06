@@ -67,6 +67,8 @@ namespace Velo::Lexer {
                 return "LessEqual";
             case TokenKind::GreaterEqual:
                 return "GreaterEqual";
+            case TokenKind::KwWhile:
+                return "KwWhile";
         }
 
         return "Unknown";

@@ -35,6 +35,31 @@ namespace Velo::IR {
     void Lowerer::lowerStatement(const AST::Statement &stmt, Function &func) {
         using namespace AST;
 
+        if (stmt.kind == StatementKind::While) {
+            const auto &whileStmt = static_cast<const WhileStatement&>(stmt);
+            const std::size_t conditionStartIdx = func.instructions.size();
+            lowerExpression(*whileStmt.condition, func);
+            const std::size_t jumpIfFalseIdx = func.instructions.size();
+            func.instructions.push_back(Instruction {
+                .code = OpCode::JumpIfFalse,
+            });
+
+            for (const auto &nested : whileStmt.body) {
+                lowerStatement(*nested, func);
+            }
+
+            func.instructions.push_back(Instruction {
+                .code = OpCode::Jump,
+                .targetOperand = conditionStartIdx,
+            });
+
+            const std::size_t endIdx = func.instructions.size();
+            // If condition is false, exit the loop.
+            func.instructions[jumpIfFalseIdx].targetOperand = endIdx;
+
+            return;
+        }
+
         if (stmt.kind == StatementKind::Return) {
             const auto &r = static_cast<const ReturnStatement&>(stmt);
             if (r.expression != nullptr) {

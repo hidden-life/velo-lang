@@ -1,0 +1,14 @@
+module app;
+
+use std::console;
+
+fn main(): int {
+    var x: int = 0;
+    while(x < 5) {
+        x = x + 1;
+    }
+
+    console::println(x);
+
+    return x;
+}

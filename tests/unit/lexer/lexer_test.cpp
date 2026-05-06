@@ -216,3 +216,14 @@ TEST(LexerTest, LexesComparisonTokens) {
     EXPECT_EQ(kinds, expected);
     EXPECT_FALSE(engine.hasErrors());
 }
+
+TEST(LexerTest, LexesWhileKeyword) {
+    const SourceFile file("while.velo", "while(true) { return 0; }");
+    DiagnosticEngine engine;
+    Lexer lexer(file, engine);
+    const auto tokens = lexer.lexAll();
+    const auto kinds = collectKinds(tokens);
+
+    EXPECT_NE(std::find(kinds.begin(), kinds.end(), TokenKind::KwWhile), kinds.end());
+    EXPECT_FALSE(engine.hasErrors());
+}

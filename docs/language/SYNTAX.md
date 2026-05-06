@@ -178,6 +178,23 @@ Supported operators:
 Current limitation:
 - comparisons currently support `int` operands only
 
+## While loops
+```velo
+fn main(): int {
+    var x: int = 0;
+    
+    while (x < 5) {
+        x = x + 1;
+    }
+    
+    return x;
+}
+```
+Rules:
+- condition must be `bool`
+- loop body is a statement block
+- `while` does not currently guarantee function return for non-void functions
+
 ## Current limitations
 - parameters are immutable
 - there are no local variable declarations yet

@@ -365,6 +365,39 @@ namespace Velo::Parser {
             );
         }
 
+        if (match(TokenKind::KwWhile)) {
+            const Token &whileKw = previous();
+
+            if (consume(TokenKind::OpenParen, "PAR070", "Expected '(' after 'while'.") == nullptr) {
+                return nullptr;
+            }
+
+            auto cond = parseExpression();
+            if (cond == nullptr) {
+                return nullptr;
+            }
+
+            if (consume(TokenKind::CloseParen, "PAR071", "Expected ')' after while condition.") == nullptr) {
+                return nullptr;
+            }
+
+            if (consume(TokenKind::OpenBrace, "PAR072", "Expected '{' before while body.") == nullptr) {
+                return nullptr;
+            }
+
+            auto body = parseBlockStatements();
+            const Token *closeBrace = consume(TokenKind::CloseBrace, "PAR073", "Expected '}' after while body.");
+            if (closeBrace == nullptr) {
+                return nullptr;
+            }
+
+            return std::make_unique<AST::WhileStatement>(
+                std::move(cond),
+                std::move(body),
+                makeRangeFromTokens(whileKw, *closeBrace)
+            );
+        }
+
         if (match(TokenKind::KwLet) || match(TokenKind::KwVar)) {
             const Token &letKw = previous();
             const bool isMutable = letKw.kind() == TokenKind::KwVar;

@@ -93,3 +93,11 @@ Examples:
 1 < 2 // bool
 "a" > 1 // semantic error
 ```
+
+## While validation
+The semantic analyzer validates:
+- while condition must be `bool`
+- body statements are analyzed recursively
+
+Current limitation:
+- while statement do not count as guaranteed return statements

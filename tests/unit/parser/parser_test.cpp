@@ -303,3 +303,32 @@ fn main(): int {
 
     EXPECT_EQ(cond->op, Velo::AST::BinaryOperator::Greater);
 }
+
+TEST(ParserTest, ParsesWhileStatement) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+fn main(): int {
+    var x: int = 0;
+    while(x < 5) {
+        x = x + 1;
+    }
+
+    return x;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    const auto &mainFunc = program->functions[0];
+    ASSERT_EQ(mainFunc.statements.size(), 3U);
+    EXPECT_EQ(mainFunc.statements[1]->kind, Velo::AST::StatementKind::While);
+
+    const auto *whileStmt = dynamic_cast<Velo::AST::WhileStatement*>(mainFunc.statements[1].get());
+    ASSERT_NE(whileStmt, nullptr);
+
+    ASSERT_EQ(whileStmt->body.size(), 1U);
+    EXPECT_EQ(whileStmt->body[0]->kind, Velo::AST::StatementKind::Assignment);
+}

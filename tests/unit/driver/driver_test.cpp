@@ -273,3 +273,24 @@ fn main(): int {
     ASSERT_TRUE(result.diagnostics.empty());
     ASSERT_TRUE(result.error.empty());
 }
+
+TEST(DriverTest, ExecutesWhileLoopProgram) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "while.velo",
+        R"(module app;
+fn main(): int {
+    var x: int = 0;
+    while(x < 5) {
+        x = x + 1;
+    }
+
+    return x;
+}
+)"
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+}

@@ -120,3 +120,14 @@ The IR supports integer comparison instructions that produce `bool` values:
 - `CompareGreaterInt`
 - `CompareLessEqualInt`
 - `CompareGreaterEqualInt`
+
+## While loop execution
+`while` is lowered into conditional jumps:
+```text
+condition_start:
+    condition
+    JumpIfFalse end
+    body
+    Jump condition_start
+end:
+```

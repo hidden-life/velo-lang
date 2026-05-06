@@ -359,3 +359,72 @@ TEST(InterpreterTest, ExecutesIntegerGreaterComparison) {
     EXPECT_EQ(result.exitCode, 1);
     EXPECT_TRUE(result.error.empty());
 }
+
+TEST(InterpreterTest, ExecutesSimpleWhileLikeJumpLoop) {
+    Module module;
+    Function mainFunc;
+    mainFunc.name = "main";
+
+    // local x = 0
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .intOperand = 0,
+    });
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::StoreLocal,
+        .indexOperand = 0U
+    });
+    // condition_start index = 2
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::LoadLocal,
+        .indexOperand = 0U
+    });
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .intOperand = 3,
+    });
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::CompareLessInt,
+    });
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::JumpIfFalse,
+        .targetOperand = 11U,
+    });
+    // x = x + 1
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::LoadLocal,
+        .indexOperand = 0U
+    });
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .intOperand = 1,
+    });
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::AddInt
+    });
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::StoreLocal,
+        .indexOperand = 0U
+    });
+    // jump to condition start
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::Jump,
+        .targetOperand = 2U
+    });
+    // return x
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::LoadLocal,
+        .indexOperand = 0U
+    });
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::Return,
+    });
+
+    module.functions.push_back(std::move(mainFunc));
+    Runtime runtime;
+    Interpreter interpreter(runtime);
+    const auto result = interpreter.execute(module);
+    EXPECT_TRUE(result.success);
+    EXPECT_EQ(result.exitCode, 3);
+    EXPECT_TRUE(result.error.empty());
+}

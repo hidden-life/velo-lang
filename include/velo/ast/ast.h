@@ -107,6 +107,7 @@ namespace Velo::AST {
         VariableDeclaration,
         Assignment,
         If,
+        While,
     };
 
     struct Statement {
@@ -174,6 +175,19 @@ namespace Velo::AST {
         std::unique_ptr<Expression> condition;
         std::vector<std::unique_ptr<Statement>> thenBranch {};
         std::vector<std::unique_ptr<Statement>> elseBranch {};
+    };
+
+    struct WhileStatement final : Statement {
+        WhileStatement(
+            std::unique_ptr<Expression> conditionExpression,
+            std::vector<std::unique_ptr<Statement>> bodyStatement,
+            Source::SourceRange statementRange
+        ) : Statement(StatementKind::While, statementRange),
+            condition(std::move(conditionExpression)),
+            body(std::move(bodyStatement)) {}
+
+        std::unique_ptr<Expression> condition;
+        std::vector<std::unique_ptr<Statement>> body;
     };
 
     struct Parameter final {

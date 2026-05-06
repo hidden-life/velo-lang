@@ -98,6 +98,23 @@ namespace Velo::AST {
 
                     break;
                 }
+
+                case StatementKind::While: {
+                    const auto &whileStmt = static_cast<const WhileStatement&>(statement);
+                    writeIndent(stream, indentLevel);
+                    stream << "While\n";
+                    writeIndent(stream, indentLevel + 1U);
+                    stream << "Condition\n";
+                    printExpression(stream, *whileStmt.condition, indentLevel + 2U);
+                    writeIndent(stream, indentLevel + 1U);
+                    stream << "Body\n";
+
+                    for (const auto &nested : whileStmt.body) {
+                        printStatement(stream, *nested, indentLevel + 2U);
+                    }
+
+                    break;
+                }
             }
         }
 

@@ -252,6 +252,24 @@ namespace Velo::Semantic {
 
                 break;
             }
+
+            case AST::StatementKind::While: {
+                const auto &whileStmt = static_cast<const AST::WhileStatement&>(stmt);
+                const auto conditionType = analyzeExpressionType(*whileStmt.condition);
+                if (conditionType != ExpressionType::Bool) {
+                    _engine.error(
+                        "SEM025",
+                        "While condition must be bool.",
+                        whileStmt.condition->range
+                    );
+                }
+
+                for (const auto &nested : whileStmt.body) {
+                    analyzeStatement(*nested);
+                }
+
+                break;
+            }
         }
     }
 
