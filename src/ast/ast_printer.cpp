@@ -199,6 +199,12 @@ namespace Velo::AST {
                         case BinaryOperator::GreaterEqual:
                             stream << ">=";
                             break;
+                        case BinaryOperator::LogicalAnd:
+                            stream << "&&";
+                            break;
+                        case BinaryOperator::LogicalOr:
+                            stream << "||";
+                            break;
                     }
 
                     stream << "\n";
@@ -206,6 +212,22 @@ namespace Velo::AST {
                     printExpression(stream, *binaryExpression.left, indentLevel + 1U);
                     printExpression(stream, *binaryExpression.right, indentLevel + 1U);
 
+                    break;
+                }
+
+                case ExpressionKind::Unary: {
+                    const auto &unaryExpression = static_cast<const UnaryExpression&>(expression);
+                    writeIndent(stream, indentLevel);
+                    stream << "Unary ";
+                    switch (unaryExpression.op) {
+                        case UnaryOperator::Not:
+                            stream << "!";
+                            break;
+                    }
+
+                    stream << "\n";
+
+                    printExpression(stream, *unaryExpression.operand, indentLevel + 1U);
                     break;
                 }
             }

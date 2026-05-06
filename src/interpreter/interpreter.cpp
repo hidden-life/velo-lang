@@ -34,6 +34,37 @@ namespace {
 
         return {};
     }
+
+    template <typename Predicate>
+    auto evaluateBinaryBool(
+        std::vector<Velo::Runtime::Value> &stack,
+        Predicate predicate
+    ) -> Velo::Runtime::ExecutionResult {
+        if (stack.size() < 2U) {
+            return Velo::Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "Logical operation requires two values on the stack."
+            };
+        }
+
+        const auto right = stack.back();
+        stack.pop_back();
+        const auto left = stack.back();
+        stack.pop_back();
+
+        if (!std::holds_alternative<bool>(left) || !std::holds_alternative<bool>(right)) {
+            return Velo::Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "Logical operation expects bool operands."
+            };
+        }
+
+        stack.emplace_back(predicate(std::get<bool>(left), std::get<bool>(right)));
+
+        return {};
+    }
 }
 
 namespace Velo::Interpreter {
@@ -200,7 +231,7 @@ namespace Velo::Interpreter {
                 return compareIntegerValues(_stack, [](int left, int right) { return left <= right; });
             case OpCode::CompareGreaterEqualInt:
                 return compareIntegerValues(_stack, [](int left, int right) { return left >= right; });
-            case OpCode::AddInt:
+            case OpCode::AddInt: {
                 if (_stack.size() < 2U) {
                     return Runtime::ExecutionResult {
                         .success = false,
@@ -225,6 +256,42 @@ namespace Velo::Interpreter {
                 _stack.emplace_back(std::get<int>(left) + std::get<int>(right));
 
                 return {};
+            }
+            case OpCode::LogicalNot: {
+                if (_stack.empty()) {
+                    return Runtime::ExecutionResult {
+                        .success = false,
+                        .exitCode = 1,
+                        .error = "LogicalNot requires one value on the stack."
+                    };
+                }
+
+                const auto value = _stack.back();
+                _stack.pop_back();
+
+                if (!std::holds_alternative<bool>(value)) {
+                    return Runtime::ExecutionResult {
+                        .success = false,
+                        .exitCode = 1,
+                        .error = "LogicalNot expects bool operand."
+                    };
+                }
+
+                _stack.emplace_back(!std::get<bool>(value));
+                return {};
+            }
+            case OpCode::LogicalAnd: {
+                return evaluateBinaryBool(
+                    _stack,
+                    [](bool left, bool right) { return left && right; }
+                );
+            }
+            case OpCode::LogicalOr: {
+                return evaluateBinaryBool(
+                    _stack,
+                    [](bool left, bool right) { return left || right; }
+                );
+            }
         }
 
         return Runtime::ExecutionResult {

@@ -254,6 +254,16 @@ namespace Velo::IR {
                             .code = OpCode::CompareGreaterEqualInt,
                         });
                         return;
+                    case BinaryOperator::LogicalAnd:
+                        func.instructions.push_back(Instruction {
+                            .code = OpCode::LogicalAnd,
+                        });
+                        return;
+                    case BinaryOperator::LogicalOr:
+                        func.instructions.push_back(Instruction {
+                            .code = OpCode::LogicalOr,
+                        });
+                        return;
                 }
 
                 return;
@@ -290,6 +300,20 @@ namespace Velo::IR {
                     .code = OpCode::PushBool,
                     .boolOperand = literal.value
                 });
+                return;
+            }
+
+            case ExpressionKind::Unary: {
+                const auto &unary = static_cast<const UnaryExpression&>(expr);
+                lowerExpression(*unary.operand, func);
+
+                switch (unary.op) {
+                    case UnaryOperator::Not:
+                        func.instructions.push_back(Instruction {
+                            .code = OpCode::LogicalNot,
+                        });
+                        return;
+                }
                 return;
             }
         }

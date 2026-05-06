@@ -70,8 +70,7 @@ namespace Velo::Lexer {
                     return makeToken(TokenKind::BangEqual, "!=", beginOffset, _offset - 1U);
                 }
 
-                reportInvalidCharacter(beginOffset);
-                return makeToken(TokenKind::Invalid, "!", beginOffset, beginOffset);
+                return makeToken(TokenKind::Bang, "!", beginOffset, beginOffset);
 
             case '<':
                 advance();
@@ -89,6 +88,26 @@ namespace Velo::Lexer {
                 }
 
                 return makeToken(TokenKind::Greater, ">", beginOffset, beginOffset);
+
+            case '&':
+                advance();
+
+                if (match('&')) {
+                    return makeToken(TokenKind::LogicalAnd, "&&", beginOffset, _offset - 1U);
+                }
+
+                reportInvalidCharacter(beginOffset);
+                return makeToken(TokenKind::Invalid, "&", beginOffset, beginOffset);
+
+            case '|':
+                advance();
+
+                if (match('|')) {
+                    return makeToken(TokenKind::LogicalOr, "||", beginOffset, _offset - 1U);
+                }
+
+                reportInvalidCharacter(beginOffset);
+                return makeToken(TokenKind::Invalid, "|", beginOffset, beginOffset);
 
             default:
                 break;

@@ -139,3 +139,13 @@ Current lowering model:
 - `break` becomes a `Jump` patched to the loop end
 - `continue` becomes a `Jump` to the loop condition
 - nested loops are handled through a loop context stack
+
+## Logical instructions
+The interpreter supports logical instructions:
+- `LogicalNot`
+- `LogicalAnd`
+- `LogicalOr`
+
+Current limitation:
+- logical `&&` and `||` are evaluated eagerly
+- short-circuit lowering will be added later

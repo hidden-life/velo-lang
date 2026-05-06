@@ -247,3 +247,25 @@ TEST(LexerTest, LexesBreakAndContinueKeywords) {
     EXPECT_EQ(kinds, expected);
     EXPECT_FALSE(engine.hasErrors());
 }
+
+TEST(LexerTest, LexesLogicalOperators) {
+    const SourceFile file("logical.velo", "true && false || !false");
+    DiagnosticEngine engine;
+    Lexer lexer(file, engine);
+
+    const auto tokens = lexer.lexAll();
+    const auto kinds = collectKinds(tokens);
+
+    const std::vector<TokenKind> expected {
+        TokenKind::BooleanLiteral,
+        TokenKind::LogicalAnd,
+        TokenKind::BooleanLiteral,
+        TokenKind::LogicalOr,
+        TokenKind::Bang,
+        TokenKind::BooleanLiteral,
+        TokenKind::EndOfFile,
+    };
+
+    EXPECT_EQ(kinds, expected);
+    EXPECT_FALSE(engine.hasErrors());
+}

@@ -35,6 +35,7 @@ Implemented so far:
 - `while` loops
 - block scoping for local variables
 - `break` and `continue` statements inside loops
+- logical operators: `&&`, `||`, `!`
 - GoogleTest test setup
 
 ## Build
@@ -111,6 +112,7 @@ Program
 ./build/debug/apps/velo/velo ./examples/comparison/main.velo
 ./build/debug/apps/velo/velo ./examples/while_loop/main.velo
 ./build/debug/apps/velo/velo ./examples/break_continue/main.velo
+./build/debug/apps/velo/velo ./examples/logical/main.velo
 ```
 
 ## Next milestone

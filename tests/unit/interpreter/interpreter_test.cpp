@@ -503,3 +503,55 @@ TEST(InterpreterTest, ExecutesBreakLikeJumpOutOfLoop) {
     EXPECT_EQ(result.exitCode, 1);
     EXPECT_TRUE(result.error.empty());
 }
+
+TEST(InterpreterTest, ExecutesLogicalOperators) {
+    Module module;
+
+    Function mainFunction;
+    mainFunction.name = "main";
+
+    // true && !false => true
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::PushBool,
+        .boolOperand = true
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::PushBool,
+        .boolOperand = false
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::LogicalNot
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::LogicalAnd
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::JumpIfFalse,
+        .targetOperand = 7U
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .intOperand = 1
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::Return
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .intOperand = 0
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::Return
+    });
+
+    module.functions.push_back(std::move(mainFunction));
+
+    Runtime runtime;
+    Interpreter interpreter(runtime);
+
+    const auto result = interpreter.execute(module);
+
+    EXPECT_TRUE(result.success);
+    EXPECT_EQ(result.exitCode, 1);
+    EXPECT_TRUE(result.error.empty());
+}

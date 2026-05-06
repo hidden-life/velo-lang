@@ -223,6 +223,25 @@ Rules:
 - `continue` jumps to the next iteration of the nearest enclosing loop
 - both are valid only inside loops
 
+## Logical operators
+```velo
+if (x > 0 && x < 10) {
+    return 1;
+}
+
+if (!false || true) {
+    return 1;
+}
+```
+
+Supported operators:
+- `&&`
+- `||`
+- `!`
+
+Current limitation:
+- `&&` and `||` do not short-circuit yet
+
 ## Current limitations
 - parameters are immutable
 - there are no local variable declarations yet

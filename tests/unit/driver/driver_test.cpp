@@ -342,3 +342,24 @@ fn main(): int {
     ASSERT_TRUE(result.diagnostics.empty());
     ASSERT_TRUE(result.error.empty());
 }
+
+TEST(DriverTest, ExecutesLogicalOperatorProgram) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "logical.velo",
+        R"(module app;
+fn main(): int {
+    let x: int = 5;
+    if (x > 0 && x < 10) {
+        return 1;
+    }
+
+    return 0;
+}
+)"
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+}

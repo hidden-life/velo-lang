@@ -330,6 +330,15 @@ namespace Velo::Semantic {
 
                 return;
             }
+
+            case AST::ExpressionKind::Unary: {
+                const auto &unaryExpr = static_cast<const AST::UnaryExpression&>(expr);
+                analyzeExpression(*unaryExpr.operand);
+                // Unary expressions must be type-checked in all expression contexts.
+                static_cast<void>(analyzeExpressionType(unaryExpr));
+
+                return;
+            }
         }
     }
 
@@ -491,6 +500,20 @@ namespace Velo::Semantic {
                     return ExpressionType::Unknown;
                 }
 
+                if (binaryExpr.op == BinaryOperator::LogicalAnd || binaryExpr.op == BinaryOperator::LogicalOr) {
+                    if (left == ExpressionType::Bool && right == ExpressionType::Bool) {
+                        return ExpressionType::Bool;
+                    }
+
+                    _engine.error(
+                        "SEM029",
+                        "Logical operators require bool operands.",
+                        binaryExpr.range
+                    );
+
+                    return ExpressionType::Unknown;
+                }
+
                 // At this stage all comparison/equality operators support int operands only.
                 if (left == ExpressionType::Int && right == ExpressionType::Int) {
                     return ExpressionType::Bool;
@@ -513,6 +536,24 @@ namespace Velo::Semantic {
 
             case ExpressionKind::BooleanLiteral: {
                 return ExpressionType::Bool;
+            }
+
+            case ExpressionKind::Unary: {
+                const auto &unaryExpr = static_cast<const UnaryExpression&>(expression);
+                const auto operandType = analyzeExpressionType(*unaryExpr.operand);
+                if (unaryExpr.op == UnaryOperator::Not) {
+                    if (operandType == ExpressionType::Bool) {
+                        return ExpressionType::Bool;
+                    }
+
+                    _engine.error(
+                        "SEM028",
+                        "Operator '!' requires bool operand.",
+                        unaryExpr.range
+                    );
+
+                    return ExpressionType::Unknown;
+                }
             }
         }
 

@@ -115,3 +115,10 @@ Rules:
 - `break` is valid only when loop depth is greater than zero
 - `continue` is valid only when loop depth is greater than zero
 - nested loops increment loop depth recursively
+
+## Logical operator validation
+The semantic analyzer validates logical expressions:
+- `!` requires a `bool` operand
+- `&&` requires `bool && bool`
+- `||` requires `bool || bool`
+- all logical operators produce `bool`

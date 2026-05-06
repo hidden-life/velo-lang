@@ -365,3 +365,33 @@ fn main(): int {
     EXPECT_EQ(whileStmt->body[1]->kind, Velo::AST::StatementKind::Continue);
     EXPECT_EQ(whileStmt->body[2]->kind, Velo::AST::StatementKind::Break);
 }
+
+TEST(ParserTest, ParsesLogicalExpression) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+fn main(): int {
+    if (true && !false) {
+        return 1;
+    }
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    const auto &mainFunc = program->functions[0];
+    ASSERT_EQ(mainFunc.statements.size(), 2U);
+    ASSERT_EQ(mainFunc.statements[0]->kind, Velo::AST::StatementKind::If);
+
+    const auto *ifStmt = dynamic_cast<Velo::AST::IfStatement*>(mainFunc.statements[0].get());
+    ASSERT_NE(ifStmt, nullptr);
+    ASSERT_EQ(ifStmt->condition->kind, ExpressionKind::Binary);
+
+    const auto *cond = dynamic_cast<Velo::AST::BinaryExpression*>(ifStmt->condition.get());
+    ASSERT_NE(cond, nullptr);
+    EXPECT_EQ(cond->op, Velo::AST::BinaryOperator::LogicalAnd);
+}

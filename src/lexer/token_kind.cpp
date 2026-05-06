@@ -73,6 +73,12 @@ namespace Velo::Lexer {
                 return "KwBreak";
             case TokenKind::KwContinue:
                 return "KwContinue";
+            case TokenKind::LogicalAnd:
+                return "LogicalAnd";
+            case TokenKind::LogicalOr:
+                return "LogicalOr";
+            case TokenKind::Bang:
+                return "Bang";
         }
 
         return "Unknown";

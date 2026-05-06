@@ -25,6 +25,7 @@ namespace Velo::AST {
         Name,
         Call,
         Binary,
+        Unary,
     };
 
     enum class BinaryOperator {
@@ -35,6 +36,12 @@ namespace Velo::AST {
         Greater,
         LessEqual,
         GreaterEqual,
+        LogicalAnd,
+        LogicalOr,
+    };
+
+    enum class UnaryOperator {
+        Not,
     };
 
     struct Expression {
@@ -83,6 +90,18 @@ namespace Velo::AST {
 
         QualifiedName callee;
         std::vector<std::unique_ptr<Expression>> arguments {};
+    };
+
+    struct UnaryExpression final : Expression {
+        UnaryExpression(
+            UnaryOperator expressionOperator,
+            std::unique_ptr<Expression> operandExpression,
+            Source::SourceRange expressionRange
+        ) : Expression(ExpressionKind::Unary, expressionRange),
+            op(expressionOperator), operand(std::move(operandExpression)) {}
+
+        UnaryOperator op;
+        std::unique_ptr<Expression> operand;
     };
 
     struct BinaryExpression final : Expression {

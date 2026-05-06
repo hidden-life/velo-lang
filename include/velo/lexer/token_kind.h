@@ -49,6 +49,11 @@ namespace Velo::Lexer {
 
         KwBreak,
         KwContinue,
+
+        // logical operators
+        LogicalAnd,
+        LogicalOr,
+        Bang,
     };
 
     [[nodiscard]] auto toString(TokenKind kind) -> std::string_view;

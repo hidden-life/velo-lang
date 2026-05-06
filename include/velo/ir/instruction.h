@@ -23,6 +23,10 @@ namespace Velo::IR {
         CompareLessEqualInt,
         CompareGreaterEqualInt,
 
+        LogicalNot,
+        LogicalAnd,
+        LogicalOr,
+
         PushBool,
         JumpIfFalse,
         Jump,

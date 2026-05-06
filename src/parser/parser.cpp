@@ -536,7 +536,7 @@ namespace Velo::Parser {
     }
 
     auto Parser::parseExpression() -> std::unique_ptr<AST::Expression> {
-        return parseEquality();
+        return parseLogicalOr();
     }
 
     auto Parser::parsePrimaryExpression() -> std::unique_ptr<AST::Expression> {
@@ -733,13 +733,13 @@ namespace Velo::Parser {
     }
 
     auto Parser::parseAddition() -> std::unique_ptr<AST::Expression> {
-        auto left = parsePrimaryExpression();
+        auto left = parseUnary();
         if (left == nullptr) {
             return nullptr;
         }
 
         while (match(TokenKind::Plus)) {
-            auto right = parsePrimaryExpression();
+            auto right = parseUnary();
             if (right == nullptr) {
                 return nullptr;
             }
@@ -754,5 +754,73 @@ namespace Velo::Parser {
         }
 
         return left;
+    }
+
+    auto Parser::parseLogicalOr() -> std::unique_ptr<AST::Expression> {
+        auto left = parseLogicalAnd();
+        if (left == nullptr) {
+            return nullptr;
+        }
+
+        while (match(TokenKind::LogicalOr)) {
+            auto right = parseLogicalAnd();
+            if (right == nullptr) {
+                return nullptr;
+            }
+
+            const auto range = Source::SourceRange(left->range.begin(), right->range.end());
+            left = std::make_unique<AST::BinaryExpression>(
+                std::move(left),
+                AST::BinaryOperator::LogicalOr,
+                std::move(right),
+                range
+            );
+        }
+
+        return left;
+    }
+
+    auto Parser::parseLogicalAnd() -> std::unique_ptr<AST::Expression> {
+        auto left = parseEquality();
+        if (left == nullptr) {
+            return nullptr;
+        }
+
+        while (match(TokenKind::LogicalAnd)) {
+            auto right = parseEquality();
+            if (right == nullptr) {
+                return nullptr;
+            }
+
+            const auto range = Source::SourceRange(left->range.begin(), right->range.end());
+            left = std::make_unique<AST::BinaryExpression>(
+                std::move(left),
+                AST::BinaryOperator::LogicalAnd,
+                std::move(right),
+                range
+            );
+        }
+
+        return left;
+    }
+
+    auto Parser::parseUnary() -> std::unique_ptr<AST::Expression> {
+        if (match(TokenKind::Bang)) {
+            const Token &operatorToken = previous();
+            auto operand = parseUnary();
+            if (operand == nullptr) {
+                return nullptr;
+            }
+
+            const auto range = Source::SourceRange(operatorToken.range().begin(), operand->range.end());
+
+            return std::make_unique<AST::UnaryExpression>(
+                AST::UnaryOperator::Not,
+                std::move(operand),
+                range
+            );
+        }
+
+        return parsePrimaryExpression();
     }
 }
