@@ -227,3 +227,23 @@ TEST(LexerTest, LexesWhileKeyword) {
     EXPECT_NE(std::find(kinds.begin(), kinds.end(), TokenKind::KwWhile), kinds.end());
     EXPECT_FALSE(engine.hasErrors());
 }
+
+TEST(LexerTest, LexesBreakAndContinueKeywords) {
+    const SourceFile file("break_continue.velo", "break; continue;");
+    DiagnosticEngine engine;
+    Lexer lexer(file, engine);
+
+    const auto tokens = lexer.lexAll();
+    const auto kinds = collectKinds(tokens);
+
+    const std::vector<TokenKind> expected {
+        TokenKind::KwBreak,
+        TokenKind::Semicolon,
+        TokenKind::KwContinue,
+        TokenKind::Semicolon,
+        TokenKind::EndOfFile,
+    };
+
+    EXPECT_EQ(kinds, expected);
+    EXPECT_FALSE(engine.hasErrors());
+}

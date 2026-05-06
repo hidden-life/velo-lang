@@ -108,6 +108,8 @@ namespace Velo::AST {
         Assignment,
         If,
         While,
+        Break,
+        Continue,
     };
 
     struct Statement {
@@ -188,6 +190,14 @@ namespace Velo::AST {
 
         std::unique_ptr<Expression> condition;
         std::vector<std::unique_ptr<Statement>> body;
+    };
+
+    struct BreakStatement final : Statement {
+        explicit BreakStatement(Source::SourceRange sourceRange) : Statement(StatementKind::Break, sourceRange) {}
+    };
+
+    struct ContinueStatement final : Statement {
+        explicit ContinueStatement(Source::SourceRange sourceRange) : Statement(StatementKind::Continue, sourceRange) {}
     };
 
     struct Parameter final {

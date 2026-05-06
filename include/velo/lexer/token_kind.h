@@ -46,6 +46,9 @@ namespace Velo::Lexer {
 
         KwIf,
         KwElse,
+
+        KwBreak,
+        KwContinue,
     };
 
     [[nodiscard]] auto toString(TokenKind kind) -> std::string_view;

@@ -428,3 +428,78 @@ TEST(InterpreterTest, ExecutesSimpleWhileLikeJumpLoop) {
     EXPECT_EQ(result.exitCode, 3);
     EXPECT_TRUE(result.error.empty());
 }
+
+TEST(InterpreterTest, ExecutesBreakLikeJumpOutOfLoop) {
+    Module module;
+    Function mainFunc;
+    mainFunc.name = "main";
+
+    // x = 0
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .intOperand = 0
+    });
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::StoreLocal,
+        .indexOperand = 0U
+    });
+
+    // loop condition: true
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::PushBool,
+        .boolOperand = true
+    });
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::JumpIfFalse,
+        .targetOperand = 8U
+    });
+
+    // x = x + 1
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::LoadLocal,
+        .indexOperand = 0U
+    });
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .intOperand = 1
+    });
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::AddInt
+    });
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::StoreLocal,
+        .indexOperand = 0U
+    });
+
+    // break; -> jump to return block
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::Jump,
+        .targetOperand = 10U
+    });
+
+    // normal loop back edge, should be skipped because break jumps over it
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::Jump,
+        .targetOperand = 2U
+    });
+
+    // return x
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::LoadLocal,
+        .indexOperand = 0U
+    });
+    mainFunc.instructions.push_back(Instruction {
+        .code = OpCode::Return
+    });
+
+    module.functions.push_back(std::move(mainFunc));
+
+    Runtime runtime;
+    Interpreter interpreter(runtime);
+
+    const auto result = interpreter.execute(module);
+
+    EXPECT_TRUE(result.success);
+    EXPECT_EQ(result.exitCode, 1);
+    EXPECT_TRUE(result.error.empty());
+}

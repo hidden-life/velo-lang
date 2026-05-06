@@ -131,3 +131,11 @@ condition_start:
     Jump condition_start
 end:
 ```
+
+## Loop control flow
+`break` and `continue` are lowered into jump instructions.
+
+Current lowering model:
+- `break` becomes a `Jump` patched to the loop end
+- `continue` becomes a `Jump` to the loop condition
+- nested loops are handled through a loop context stack

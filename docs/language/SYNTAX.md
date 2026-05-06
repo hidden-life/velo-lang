@@ -205,6 +205,24 @@ if (true) {
 return x; // ❌ error
 ```
 
+## break / continue
+```velo
+while(true) {
+    break;
+}
+```
+
+```velo
+while(x < 10) {
+    x = x + 1;
+    continue;
+}
+```
+Rules:
+- `break` exits the nearest enclosing loop
+- `continue` jumps to the next iteration of the nearest enclosing loop
+- both are valid only inside loops
+
 ## Current limitations
 - parameters are immutable
 - there are no local variable declarations yet

@@ -67,6 +67,8 @@ namespace Velo::Semantic {
         std::unordered_set<std::string> _currentParameters {};
         std::string _currentFunctionReturnType {};
 
+        int _loopDepth {0};
+
         [[nodiscard]] auto declareLocal(const std::string &name, const LocalSymbol &symbol) -> bool;
         [[nodiscard]] auto resolveLocal(const std::string &name) const -> const LocalSymbol*;
     };

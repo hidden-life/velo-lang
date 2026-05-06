@@ -1,0 +1,17 @@
+module app;
+
+use std::console;
+
+fn main(): int {
+    var x: int = 0;
+    while(true) {
+        if (x == 3) {
+            break;
+        }
+        x = x + 1;
+    }
+
+    console::println(x);
+
+    return x;
+}

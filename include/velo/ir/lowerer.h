@@ -19,6 +19,13 @@ namespace Velo::IR {
         [[nodiscard]] auto findLocalIndex(const std::string &name) const -> const std::size_t*;
 
         std::unordered_map<std::string, std::size_t> _locals {};
+
+        struct LoopContext {
+            size_t conditionIndex;
+            std::vector<size_t> breakJumps;
+        };
+
+        std::vector<LoopContext> _loopStack;
     };
 }
 

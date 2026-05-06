@@ -107,3 +107,11 @@ The semantic analyzer uses a scope stack:
 - each block creates a new scope
 - variables are resolved from inner to outer scopes
 - shadowing is allowed
+
+## Loop control validation
+The semantic analyzer tracks loop depth.
+
+Rules:
+- `break` is valid only when loop depth is greater than zero
+- `continue` is valid only when loop depth is greater than zero
+- nested loops increment loop depth recursively

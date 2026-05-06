@@ -115,6 +115,18 @@ namespace Velo::AST {
 
                     break;
                 }
+
+                case StatementKind::Break: {
+                    writeIndent(stream, indentLevel);
+                    stream << "Break\n";
+                    break;
+                }
+
+                case StatementKind::Continue: {
+                    writeIndent(stream, indentLevel);
+                    stream << "Continue\n";
+                    break;
+                }
             }
         }
 

@@ -350,6 +350,14 @@ namespace Velo::Lexer {
             return TokenKind::KwWhile;
         }
 
+        if (text == "break") {
+            return TokenKind::KwBreak;
+        }
+
+        if (text == "continue") {
+            return TokenKind::KwContinue;
+        }
+
         return TokenKind::Identifier;
     }
 

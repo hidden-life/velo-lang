@@ -37,9 +37,12 @@ namespace Velo::IR {
 
         if (stmt.kind == StatementKind::While) {
             const auto &whileStmt = static_cast<const WhileStatement&>(stmt);
-            const std::size_t conditionStartIdx = func.instructions.size();
+            LoopContext loopCtx;
+            loopCtx.conditionIndex = func.instructions.size();
+            _loopStack.push_back(loopCtx);
             lowerExpression(*whileStmt.condition, func);
-            const std::size_t jumpIfFalseIdx = func.instructions.size();
+
+            const size_t jumpIfFalseIdx = func.instructions.size();
             func.instructions.push_back(Instruction {
                 .code = OpCode::JumpIfFalse,
             });
@@ -50,12 +53,18 @@ namespace Velo::IR {
 
             func.instructions.push_back(Instruction {
                 .code = OpCode::Jump,
-                .targetOperand = conditionStartIdx,
+                .targetOperand = loopCtx.conditionIndex,
             });
 
-            const std::size_t endIdx = func.instructions.size();
-            // If condition is false, exit the loop.
+            const size_t endIdx = func.instructions.size();
             func.instructions[jumpIfFalseIdx].targetOperand = endIdx;
+
+            // patch break jumps
+            for (auto idx : _loopStack.back().breakJumps) {
+                func.instructions[idx].targetOperand = endIdx;
+            }
+
+            _loopStack.pop_back();
 
             return;
         }
@@ -135,6 +144,29 @@ namespace Velo::IR {
             func.instructions[jumpIfFalseIdx].targetOperand = elseStartIdx;
             // After then branch, skip the else branch.
             func.instructions[jumpOverElseIdx].targetOperand = endIdx;
+
+            return;
+        }
+
+        if (stmt.kind == StatementKind::Break) {
+            if (_loopStack.empty()) return;
+            const size_t jumpIdx = func.instructions.size();
+            func.instructions.push_back(Instruction {
+                .code = OpCode::Jump,
+            });
+
+            _loopStack.back().breakJumps.push_back(jumpIdx);
+
+            return;
+        }
+
+        if (stmt.kind == StatementKind::Continue) {
+            if (_loopStack.empty()) return;
+
+            func.instructions.push_back(Instruction {
+                .code = OpCode::Jump,
+                .targetOperand = _loopStack.back().conditionIndex,
+            });
 
             return;
         }

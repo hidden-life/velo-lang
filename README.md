@@ -34,6 +34,7 @@ Implemented so far:
 - integer comparison operators: `==`, `!=`, `<`, `>`, `<=`, `>=`
 - `while` loops
 - block scoping for local variables
+- `break` and `continue` statements inside loops
 - GoogleTest test setup
 
 ## Build
@@ -109,6 +110,7 @@ Program
 ./build/debug/apps/velo/velo ./examples/locals/main.velo
 ./build/debug/apps/velo/velo ./examples/comparison/main.velo
 ./build/debug/apps/velo/velo ./examples/while_loop/main.velo
+./build/debug/apps/velo/velo ./examples/break_continue/main.velo
 ```
 
 ## Next milestone

@@ -484,6 +484,40 @@ namespace Velo::Parser {
             );
         }
 
+        if (match(TokenKind::KwBreak)) {
+            const Token &token = previous();
+            const Token *semicolon = consume(
+                TokenKind::Semicolon,
+                "PAR080",
+                "Expected ';' after 'break'."
+            );
+
+            if (semicolon == nullptr) {
+                return nullptr;
+            }
+
+            return std::make_unique<AST::BreakStatement>(
+                makeRangeFromTokens(token, *semicolon)
+            );
+        }
+
+        if (match(TokenKind::KwContinue)) {
+            const Token &token = previous();
+            const Token *semicolon = consume(
+                TokenKind::Semicolon,
+                "PAR081",
+                "Expected ';' after 'continue'."
+            );
+
+            if (semicolon == nullptr) {
+                return nullptr;
+            }
+
+            return std::make_unique<AST::ContinueStatement>(
+                makeRangeFromTokens(token, *semicolon)
+            );
+        }
+
         auto expression = parseExpression();
         if (expression == nullptr) {
             return nullptr;

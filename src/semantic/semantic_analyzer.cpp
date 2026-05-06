@@ -259,11 +259,37 @@ namespace Velo::Semantic {
                     );
                 }
 
+                _loopDepth++;
                 pushScope();
                 for (const auto &nested : whileStmt.body) {
                     analyzeStatement(*nested);
                 }
                 popScope();
+                _loopDepth--;
+
+                break;
+            }
+
+            case AST::StatementKind::Break: {
+                if (_loopDepth == 0) {
+                    _engine.error(
+                        "SEM026",
+                        "break used outside of loop.",
+                        stmt.range
+                    );
+                }
+
+                break;
+            }
+
+            case AST::StatementKind::Continue: {
+                if (_loopDepth == 0) {
+                    _engine.error(
+                        "SEM027",
+                        "continue used outside of loop.",
+                        stmt.range
+                    );
+                }
 
                 break;
             }

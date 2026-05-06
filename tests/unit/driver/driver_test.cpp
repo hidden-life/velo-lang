@@ -294,3 +294,51 @@ fn main(): int {
     ASSERT_TRUE(result.diagnostics.empty());
     ASSERT_TRUE(result.error.empty());
 }
+
+TEST(DriverTest, ExecutesBreakStatementInLoop) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "break.velo",
+        R"(module app;
+fn main(): int {
+    var x: int = 0;
+
+    while(true) {
+        x = x + 1;
+        break;
+    }
+
+    return x;
+}
+)"
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+}
+
+TEST(DriverTest, ExecutesContinueStatementInLoop) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "break.velo",
+        R"(module app;
+fn main(): int {
+    var x: int = 0;
+    var y: int = 0;
+
+    while(x < 3) {
+        x = x + 1;
+        continue;
+        y = y + 1;
+    }
+
+    return y;
+}
+)"
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+}

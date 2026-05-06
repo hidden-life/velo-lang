@@ -332,3 +332,36 @@ fn main(): int {
     ASSERT_EQ(whileStmt->body.size(), 1U);
     EXPECT_EQ(whileStmt->body[0]->kind, Velo::AST::StatementKind::Assignment);
 }
+
+TEST(ParserTest, ParsesBreakAndContinueStatements) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+fn main(): int {
+    var x: int = 0;
+    while(x < 10) {
+        x = x + 1;
+        continue;
+        break;
+    }
+
+    return x;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    const auto &mainFunc = program->functions[0];
+    ASSERT_EQ(mainFunc.statements.size(), 3U);
+    ASSERT_EQ(mainFunc.statements[1]->kind, Velo::AST::StatementKind::While);
+
+    const auto *whileStmt = dynamic_cast<Velo::AST::WhileStatement*>(mainFunc.statements[1].get());
+    ASSERT_NE(whileStmt, nullptr);
+    ASSERT_EQ(whileStmt->body.size(), 3U);
+
+    EXPECT_EQ(whileStmt->body[0]->kind, Velo::AST::StatementKind::Assignment);
+    EXPECT_EQ(whileStmt->body[1]->kind, Velo::AST::StatementKind::Continue);
+    EXPECT_EQ(whileStmt->body[2]->kind, Velo::AST::StatementKind::Break);
+}
