@@ -64,7 +64,9 @@ namespace Velo::Semantic {
         std::vector<std::unordered_map<std::string, LocalSymbol>> _scopeStack {};
 
         const Module::ModuleRegistry &_modules;
-        std::unordered_set<std::string> _currentParameters {};
+        // Function parameters visible in the currently analyzed function.
+        // Parameter name -> semantic type.
+        std::unordered_map<std::string, ExpressionType> _currentParameters {};
         std::string _currentFunctionReturnType {};
 
         int _loopDepth {0};

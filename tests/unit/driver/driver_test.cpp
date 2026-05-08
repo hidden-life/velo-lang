@@ -363,3 +363,27 @@ fn main(): int {
     ASSERT_TRUE(result.diagnostics.empty());
     ASSERT_TRUE(result.error.empty());
 }
+
+TEST(DriverTest, ExecutesBoolParameterProgram) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "bool_parameter.velo",
+        R"(module app;
+fn identity(val: bool): bool {
+    return val;
+}
+
+fn main(): int {
+    if (identity(true)) {
+        return 1;
+    }
+
+    return 0;
+}
+)"
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+}

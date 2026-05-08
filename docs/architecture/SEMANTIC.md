@@ -122,3 +122,13 @@ The semantic analyzer validates logical expressions:
 - `&&` requires `bool && bool`
 - `||` requires `bool || bool`
 - all logical operators produce `bool`
+
+## Parameter type resolution
+Function parameters are stored in the semantic analyzer with their actual semantic type.
+
+Example:
+```velo
+fn echo(value: string): string {
+    return value;
+}
+```

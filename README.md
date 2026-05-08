@@ -76,6 +76,7 @@ The project can now:
 - semantic type checking for expressions
 - integer-only validation for binary `+`
 - return type validation
+- typed function parameters for `int`, `string`, and `bool`
 
 Current semantic checks:
 - `main` must exist
@@ -113,6 +114,7 @@ Program
 ./build/debug/apps/velo/velo ./examples/while_loop/main.velo
 ./build/debug/apps/velo/velo ./examples/break_continue/main.velo
 ./build/debug/apps/velo/velo ./examples/logical/main.velo
+./build/debug/apps/velo/velo ./examples/typed_parameters/main.velo
 ```
 
 ## Next milestone

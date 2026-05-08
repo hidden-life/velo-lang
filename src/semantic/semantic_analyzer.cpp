@@ -88,7 +88,8 @@ namespace Velo::Semantic {
         pushScope();
 
         for (const auto &param : func.parameters) {
-            const auto [it, inserted] = _currentParameters.insert(param.name);
+            const auto paramType = typeFromTypeName(param.type);
+            const auto [it, inserted] = _currentParameters.emplace(param.name, paramType);
             if (!inserted) {
                 _engine.error(
                     "SEM012",
@@ -364,7 +365,7 @@ namespace Velo::Semantic {
                 return;
             }
 
-            if (!isCallable && _currentParameters.contains(firstSegment)) {
+            if (!isCallable && _currentParameters.find(firstSegment) != _currentParameters.end()) {
                 return;
             }
 
@@ -468,8 +469,9 @@ namespace Velo::Semantic {
                 const auto &nameExpr = static_cast<const NameExpression&>(expression);
                 if (nameExpr.name.segments.size() == 1U) {
                     const std::string &name = nameExpr.name.segments.front();
-                    if (_currentParameters.contains(name)) {
-                        return ExpressionType::Int; // currently INT
+                    const auto paramIt = _currentParameters.find(name);
+                    if (paramIt != _currentParameters.end()) {
+                        return paramIt->second;
                     }
 
                     const auto *local = resolveLocal(name);

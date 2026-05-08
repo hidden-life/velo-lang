@@ -242,6 +242,22 @@ Supported operators:
 Current limitation:
 - `&&` and `||` do not short-circuit yet
 
+## Typed parameters
+Function parameters preserve their declared type during semantic analysis.
+```velo
+fn echo(value: string): string {
+    return value;
+}
+
+fn identity(value: bool): bool {
+    return value;
+}
+```
+Supported parameter types:
+- `int`
+- `string`
+- `bool`
+
 ## Current limitations
 - parameters are immutable
 - there are no local variable declarations yet
