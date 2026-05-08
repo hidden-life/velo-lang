@@ -13,7 +13,7 @@ fn echo(value: string): string {
 fn main(): int {
     if (isReady(true)) {
         console::println(echo("typed parameters work"));
-        return 1;
+        return 0;
     }
 
     return 0;

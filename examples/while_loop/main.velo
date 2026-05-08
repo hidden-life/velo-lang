@@ -10,5 +10,5 @@ fn main(): int {
 
     console::println(x);
 
-    return x;
+    return 0;
 }

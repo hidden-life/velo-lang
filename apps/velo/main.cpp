@@ -64,5 +64,5 @@ int main(int argc, char **argv) {
 
     std::cout << result.astText;
 
-    return EXIT_SUCCESS;
+    return result.exitCode;
 }

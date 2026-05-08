@@ -13,6 +13,9 @@ namespace Velo::Driver {
         if (file == nullptr) {
             DriverResult result;
             result.error = "Failed to load source file: " + path;
+            result.success = false;
+            result.exitCode = 1;
+
             return result;
         }
 
@@ -31,34 +34,45 @@ namespace Velo::Driver {
         Parser::Parser parser(lexer.lexAll(), engine);
 
         auto program = parser.parse();
-        if (program != nullptr && !engine.hasErrors()) {
-            Runtime::Runtime runtime;
-            Semantic::SemanticAnalyzer analyzer(*program, engine, runtime.modules());
-            [[maybe_unused]] auto ok = analyzer.analyze();
+        DriverResult result;
+        if (program == nullptr || engine.hasErrors()) {
+            result.success = false;
+            result.exitCode = 1;
+            result.diagnostics = engine.diagnostics();
+
+            return result;
         }
 
-        DriverResult result;
+        Runtime::Runtime runtime;
+        Semantic::SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+        const bool semanticOk = analyzer.analyze();
         result.diagnostics = engine.diagnostics();
-        result.success = !engine.hasErrors() && program != nullptr;
+        if (!semanticOk || engine.hasErrors()) {
+            result.success = false;
+            result.exitCode = 1;
 
-        if (!result.success) {
             return result;
         }
 
         IR::Lowerer lowerer;
         const auto module = lowerer.lower(*program);
-        Runtime::Runtime runtime;
         Interpreter::Interpreter interpreter(runtime);
         const auto execResult = interpreter.execute(module);
+        result.exitCode = execResult.exitCode;
         if (!execResult.success) {
             result.success = false;
             result.error = execResult.error;
+            // Runtime errors should produce non-zero process status.
+            if (result.exitCode == 0) {
+                result.exitCode = 1;
+            }
 
             return result;
         }
 
         AST::ASTPrinter printer;
         result.astText = printer.print(*program);
+        result.success = true;
 
         return result;
     }

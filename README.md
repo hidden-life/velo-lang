@@ -39,6 +39,7 @@ Implemented so far:
 - declared type validation for function returns, parameters, and locals
 - unknown type diagnostics
 - `void` is restricted to function return types
+- driver exposes interpreter exit code through `DriverResult.exitCode`
 - GoogleTest test setup
 
 ## Build
@@ -49,6 +50,9 @@ ctest --preset debug
 ```
 
 ## Run
+The `velo` CLI returns the Velo `main()` return value as the process exit code.
+
+For demo examples, prefer returning `0` after printing output, so the shell treats the command as successful.
 ```bash
 ./build/debug/apps/velo/velo ./examples/hello_world/main.velo
 ```

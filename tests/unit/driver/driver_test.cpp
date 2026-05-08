@@ -68,6 +68,7 @@ TEST(DriverTest, ReturnsErrorMessageWhenFileCannotBeLoaded) {
 
     ASSERT_FALSE(result.success);
     ASSERT_FALSE(result.error.empty());
+    EXPECT_EQ(result.exitCode, 1);
 }
 
 TEST(DriverTest, ExecutesUserDefinedFunctionCall) {
@@ -272,6 +273,7 @@ fn main(): int {
     ASSERT_TRUE(result.success);
     ASSERT_TRUE(result.diagnostics.empty());
     ASSERT_TRUE(result.error.empty());
+    EXPECT_EQ(result.exitCode, 1);
 }
 
 TEST(DriverTest, ExecutesWhileLoopProgram) {
@@ -293,6 +295,7 @@ fn main(): int {
     ASSERT_TRUE(result.success);
     ASSERT_TRUE(result.diagnostics.empty());
     ASSERT_TRUE(result.error.empty());
+    EXPECT_EQ(result.exitCode, 5);
 }
 
 TEST(DriverTest, ExecutesBreakStatementInLoop) {
@@ -316,6 +319,7 @@ fn main(): int {
     ASSERT_TRUE(result.success);
     ASSERT_TRUE(result.diagnostics.empty());
     ASSERT_TRUE(result.error.empty());
+    EXPECT_EQ(result.exitCode, 1);
 }
 
 TEST(DriverTest, ExecutesContinueStatementInLoop) {
@@ -341,6 +345,7 @@ fn main(): int {
     ASSERT_TRUE(result.success);
     ASSERT_TRUE(result.diagnostics.empty());
     ASSERT_TRUE(result.error.empty());
+    EXPECT_EQ(result.exitCode, 0);
 }
 
 TEST(DriverTest, ExecutesLogicalOperatorProgram) {
@@ -362,6 +367,7 @@ fn main(): int {
     ASSERT_TRUE(result.success);
     ASSERT_TRUE(result.diagnostics.empty());
     ASSERT_TRUE(result.error.empty());
+    EXPECT_EQ(result.exitCode, 1);
 }
 
 TEST(DriverTest, ExecutesBoolParameterProgram) {
@@ -386,6 +392,7 @@ fn main(): int {
     ASSERT_TRUE(result.success);
     ASSERT_TRUE(result.diagnostics.empty());
     ASSERT_TRUE(result.error.empty());
+    EXPECT_EQ(result.exitCode, 1);
 }
 
 TEST(DriverTest, ReportsUnknownDeclaredType) {
@@ -406,4 +413,46 @@ fn main(): int {
     ASSERT_FALSE(result.success);
     ASSERT_FALSE(result.diagnostics.empty());
     EXPECT_EQ(result.diagnostics.front().code(), "SEM030");
+}
+
+TEST(DriverTest, ReturnsInterpreterExitCode) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "exit_code.velo",
+        R"(module app;
+fn main(): int {
+    return 42;
+}
+)"
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+    EXPECT_EQ(result.exitCode, 42);
+}
+
+TEST(DriverTest, ReturnsExitCodeOneForSemanticError) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "semantic_error.velo",
+        R"(module app;
+fn main(): int {
+    return missing;
+}
+)"
+    );
+
+    ASSERT_FALSE(result.success);
+    ASSERT_FALSE(result.diagnostics.empty());
+
+    EXPECT_EQ(result.exitCode, 1);
+}
+
+TEST(DriverTest, ReturnsExitCodeOneWhenFileCannotBeLoaded) {
+    Driver driver;
+    const auto result = driver.parseFile("missing_file.velo");
+    ASSERT_FALSE(result.success);
+    ASSERT_FALSE(result.error.empty());
+    EXPECT_EQ(result.exitCode, 1);
 }

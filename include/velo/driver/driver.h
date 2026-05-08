@@ -13,6 +13,8 @@ namespace Velo::Driver {
         std::string astText {};
         std::vector<Diagnostic::Diagnostic> diagnostics {};
         std::string error {};
+        // Process exit code produced by the interpreter
+        int exitCode {0};
     };
 
     // The first orchestration layer for the source -> lexer -> parser -> semantic -> AST print pipeline.

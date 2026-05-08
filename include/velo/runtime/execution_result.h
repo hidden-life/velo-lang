@@ -7,7 +7,7 @@ namespace Velo::Runtime {
     struct ExecutionResult final {
         bool success {true};
         int exitCode {0};
-        std::string error;
+        std::string error {};
     };
 }
 

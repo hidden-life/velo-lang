@@ -149,3 +149,13 @@ The interpreter supports logical instructions:
 Current limitation:
 - logical `&&` and `||` are evaluated eagerly
 - short-circuit lowering will be added later
+
+## Program exit code
+The interpreter returns an `ExecutionResult` with:
+- success flag
+- exit code
+- runtime error message
+
+The driver forwards the interpreter exit code through `DriverResult.exitCode`.
+
+This allows integration tests to validate actual execution results, not only pipeline success.

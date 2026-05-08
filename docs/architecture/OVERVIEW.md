@@ -36,3 +36,4 @@ source text
 - Calls with arguments are still limited to builtins.
 - Expressions statements now emit a Pop instruction to prevent stack pollution.
 - User-defined function calls now use isolated stack frames with proper return value propagation.
+- `DriverResult` contains diagnostics, AST text, success status, error message, and interpreter exit code.
