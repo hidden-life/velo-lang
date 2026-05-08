@@ -67,7 +67,8 @@ namespace Velo::Semantic {
             );
         }
 
-        if (!isBuiltinInt(mainFunc.returnType)) {
+        const auto mainReturnType = typeFromTypeName(mainFunc.returnType);
+        if (mainReturnType != ExpressionType::Unknown && mainReturnType != ExpressionType::Int) {
             _engine.error(
                 "SEM005",
                 "Entry point 'main' must return int.",
@@ -85,10 +86,18 @@ namespace Velo::Semantic {
         } else {
             _currentFunctionReturnType.clear();
         }
+
+        validateDeclaredType(func.returnType, true, "function '" + func.name + "' return type");
         pushScope();
 
         for (const auto &param : func.parameters) {
-            const auto paramType = typeFromTypeName(param.type);
+            validateDeclaredType(param.type, false, "parameter '" + param.name + "'");
+            auto paramType = typeFromTypeName(param.type);
+            // If the parameter type is invalid for value position, keep it Unknown
+            // to reduce follow-up type mismatch diagnostics.
+            if (paramType == ExpressionType::Void) {
+                paramType = ExpressionType::Unknown;
+            }
             const auto [it, inserted] = _currentParameters.emplace(param.name, paramType);
             if (!inserted) {
                 _engine.error(
@@ -141,17 +150,17 @@ namespace Velo::Semantic {
                     return;
                 }
 
-                const auto actual = analyzeExpressionType(*returnStmt.expression);
+                const auto actual = analyzeCheckedExpressionType(*returnStmt.expression);
                 if (expectedType == ExpressionType::Void) {
                     _engine.error(
                         "SEM016",
-                        "Void function must return a value.",
+                        "Void function must not return a value.",
                         returnStmt.range
                     );
                     return;
                 }
 
-                if (expectedType != ExpressionType::Unknown && actual != expectedType) {
+                if (expectedType != ExpressionType::Unknown && actual != expectedType && actual != ExpressionType::Unknown) {
                     _engine.error(
                         "SEM014",
                         "Return type mismatch.",
@@ -163,10 +172,14 @@ namespace Velo::Semantic {
             }
             case AST::StatementKind::VariableDeclaration: {
                 const auto &varDecl = static_cast<const AST::VariableDeclarationStatement&>(stmt);
-                const auto declType = typeFromTypeName(varDecl.type);
-                const auto initType = analyzeExpressionType(*varDecl.initializer);
+                validateDeclaredType(varDecl.type, false, "local variable '" + varDecl.name + "'");
+                auto declType = typeFromTypeName(varDecl.type);
+                if (declType == ExpressionType::Void) {
+                    declType = ExpressionType::Unknown;
+                }
+                const auto initType = analyzeCheckedExpressionType(*varDecl.initializer);
 
-                if (declType != ExpressionType::Unknown && initType != declType) {
+                if (declType != ExpressionType::Unknown && initType != ExpressionType::Unknown && initType != declType) {
                     _engine.error(
                         "SEM019",
                         "Local variable initializer type mismatch.",
@@ -210,9 +223,9 @@ namespace Velo::Semantic {
                     );
                 }
 
-                const auto valueType = analyzeExpressionType(*assignment.value);
+                const auto valueType = analyzeCheckedExpressionType(*assignment.value);
 
-                if (valueType != local->type) {
+                if (valueType != ExpressionType::Unknown && local->type != ExpressionType::Unknown && valueType != local->type) {
                     _engine.error(
                         "SEM022",
                         "Assignment type mismatch.",
@@ -225,8 +238,8 @@ namespace Velo::Semantic {
 
             case AST::StatementKind::If: {
                 const auto &ifStmt = static_cast<const AST::IfStatement&>(stmt);
-                const auto conditionType = analyzeExpressionType(*ifStmt.condition);
-                if (conditionType != ExpressionType::Bool) {
+                const auto conditionType = analyzeCheckedExpressionType(*ifStmt.condition);
+                if (conditionType != ExpressionType::Bool && conditionType != ExpressionType::Unknown) {
                     _engine.error(
                         "SEM023",
                         "If condition must be bool.",
@@ -251,8 +264,8 @@ namespace Velo::Semantic {
 
             case AST::StatementKind::While: {
                 const auto &whileStmt = static_cast<const AST::WhileStatement&>(stmt);
-                const auto conditionType = analyzeExpressionType(*whileStmt.condition);
-                if (conditionType != ExpressionType::Bool) {
+                const auto conditionType = analyzeCheckedExpressionType(*whileStmt.condition);
+                if (conditionType != ExpressionType::Bool && conditionType != ExpressionType::Unknown) {
                     _engine.error(
                         "SEM025",
                         "While condition must be bool.",
@@ -692,5 +705,53 @@ namespace Velo::Semantic {
         }
 
         return nullptr;
+    }
+
+    void SemanticAnalyzer::validateDeclaredType(
+        const AST::TypeName &typeName,
+        bool allowVoid,
+        const std::string &subject) {
+        const auto type = typeFromTypeName(typeName);
+        if (type == ExpressionType::Unknown) {
+            _engine.error(
+                "SEM030",
+                "Unknown type '" + typeNameToString(typeName) + "' in " + subject + ".",
+                typeName.range
+            );
+            return;
+        }
+
+        if (!allowVoid && type == ExpressionType::Void) {
+            _engine.error(
+                "SEM031",
+                "Type 'void' cannot be used in " + subject + ".",
+                typeName.range
+            );
+        }
+    }
+
+    auto SemanticAnalyzer::typeNameToString(const AST::TypeName &typeName) -> std::string {
+        std::string result;
+        for (std::size_t idx = 0; idx < typeName.name.segments.size(); ++idx) {
+            if (idx > 0U) {
+                result += "::";
+            }
+            result += typeName.name.segments[idx];
+        }
+
+        return result;
+    }
+
+    auto SemanticAnalyzer::analyzeCheckedExpressionType(const AST::Expression &expression) -> ExpressionType {
+        const auto errorsBefore = _engine.size();
+        analyzeExpression(expression);
+
+        // If name/function/module validation already reported an error,
+        // do not run type analysis to avoid duplicate/cascading diagnostics.
+        if (_engine.size() != errorsBefore) {
+            return ExpressionType::Unknown;
+        }
+
+        return analyzeExpressionType(expression);
     }
 }

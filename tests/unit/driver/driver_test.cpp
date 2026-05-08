@@ -387,3 +387,23 @@ fn main(): int {
     ASSERT_TRUE(result.diagnostics.empty());
     ASSERT_TRUE(result.error.empty());
 }
+
+TEST(DriverTest, ReportsUnknownDeclaredType) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "unknown_type.velo",
+        R"(module app;
+fn broken(value: mystery): int {
+    return 0;
+}
+
+fn main(): int {
+    return 0;
+}
+)"
+    );
+
+    ASSERT_FALSE(result.success);
+    ASSERT_FALSE(result.diagnostics.empty());
+    EXPECT_EQ(result.diagnostics.front().code(), "SEM030");
+}

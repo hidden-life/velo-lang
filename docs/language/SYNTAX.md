@@ -258,6 +258,32 @@ Supported parameter types:
 - `string`
 - `bool`
 
+## Declared types
+Supported built-in types:
+- `int`
+- `string`
+- `bool`
+- `void`
+
+`void` is only valid as a function return type:
+```velo
+fn log(): void {
+    return;
+}
+```
+
+Invalid:
+```velo
+fn bad(value: void): int {
+    return 0;
+}
+
+fn main(): int {
+    let x: void = 0;
+    return 0;
+}
+```
+
 ## Current limitations
 - parameters are immutable
 - there are no local variable declarations yet

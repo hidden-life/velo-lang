@@ -36,6 +36,9 @@ Implemented so far:
 - block scoping for local variables
 - `break` and `continue` statements inside loops
 - logical operators: `&&`, `||`, `!`
+- declared type validation for function returns, parameters, and locals
+- unknown type diagnostics
+- `void` is restricted to function return types
 - GoogleTest test setup
 
 ## Build

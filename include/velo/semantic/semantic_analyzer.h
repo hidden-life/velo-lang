@@ -2,7 +2,6 @@
 #define INC_VELO_SEMANTIC_SEMATIC_ANALYZER_H
 
 #include <unordered_map>
-#include <unordered_set>
 
 #include "velo/ast/ast.h"
 #include "velo/diagnostic/diagnostic_engine.h"
@@ -38,10 +37,19 @@ namespace Velo::Semantic {
 
         [[nodiscard]] auto analyzeExpressionType(const AST::Expression &expression) -> ExpressionType;
 
+        [[nodiscard]] auto analyzeCheckedExpressionType(const AST::Expression &expression) -> ExpressionType;
+
         [[nodiscard]] auto typeFromTypeName(const AST::TypeName &typeName) -> ExpressionType;
         [[nodiscard]] auto analyzeCallExpressionType(const AST::CallExpression &callExpr) -> ExpressionType;
 
         [[nodiscard]] auto typeFromString(const std::string &typeName) -> ExpressionType;
+
+        void validateDeclaredType(
+            const AST::TypeName &typeName,
+            bool allowVoid,
+            const std::string &subject
+        );
+        [[nodiscard]] static auto typeNameToString(const AST::TypeName &typeName) -> std::string;
 
         [[nodiscard]] static auto importedModuleName(const AST::UseDeclaration &useDecl) -> std::string;
 

@@ -132,3 +132,20 @@ fn echo(value: string): string {
     return value;
 }
 ```
+
+## Declared type validation
+The semantic analyzer validates declared types in:
+- function return types
+- function parameters
+- local variable declarations
+
+Supported types:
+- `int`
+- `string`
+- `bool`
+- `void`
+
+Rules:
+- unknown declared types produce `SEM030`
+- `void` is allowed only as a function return type
+- `void` parameters and local variables produce `SEM031`

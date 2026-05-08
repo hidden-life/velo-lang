@@ -972,3 +972,121 @@ fn main(): int {
     ASSERT_TRUE(engine.hasErrors());
     EXPECT_EQ(engine.diagnostics().front().code(), "SEM014");
 }
+
+TEST(SemanticaAnalyzerTest, ReportsUnknownFunctionReturnType) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+fn broken(): mystery {
+    return 0;
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM030");
+}
+
+TEST(SemanticAnalyzerTest, ReportsUnknownParameterType) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+fn broken(value: mystery): int {
+    return 0;
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM030");
+}
+
+TEST(SemanticAnalyzerTest, ReportsUnknownLocalVariableType) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+fn main(): int {
+    let val: mystery = 1;
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM030");
+}
+
+TEST(SemanticAnalyzerTest, ReportsVoidParameterType) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+fn broken(value: void): int {
+    return 0;
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM031");
+}
+
+TEST(SemanticAnalyzerTest, ReportsVoidLocalVariableType) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+fn main(): int {
+    let value: void = 0;
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM031");
+}
