@@ -2,11 +2,14 @@
 
 namespace Velo::IR {
     auto Lowerer::lower(const AST::Program &program) -> Module {
+        collectModuleAliases(program);
         Module module;
 
         for (const auto &fn : program.functions) {
             module.functions.push_back(lowerFunction(fn));
         }
+
+        _moduleAliases.clear();
 
         return module;
     }
@@ -299,21 +302,18 @@ namespace Velo::IR {
                 }
 
                 Instruction i;
-                // Qualified calls like console::println() are treated as builtin calls.
-                // Single-segment calls like message() are treated as user-defined function calls.
-                i.code = call.callee.segments.size() > 1U ? OpCode::CallBuiltin : OpCode::CallFunction;
+                // Qualified calls like console::println() or str::len()
+                // are treated as builtin calls.
+                //
+                // Single-segment calls like helper() are treated as user-defined function calls.
+                i.code = call.callee.segments.size() > 1U ?
+                    OpCode::CallBuiltin :
+                    OpCode::CallFunction;
                 i.argsCount = call.arguments.size();
-
-                // concat names currently
-                std::string name;
-                for (std::size_t idx = 0; idx < call.callee.segments.size(); ++idx) {
-                    if (idx > 0U) name += "::";
-                    name += call.callee.segments[idx];
-                }
-
-                i.stringOperand = name;
+                i.stringOperand = lowerQualifiedName(call.callee);
 
                 func.instructions.push_back(i);
+
                 return;
             }
 
@@ -424,5 +424,50 @@ namespace Velo::IR {
         func.instructions[jumpToRightIdx].targetOperand = rightBranchIdx;
         // If left is true, PushBool true is the final result.
         func.instructions[jumpToEndIdx].targetOperand = endIdx;
+    }
+
+    void Lowerer::collectModuleAliases(const AST::Program &program) {
+        _moduleAliases.clear();
+
+        for (const auto &useDecl : program.uses) {
+            if (useDecl.path.segments.empty()) {
+                continue;
+            }
+
+            const std::string actualModuleName = useDecl.path.segments.back();
+
+            std::string visibleModuleName = actualModuleName;
+            if (useDecl.alias.has_value()) {
+                visibleModuleName = useDecl.alias.value();
+            }
+
+            _moduleAliases.insert_or_assign(visibleModuleName, actualModuleName);
+        }
+    }
+
+    auto Lowerer::lowerQualifiedName(const AST::QualifiedName &name) const -> std::string {
+        if (name.segments.empty()) {
+            return {};
+        }
+
+        if (name.segments.size() == 1U) {
+            return name.segments.front();
+        }
+
+        std::string result;
+
+        const auto aliasIt = _moduleAliases.find(name.segments.front());
+        if (aliasIt != _moduleAliases.end()) {
+            result = aliasIt->second;
+        } else {
+            result = name.segments.front();
+        }
+
+        for (std::size_t idx = 1U; idx < name.segments.size(); ++idx) {
+            result += "::";
+            result += name.segments[idx];
+        }
+
+        return result;
     }
 }

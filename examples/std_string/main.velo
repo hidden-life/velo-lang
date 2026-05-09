@@ -1,0 +1,11 @@
+module app;
+
+use std::console;
+use std::string as str;
+
+fn main(): int {
+    let length: int = str::len("hello");
+    console::println(length);
+
+    return 0;
+}

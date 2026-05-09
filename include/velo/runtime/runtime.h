@@ -18,6 +18,7 @@ namespace Velo::Runtime {
 
     private:
         void registerStdConsole();
+        void registerStdString();
 
         BuiltinRegistry _registry {};
         Module::ModuleRegistry _modules {};

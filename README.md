@@ -45,6 +45,8 @@ Implemented so far:
 - grouped expressions with parentheses
 - short-circuit logical operators: `&&` and `||`
 - IR dump mode via `velo ir`
+- `std::string` module foundation
+- `std::string::len(value)` builtin
 - GoogleTest test setup
 
 ## Build
@@ -159,6 +161,7 @@ Program
 ./build/debug/apps/velo/velo ./examples/typed_parameters/main.velo
 ./build/debug/apps/velo/velo ./examples/arithmetic/main.velo
 ./build/debug/apps/velo/velo ./examples/short_circuit/main.velo
+./build/debug/apps/velo/velo ./examples/std_string/main.velo
 ```
 
 ## Next milestone

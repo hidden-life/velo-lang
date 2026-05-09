@@ -703,3 +703,81 @@ fn main(): int {
     EXPECT_NE(result.irText.find("MulInt"), std::string::npos);
     EXPECT_NE(result.irText.find("Return"), std::string::npos);
 }
+
+TEST(DriverTest, IrModuleResolvesBuiltinImportAlias) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "string_len_ir_alias.velo",
+        R"(module app;
+use std::string as str;
+
+fn main(): int {
+    return str::len("hello");
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.irText.find("CallBuiltin string::len args=1"), std::string::npos);
+    EXPECT_EQ(result.irText.find("CallBuiltin str::len args=1"), std::string::npos);
+}
+
+TEST(DriverTest, ExecutesStringLengthBuiltinProgram) {
+    Driver driver;
+
+    const auto result = driver.parseText(
+        "string_len.velo",
+        R"(module app;
+use std::string as str;
+
+fn main(): int {
+    return str::len("hello");
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 5);
+}
+
+TEST(DriverTest, ExecutesStringLengthBuiltinThroughAlias) {
+    Driver driver;
+
+    const auto result = driver.parseText(
+        "string_len.velo",
+        R"(module app;
+use std::string as text;
+
+fn main(): int {
+    return text::len("hello");
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 5);
+}

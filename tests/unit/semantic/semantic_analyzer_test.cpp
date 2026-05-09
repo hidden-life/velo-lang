@@ -1149,3 +1149,47 @@ fn main(): int {
     ASSERT_TRUE(engine.hasErrors());
     EXPECT_EQ(engine.diagnostics().front().code(), "SEM032");
 }
+
+TEST(SemanticAnalyzerTest, AcceptsStringLengthBuiltinReturnType) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+use std::string as str;
+
+fn main(): int {
+    return str::len("hello");
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, ReportsWrongStringLengthArgumentCount) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+use std::string as str;
+
+fn main(): int {
+    return str::len("hello", "world");
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM010");
+}

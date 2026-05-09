@@ -157,3 +157,21 @@ The semantic analyzer validates arithmetic expressions:
 - binary arithmetic operators require `int` operands
 - unary `-` requires an `int` operand
 - arithmetic expressions produce `int`
+
+## Builtin return type metadata
+Builtin return types are mirrored into `ModuleRegistry`.
+
+This allows semantic analysis to resolve builtin call expression types:
+```velo
+use std::string as str;
+
+fn main(): int {
+    return str::len("hello");
+}
+```
+
+`str::len(...)` resolves to `int`.
+
+Current limitation:
+- builtin parameter types are not validated by semantic analysis yet.
+- invalid builtin argument value types are reported by the runtime.

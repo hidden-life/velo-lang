@@ -27,6 +27,7 @@ TEST(BuiltinRegistryTest, RegistersAndFindsFunction) {
     ASSERT_NE(func, nullptr);
     EXPECT_EQ(func->name(), "test::echo");
     EXPECT_EQ(func->arity(), 1U);
+    EXPECT_EQ(func->returnType(), "void");
 }
 
 TEST(BuiltinRegistryTest, ReturnsNullForUnknownFunction) {

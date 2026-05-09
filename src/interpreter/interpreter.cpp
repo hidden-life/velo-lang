@@ -428,7 +428,16 @@ namespace Velo::Interpreter {
         arguments.insert(arguments.end(), first, _stack.end());
         _stack.erase(first, _stack.end());
 
-        return func->call(arguments);
+        auto result = func->call(arguments);
+        if (!result.success) {
+            return result;
+        }
+
+        if (result.returnValue.has_value()) {
+            _stack.push_back(*result.returnValue);
+        }
+
+        return {};
     }
 
     auto Interpreter::callFunction(const std::string &name, std::size_t argsCount) -> Runtime::ExecutionResult {

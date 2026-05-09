@@ -209,3 +209,19 @@ This is useful for debugging:
 - jumps
 - function calls
 - local loads/stores
+
+## Builtin return values
+Builtins can now return runtime values through `ExecutionResult::returnValue`.
+
+Void builtins leave `returnValue` empty:
+```text
+console::println(value) -> void
+```
+
+Value-returning builtins set `returnValue`:
+```text
+string::len(value) -> int
+```
+
+The interpreter pushes builtin return values onto the operand stack after successful
+builtin execution.
