@@ -578,3 +578,80 @@ fn main(): int {
 
     EXPECT_EQ(result.exitCode, 4);
 }
+
+TEST(DriverTest, CheckModeDoesNotExecuteProgram) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "check_mode.velo",
+        R"(module app;
+fn main(): int {
+    return 1 / 0;
+}
+)",
+        Velo::Driver::DriverMode::Check
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 0);
+    EXPECT_TRUE(result.astText.empty());
+}
+
+TEST(DriverTest, CheckModeReportsSemanticErrors) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "check_semantic_error.velo",
+        R"(module app;
+fn main(): int {
+    return missing;
+}
+)",
+        Velo::Driver::DriverMode::Check
+    );
+
+    ASSERT_FALSE(result.success);
+    ASSERT_FALSE(result.diagnostics.empty());
+
+    EXPECT_EQ(result.exitCode, 1);
+}
+
+TEST(DriverTest, AstModeReturnsAstTextWithoutExecutingProgram) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "ast_mode.velo",
+        R"(module app;
+fn main(): int {
+    return 1 / 0;
+}
+)",
+        Velo::Driver::DriverMode::Ast
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 0);
+    EXPECT_FALSE(result.astText.empty());
+}
+
+TEST(DriverTest, RunModeExecutesProgram) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "run_mode.velo",
+        R"(module app;
+fn main(): int {
+    return 42;
+}
+)",
+        Velo::Driver::DriverMode::Run
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 42);
+}

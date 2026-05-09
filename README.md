@@ -61,6 +61,31 @@ For demo examples, prefer returning `0` after printing output, so the shell trea
 ./build/debug/apps/velo/velo ./examples/hello_world/main.velo
 ```
 
+## CLI
+```bash
+velo run app.velo
+```
+Runs a Velo source file.
+
+```bash
+velo check app.velo
+```
+Runs lexer, parser, and semantic analysis without executing the program.
+
+```bash
+velo ast app.velo
+```
+Prints the AST without executing program.
+
+Backward-compatible shorthand:
+```bash
+velo app.velo
+```
+is equivalent to:
+```bash
+velo run app.velo
+```
+
 ## Current milestone
 The project can now:
 - load source text

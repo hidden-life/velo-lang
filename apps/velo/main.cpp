@@ -36,33 +36,91 @@ namespace {
 
     void printUsage() {
         std::cerr << "velo " << VELO_VERSION << std::endl;
-        std::cerr << "Usage: velo <source-file.velo>" << std::endl;
+        std::cerr << "Usage:" << std::endl;
+        std::cerr << "    velo <source-file.velo>" << std::endl;
+        std::cerr << "    velo run <source-file.velo>" << std::endl;
+        std::cerr << "    velo check <source-file.velo>" << std::endl;
+        std::cerr << "    velo ast <source-file.velo>" << std::endl;
+        std::cerr << "    velo --version" << std::endl;
+        std::cerr << "    velo --help" << std::endl;
+    }
+
+    auto parseMode(std::string_view command) -> Velo::Driver::DriverMode {
+        if (command == "check") {
+            return Velo::Driver::DriverMode::Check;
+        }
+
+        if (command == "ast") {
+            return Velo::Driver::DriverMode::Ast;
+        }
+
+        return Velo::Driver::DriverMode::Run;
+    }
+
+    auto printResult(const Velo::Driver::DriverResult &result, bool printAst) -> int {
+        if (!result.error.empty()) {
+            std::cerr << result.error << std::endl;
+        }
+
+        for (const auto &diag : result.diagnostics) {
+            printDiagnostic(diag);
+        }
+
+        if (!result.success) {
+            return result.exitCode == 0 ? EXIT_FAILURE : result.exitCode;
+        }
+
+        if (printAst && !result.astText.empty()) {
+            std::cout << result.astText;
+        }
+
+        return result.exitCode;
     }
 }
 
 int main(int argc, char **argv) {
-    if (argc != 2) {
-        printUsage();
-        return EXIT_FAILURE;
+    if (argc == 2) {
+        const std::string_view argument = argv[1];
+
+        if (argument == "--help" || argument == "-h") {
+            printUsage();
+            return EXIT_SUCCESS;
+        }
+
+        if (argument == "--version" || argument == "-v") {
+            std::cout << VELO_VERSION << std::endl;
+            return EXIT_SUCCESS;
+        }
+
+        // Backward-compatible mode:
+        //      velo file.velo
+        // behaves like:
+        //      velo run file.velo
+        Velo::Driver::Driver driver;
+        const auto result = driver.parseFile(std::string(argument), Velo::Driver::DriverMode::Run);
+
+        return printResult(result, false);
     }
 
-    Velo::Driver::Driver driver;
-    Velo::Driver::DriverResult result = driver.parseFile(argv[1]);
+    if (argc == 3) {
+        const std::string_view command = argv[1];
+        const std::string sourcePath = argv[2];
 
-    if (!result.error.empty()) {
-        std::cerr << result.error << std::endl;
-        return EXIT_FAILURE;
+        if (command != "run" && command != "check" && command != "ast") {
+            printUsage();
+            return EXIT_FAILURE;
+        }
+
+        const auto mode = parseMode(command);
+
+        Velo::Driver::Driver driver;
+        const auto result = driver.parseFile(sourcePath, mode);
+        const bool shouldPrintAst = (mode == Velo::Driver::DriverMode::Ast);
+
+        return printResult(result, shouldPrintAst);
     }
 
-    for (const auto &diag : result.diagnostics) {
-        printDiagnostic(diag);
-    }
+    printUsage();
 
-    if (!result.success) {
-        return EXIT_FAILURE;
-    }
-
-    std::cout << result.astText;
-
-    return result.exitCode;
+    return EXIT_FAILURE;
 }

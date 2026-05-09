@@ -8,6 +8,12 @@
 #include "velo/source/source_manager.h"
 
 namespace Velo::Driver {
+    enum class DriverMode {
+        Run,
+        Check,
+        Ast,
+    };
+
     struct DriverResult final {
         bool success {false};
         std::string astText {};
@@ -17,14 +23,14 @@ namespace Velo::Driver {
         int exitCode {0};
     };
 
-    // The first orchestration layer for the source -> lexer -> parser -> semantic -> AST print pipeline.
+    // Orchestrates the source -> lexer -> parser -> semantic -> IR -> VM pipeline.
     class Driver final {
     public:
-        [[nodiscard]] auto parseFile(const std::string &path) -> DriverResult;
-        [[nodiscard]] auto parseText(std::string path, std::string content) -> DriverResult;
+        [[nodiscard]] auto parseFile(const std::string &path, DriverMode mode = DriverMode::Run) -> DriverResult;
+        [[nodiscard]] auto parseText(std::string path, std::string content, DriverMode mode = DriverMode::Run) -> DriverResult;
 
     private:
-        [[nodiscard]] auto runPipeline(const Source::SourceFile &source) -> DriverResult;
+        [[nodiscard]] auto runPipeline(const Source::SourceFile &source, DriverMode mode) -> DriverResult;
 
         Source::SourceManager _sourceManager {};
     };

@@ -190,3 +190,8 @@ The VM supports integer arithmetic instructions:
 - `NegInt`
 
 Division and modulo by zero are reported as runtime errors.
+
+## CLI run mode
+Runtime execution happens only in `run` mode.
+
+`check` and `ast` do not execute the program, so runtime errors such as division by zero are not triggered in those modes.

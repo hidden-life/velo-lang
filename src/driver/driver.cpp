@@ -8,7 +8,7 @@
 #include "velo/interpreter/interpreter.h"
 
 namespace Velo::Driver {
-    auto Driver::parseFile(const std::string &path) -> DriverResult {
+    auto Driver::parseFile(const std::string &path, DriverMode mode) -> DriverResult {
         const auto *file = _sourceManager.loadFromDisk(path);
         if (file == nullptr) {
             DriverResult result;
@@ -19,16 +19,16 @@ namespace Velo::Driver {
             return result;
         }
 
-        return runPipeline(*file);
+        return runPipeline(*file, mode);
     }
 
-    auto Driver::parseText(std::string path, std::string content) -> DriverResult {
+    auto Driver::parseText(std::string path, std::string content, DriverMode mode) -> DriverResult {
         const auto &file = _sourceManager.addVirtualFile(std::move(path), std::move(content));
 
-        return runPipeline(file);
+        return runPipeline(file, mode);
     }
 
-    auto Driver::runPipeline(const Source::SourceFile &source) -> DriverResult {
+    auto Driver::runPipeline(const Source::SourceFile &source, DriverMode mode) -> DriverResult {
         Diagnostic::DiagnosticEngine engine;
         Lexer::Lexer lexer(source, engine);
         Parser::Parser parser(lexer.lexAll(), engine);
@@ -54,18 +54,37 @@ namespace Velo::Driver {
             return result;
         }
 
+        if (mode == DriverMode::Check) {
+            result.success = true;
+            result.exitCode = 0;
+
+            return result;
+        }
+
+        if (mode == DriverMode::Ast) {
+            AST::ASTPrinter printer;
+            result.astText = printer.print(*program);
+            result.success = true;
+            result.exitCode = 0;
+
+            return result;
+        }
+
         IR::Lowerer lowerer;
         const auto module = lowerer.lower(*program);
+
         Interpreter::Interpreter interpreter(runtime);
         const auto execResult = interpreter.execute(module);
+
         result.exitCode = execResult.exitCode;
+
         if (!execResult.success) {
             result.success = false;
-            result.error = execResult.error;
             // Runtime errors should produce non-zero process status.
             if (result.exitCode == 0) {
                 result.exitCode = 1;
             }
+            result.error = execResult.error;
 
             return result;
         }

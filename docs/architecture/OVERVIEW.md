@@ -27,6 +27,19 @@ source text
     -> runtime builtins
 ```
 
+## Driver modes
+The driver supports multiple pipeline modes:
+- `Run`: lexer -> parser -> semantic -> IR lowerer -> interpreter
+- `Check`: lexer -> parser -> semantic
+- `Ast`: lexer -> parser -> semantic -> AST printer
+
+The CLI maps these modes to:
+```bash
+velo run file.velo
+velo check file.velo
+velo ast file.velo
+```
+
 ## Notes
 - The parser is handwritten and recursive descent.
 - The AST is intentionally minimal and only covers the first executable program shape.
