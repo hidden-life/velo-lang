@@ -146,9 +146,29 @@ The interpreter supports logical instructions:
 - `LogicalAnd`
 - `LogicalOr`
 
-Current limitation:
-- logical `&&` and `||` are evaluated eagerly
-- short-circuit lowering will be added later
+## Short-circuit logical lowering
+Logical `&&` and `||` are lowered into conditional jumps.
+
+`a && b`:
+```text
+a
+JumpIfFalse false_branch
+b
+Jump end
+false_branch:
+PushBool false
+end:
+```
+
+`a || b`:
+```text
+a
+JumpIfFalse true
+Jump end
+right_branch:
+b
+end:
+```
 
 ## Program exit code
 The interpreter returns an `ExecutionResult` with:

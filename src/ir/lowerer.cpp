@@ -214,6 +214,15 @@ namespace Velo::IR {
 
             case ExpressionKind::Binary: {
                 const auto &binaryExpr = static_cast<const BinaryExpression&>(expr);
+                if (binaryExpr.op == BinaryOperator::LogicalAnd) {
+                    lowerLogicalAndExpression(binaryExpr, func);
+                    return;
+                }
+
+                if (binaryExpr.op == BinaryOperator::LogicalOr) {
+                    lowerLogicalOrExpression(binaryExpr, func);
+                    return;
+                }
 
                 lowerExpression(*binaryExpr.left, func);
                 lowerExpression(*binaryExpr.right, func);
@@ -275,14 +284,8 @@ namespace Velo::IR {
                         });
                         return;
                     case BinaryOperator::LogicalAnd:
-                        func.instructions.push_back(Instruction {
-                            .code = OpCode::LogicalAnd,
-                        });
-                        return;
                     case BinaryOperator::LogicalOr:
-                        func.instructions.push_back(Instruction {
-                            .code = OpCode::LogicalOr,
-                        });
+                        // Already handled above with short-circuit lowering.
                         return;
                 }
 
@@ -351,5 +354,75 @@ namespace Velo::IR {
         }
 
         return &it->second;
+    }
+
+    void Lowerer::lowerLogicalAndExpression(const AST::BinaryExpression &expr, Function &func) {
+        // Short-circuit AND:
+        //
+        // left
+        // JumpIfFalse false_branch
+        // right
+        // Jump end
+        // false_branch
+        // PushBool false
+        // end:
+
+        lowerExpression(*expr.left, func);
+        const std::size_t jumpIfFalseIdx = func.instructions.size();
+        func.instructions.push_back(Instruction {
+            .code = OpCode::JumpIfFalse,
+        });
+
+        lowerExpression(*expr.right, func);
+        const std::size_t jumpToEndIdx = func.instructions.size();
+        func.instructions.push_back(Instruction {
+            .code = OpCode::Jump,
+        });
+
+        const std::size_t falseBranchIdx = func.instructions.size();
+        func.instructions.push_back(Instruction {
+            .code = OpCode::PushBool,
+            .boolOperand = false,
+        });
+
+        const std::size_t endIdx = func.instructions.size();
+        // If left is false, skip right operand and push false.
+        func.instructions[jumpIfFalseIdx].targetOperand = falseBranchIdx;
+        // If left is true, right operand has produced final bool result.
+        func.instructions[jumpToEndIdx].targetOperand = endIdx;
+    }
+
+    void Lowerer::lowerLogicalOrExpression(const AST::BinaryExpression &expr, Function &func) {
+        // Short-circuit OR:
+        //
+        // left
+        // JumpIfFalse right_branch
+        // PushBool true
+        // Jump end
+        // right_branch
+        // right
+        // end:
+        lowerExpression(*expr.left, func);
+        const std::size_t jumpToRightIdx = func.instructions.size();
+        func.instructions.push_back(Instruction {
+            .code = OpCode::JumpIfFalse,
+        });
+        func.instructions.push_back(Instruction {
+            .code = OpCode::PushBool,
+            .boolOperand = true,
+        });
+
+        const std::size_t jumpToEndIdx = func.instructions.size();
+        func.instructions.push_back(Instruction {
+            .code = OpCode::Jump,
+        });
+
+        const std::size_t rightBranchIdx = func.instructions.size();
+        lowerExpression(*expr.right, func);
+        const std::size_t endIdx = func.instructions.size();
+        // If left is false, evaluate right operand.
+        func.instructions[jumpToRightIdx].targetOperand = rightBranchIdx;
+        // If left is true, PushBool true is the final result.
+        func.instructions[jumpToEndIdx].targetOperand = endIdx;
     }
 }

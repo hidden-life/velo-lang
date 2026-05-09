@@ -43,6 +43,7 @@ Implemented so far:
 - arithmetic operators: `+`, `-`, `*`, `/`, `%`
 - unary minus
 - grouped expressions with parentheses
+- short-circuit logical operators: `&&` and `||`
 - GoogleTest test setup
 
 ## Build
@@ -126,6 +127,7 @@ Program
 ./build/debug/apps/velo/velo ./examples/logical/main.velo
 ./build/debug/apps/velo/velo ./examples/typed_parameters/main.velo
 ./build/debug/apps/velo/velo ./examples/arithmetic/main.velo
+./build/debug/apps/velo/velo ./examples/short_circuit/main.velo
 ```
 
 ## Next milestone

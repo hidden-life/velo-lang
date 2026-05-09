@@ -239,8 +239,11 @@ Supported operators:
 - `||`
 - `!`
 
-Current limitation:
-- `&&` and `||` do not short-circuit yet
+`&&` and `||` use short-circuit evaluation:
+```velo
+false && explode() // explode is not called
+true || explode() // explode is not called
+```
 
 ## Typed parameters
 Function parameters preserve their declared type during semantic analysis.

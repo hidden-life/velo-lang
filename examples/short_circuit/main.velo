@@ -1,0 +1,22 @@
+module app;
+
+use std::console;
+
+fn explode(): bool {
+    return 1 / 0 == 0;
+}
+
+fn main(): int {
+    if (false && explode()) {
+        console::println("wrong");
+        return 0;
+    }
+
+    if (true || explode()) {
+        console::println("it works!");
+        return 0;
+    }
+
+    console::println("wrong");
+    return 0;
+}

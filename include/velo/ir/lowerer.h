@@ -18,6 +18,9 @@ namespace Velo::IR {
         void lowerExpression(const AST::Expression &expr, Function &func);
         [[nodiscard]] auto findLocalIndex(const std::string &name) const -> const std::size_t*;
 
+        void lowerLogicalAndExpression(const AST::BinaryExpression &expr, Function &func);
+        void lowerLogicalOrExpression(const AST::BinaryExpression &expr, Function &func);
+
         std::unordered_map<std::string, std::size_t> _locals {};
 
         struct LoopContext {

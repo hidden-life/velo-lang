@@ -123,6 +123,8 @@ The semantic analyzer validates logical expressions:
 - `||` requires `bool || bool`
 - all logical operators produce `bool`
 
+Short-circuit behavior is implemented in the IR lowerer, not in semantic analysis.
+
 ## Parameter type resolution
 Function parameters are stored in the semantic analyzer with their actual semantic type.
 

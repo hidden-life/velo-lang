@@ -474,3 +474,107 @@ fn main(): int {
 
     EXPECT_EQ(result.exitCode, 7);
 }
+
+TEST(DriverTest, ShortCircuitsLogicalAnd) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "short_circuit_and.velo",
+        R"(module app;
+fn explode(): bool {
+    return 1 / 0 == 0;
+}
+
+fn main(): int {
+    if (false && explode()) {
+        return 1;
+    }
+
+    return 0;
+}
+)"
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 0);
+}
+
+TEST(DriveTest, ShortCircuitsLogicalOr) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "short_circuit_or.velo",
+        R"(module app;
+fn explode(): bool {
+    return 1 / 0 == 0;
+}
+
+fn main(): int {
+    if (true || explode()) {
+        return 7;
+    }
+
+    return 0;
+}
+)"
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 7);
+}
+
+TEST(DriverTest, EvaluatesRightSideOfLogicalAndWhenLeftIsTrue) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "logical_and_right.velo",
+        R"(module app;
+fn yes(): bool {
+    return true;
+}
+
+fn main(): int {
+    if (true && yes()) {
+        return 3;
+    }
+
+    return 0;
+}
+)"
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 3);
+}
+
+TEST(DriverTest, EvaluatesRightSideOfLogicalOrWhenLeftIsFalse) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "logical_or_right.velo",
+        R"(module app;
+fn yes(): bool {
+    return true;
+}
+
+fn main(): int {
+    if (false || yes()) {
+        return 4;
+    }
+
+    return 0;
+}
+)"
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 4);
+}
