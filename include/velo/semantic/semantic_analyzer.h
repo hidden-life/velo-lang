@@ -58,6 +58,8 @@ namespace Velo::Semantic {
         void pushScope();
         void popScope();
 
+        [[nodiscard]] static auto builtinParameterAcceptsType(const std::string &expected, ExpressionType actual) -> bool;
+
         const AST::Program &_program;
         Diagnostic::DiagnosticEngine &_engine;
 

@@ -781,3 +781,24 @@ fn main(): int {
 
     EXPECT_EQ(result.exitCode, 5);
 }
+
+TEST(DriverTest, ReportsStringLengthArgumentTypeMismatch) {
+    Driver driver;
+
+    const auto result = driver.parseText(
+        "string_len_type_mismatch.velo",
+        R"(module app;
+use std::string as str;
+
+fn main(): int {
+    return str::len(123);
+}
+)"
+    );
+
+    ASSERT_FALSE(result.success);
+    ASSERT_FALSE(result.diagnostics.empty());
+
+    EXPECT_EQ(result.diagnostics.front().code(), "SEM033");
+    EXPECT_EQ(result.exitCode, 1);
+}

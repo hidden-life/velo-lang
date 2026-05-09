@@ -1193,3 +1193,56 @@ fn main(): int {
     ASSERT_TRUE(engine.hasErrors());
     EXPECT_EQ(engine.diagnostics().front().code(), "SEM010");
 }
+
+TEST(SemanticAnalyzerTest, ReportsStringLengthArgumentTypeMismatch) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+use std::string as str;
+
+fn main(): int {
+    return str::len(123);
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM033");
+}
+
+TEST(SemanticAnalyzerTest, AcceptsConsolePrintlnAnyArgumentType) {
+    DiagnosticEngine engine;
+
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::console;
+
+fn main(): int {
+    console::println(123);
+    console::println("hello");
+    console::println(true);
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}

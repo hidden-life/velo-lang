@@ -225,3 +225,13 @@ string::len(value) -> int
 
 The interpreter pushes builtin return values onto the operand stack after successful
 builtin execution.
+
+## Builtin parameter metadata
+Builtin functions declare parameter types.
+
+Examples:
+- `console::println(any): void`
+- `string::len(string): int`
+
+The runtime still validates builtin argument values defensively, but semantic
+analysis can now catch builtin argument type errors before execution.

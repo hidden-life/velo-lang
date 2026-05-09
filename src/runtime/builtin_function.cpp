@@ -2,8 +2,16 @@
 #include <utility>
 
 namespace Velo::Runtime {
-    BuiltinFunction::BuiltinFunction(std::string name, std::size_t arity, std::string returnType, BuiltinHandler handler) :
-        _name(std::move(name)), _arity(arity), _returnType(std::move(returnType)), _handler(std::move(handler)) {
+    BuiltinFunction::BuiltinFunction(
+        std::string name,
+        std::vector<std::string> parameterTypes,
+        std::string returnType,
+        BuiltinHandler handler
+    ) :
+        _name(std::move(name)),
+        _returnType(std::move(returnType)),
+        _handler(std::move(handler)),
+        _parameterTypes(std::move(parameterTypes)) {
     }
 
     auto BuiltinFunction::name() const -> const std::string& {
@@ -11,7 +19,7 @@ namespace Velo::Runtime {
     }
 
     auto BuiltinFunction::arity() const -> std::size_t {
-        return _arity;
+        return _parameterTypes.size();
     }
 
     auto BuiltinFunction::call(const std::vector<Value> &arguments) const -> ExecutionResult {
@@ -38,5 +46,9 @@ namespace Velo::Runtime {
 
     auto BuiltinFunction::returnType() const -> const std::string& {
         return _returnType;
+    }
+
+    auto BuiltinFunction::parameterTypes() const -> const std::vector<std::string>& {
+        return _parameterTypes;
     }
 }

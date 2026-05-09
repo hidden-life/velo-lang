@@ -16,6 +16,8 @@ TEST(RuntimeTest, BuildsModulesFromBuiltins) {
     EXPECT_EQ(println->name, "println");
     EXPECT_EQ(println->arity, 1U);
     EXPECT_EQ(println->returnType, "void");
+    ASSERT_EQ(println->parameterTypes.size(), 1U);
+    EXPECT_EQ(println->parameterTypes[0], "any");
 
     const auto *stringModule = modules.find("string");
     ASSERT_NE(stringModule, nullptr);
@@ -26,4 +28,6 @@ TEST(RuntimeTest, BuildsModulesFromBuiltins) {
     EXPECT_EQ(len->name, "len");
     EXPECT_EQ(len->arity, 1U);
     EXPECT_EQ(len->returnType, "int");
+    ASSERT_EQ(len->parameterTypes.size(), 1U);
+    EXPECT_EQ(len->parameterTypes[0], "string");
 }

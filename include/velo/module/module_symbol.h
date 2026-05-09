@@ -4,19 +4,29 @@
 #include <string>
 #include <unordered_map>
 #include <cstddef>
+#include <vector>
 
 namespace Velo::Module {
     struct FunctionSymbol final {
         std::string name;
         std::size_t arity {0};
         std::string returnType;
+
+        // Declared parameter types used by semantic analysis.
+        // Supported values for now: "int"m "string", "bool", "any"
+        std::vector<std::string> parameterTypes {};
     };
 
     class ModuleSymbol final {
     public:
         explicit ModuleSymbol(std::string name);
         // Adds a module function with its expected argument count.
-        void addFunction(std::string funcName, std::size_t arity, std::string returnType);
+        void addFunction(
+            std::string funcName,
+            std::size_t arity,
+            std::string returnType,
+            std::vector<std::string> parameterTypes
+            );
 
         [[nodiscard]] auto findFunction(const std::string &name) const -> const FunctionSymbol*;
         [[nodiscard]] auto hasFunction(const std::string &name) const -> bool;

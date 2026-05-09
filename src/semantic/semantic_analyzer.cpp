@@ -637,6 +637,26 @@ namespace Velo::Semantic {
         }
 
         const auto *func = module->findFunction(funcName);
+        for (std::size_t idx = 0; idx < callExpr.arguments.size(); ++idx) {
+            if (idx >= func->parameterTypes.size()) {
+                break;
+            }
+
+            const std::string &expectedTypeName = func->parameterTypes[idx];
+            if (expectedTypeName == "any") {
+                continue;
+            }
+
+            const auto actualType = analyzeCheckedExpressionType(*callExpr.arguments[idx]);
+            if (!builtinParameterAcceptsType(expectedTypeName, actualType)) {
+                _engine.error(
+                    "SEM033",
+                    "Builtin argument type mismatch.",
+                    callExpr.arguments[idx]->range
+                );
+            }
+        }
+
         if (func == nullptr) {
             return ExpressionType::Unknown;
         }
@@ -774,5 +794,29 @@ namespace Velo::Semantic {
         }
 
         return analyzeExpressionType(expression);
+    }
+
+    auto SemanticAnalyzer::builtinParameterAcceptsType(const std::string &expected, ExpressionType actual) -> bool {
+        if (expected == "any") {
+            return true;
+        }
+
+        if (actual == ExpressionType::Unknown) {
+            return true;
+        }
+
+        if (expected == "int") {
+            return actual == ExpressionType::Int;
+        }
+
+        if (expected == "string") {
+            return actual == ExpressionType::String;
+        }
+
+        if (expected == "bool") {
+            return actual == ExpressionType::Bool;
+        }
+
+        return false;
     }
 }

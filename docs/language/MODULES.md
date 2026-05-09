@@ -32,6 +32,6 @@ Prints a runtime value.
 ```velo
 use std::string as str;
 
-str::len("hello");
+str::len("hello"); // int
 ```
-Returns the length of a string as `int`.
+`str::len` expects a `string` argument.

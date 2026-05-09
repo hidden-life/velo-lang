@@ -175,3 +175,19 @@ fn main(): int {
 Current limitation:
 - builtin parameter types are not validated by semantic analysis yet.
 - invalid builtin argument value types are reported by the runtime.
+
+## Builtin argument type validation
+The semantic analyzer validates builtin call arguments using metadata mirrored
+from runtime builtins into `ModuleRegistry`.
+
+Example:
+```velo
+use std::string as str;
+
+fn main(): int {
+    return str::len(123); // ❌ semantic error
+}
+```
+
+`console::println` uses the special `any` parameter type and accepts all current
+runtime value types.

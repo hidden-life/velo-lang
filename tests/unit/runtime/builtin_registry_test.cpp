@@ -13,7 +13,7 @@ TEST(BuiltinRegistryTest, RegistersAndFindsFunction) {
     registry.registerFunc(
         BuiltinFunction {
             "test::echo",
-            1U,
+            {"any"},
             "void",
             [](const std::vector<Value>&) -> ExecutionResult {
                 return {};
@@ -28,6 +28,8 @@ TEST(BuiltinRegistryTest, RegistersAndFindsFunction) {
     EXPECT_EQ(func->name(), "test::echo");
     EXPECT_EQ(func->arity(), 1U);
     EXPECT_EQ(func->returnType(), "void");
+    ASSERT_EQ(func->parameterTypes().size(), 1U);
+    EXPECT_EQ(func->parameterTypes()[0], "any");
 }
 
 TEST(BuiltinRegistryTest, ReturnsNullForUnknownFunction) {

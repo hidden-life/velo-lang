@@ -50,12 +50,12 @@ namespace Velo::Runtime {
             auto *module = _modules.findMutable(moduleName);
             if (module == nullptr) {
                 Module::ModuleSymbol newModule(moduleName);
-                newModule.addFunction(functionName, func.arity(), func.returnType());
+                newModule.addFunction(functionName, func.arity(), func.returnType(), func.parameterTypes());
                 _modules.registerModule(std::move(newModule));
                 continue;
             }
 
-            module->addFunction(functionName, func.arity(), func.returnType());
+            module->addFunction(functionName, func.arity(), func.returnType(), func.parameterTypes());
         }
     }
 
@@ -63,7 +63,7 @@ namespace Velo::Runtime {
         _registry.registerFunc(
             BuiltinFunction {
                 "console::println",
-                1U,
+                {"any"},
                 "void",
                 [](const std::vector<Value> &args) -> ExecutionResult {
                     if (args.size() != 1U) {
@@ -86,7 +86,7 @@ namespace Velo::Runtime {
         _registry.registerFunc(
             BuiltinFunction {
                 "string::len",
-                1U,
+                {"string"},
                 "int",
                 [](const std::vector<Value> &args) -> ExecutionResult {
                     if (args.size() != 1U) {
