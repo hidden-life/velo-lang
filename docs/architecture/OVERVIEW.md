@@ -32,12 +32,14 @@ The driver supports multiple pipeline modes:
 - `Run`: lexer -> parser -> semantic -> IR lowerer -> interpreter
 - `Check`: lexer -> parser -> semantic
 - `Ast`: lexer -> parser -> semantic -> AST printer
+- `Ir`: lexer -> parser -> semantic -> IR lowerer -> IR printer
 
 The CLI maps these modes to:
 ```bash
 velo run file.velo
 velo check file.velo
 velo ast file.velo
+velo ir file.velo
 ```
 
 ## Notes

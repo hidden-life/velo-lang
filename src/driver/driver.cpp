@@ -5,6 +5,7 @@
 #include "velo/parser/parser.h"
 #include "velo/semantic/semantic_analyzer.h"
 #include "velo/ir/lowerer.h"
+#include "velo/ir/ir_printer.h"
 #include "velo/interpreter/interpreter.h"
 
 namespace Velo::Driver {
@@ -72,6 +73,15 @@ namespace Velo::Driver {
 
         IR::Lowerer lowerer;
         const auto module = lowerer.lower(*program);
+
+        if (mode == DriverMode::Ir) {
+            IR::IRPrinter printer;
+            result.irText = printer.print(module);
+            result.success = true;
+            result.exitCode = 0;
+
+            return result;
+        }
 
         Interpreter::Interpreter interpreter(runtime);
         const auto execResult = interpreter.execute(module);

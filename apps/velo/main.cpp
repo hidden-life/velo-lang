@@ -41,6 +41,7 @@ namespace {
         std::cerr << "    velo run <source-file.velo>" << std::endl;
         std::cerr << "    velo check <source-file.velo>" << std::endl;
         std::cerr << "    velo ast <source-file.velo>" << std::endl;
+        std::cerr << "    velo ir <source-file.velo>" << std::endl;
         std::cerr << "    velo --version" << std::endl;
         std::cerr << "    velo --help" << std::endl;
     }
@@ -54,10 +55,14 @@ namespace {
             return Velo::Driver::DriverMode::Ast;
         }
 
+        if (command == "ir") {
+            return Velo::Driver::DriverMode::Ir;
+        }
+
         return Velo::Driver::DriverMode::Run;
     }
 
-    auto printResult(const Velo::Driver::DriverResult &result, bool printAst) -> int {
+    auto printResult(const Velo::Driver::DriverResult &result, bool printAst, bool printIr) -> int {
         if (!result.error.empty()) {
             std::cerr << result.error << std::endl;
         }
@@ -72,6 +77,10 @@ namespace {
 
         if (printAst && !result.astText.empty()) {
             std::cout << result.astText;
+        }
+
+        if (printIr && !result.irText.empty()) {
+            std::cout << result.irText;
         }
 
         return result.exitCode;
@@ -99,14 +108,14 @@ int main(int argc, char **argv) {
         Velo::Driver::Driver driver;
         const auto result = driver.parseFile(std::string(argument), Velo::Driver::DriverMode::Run);
 
-        return printResult(result, false);
+        return printResult(result, false, false);
     }
 
     if (argc == 3) {
         const std::string_view command = argv[1];
         const std::string sourcePath = argv[2];
 
-        if (command != "run" && command != "check" && command != "ast") {
+        if (command != "run" && command != "check" && command != "ast" && command != "ir") {
             printUsage();
             return EXIT_FAILURE;
         }
@@ -116,8 +125,9 @@ int main(int argc, char **argv) {
         Velo::Driver::Driver driver;
         const auto result = driver.parseFile(sourcePath, mode);
         const bool shouldPrintAst = (mode == Velo::Driver::DriverMode::Ast);
+        const bool shouldPrintIr = (mode == Velo::Driver::DriverMode::Ir);
 
-        return printResult(result, shouldPrintAst);
+        return printResult(result, shouldPrintAst, shouldPrintIr);
     }
 
     printUsage();

@@ -44,6 +44,7 @@ Implemented so far:
 - unary minus
 - grouped expressions with parentheses
 - short-circuit logical operators: `&&` and `||`
+- IR dump mode via `velo ir`
 - GoogleTest test setup
 
 ## Build
@@ -85,6 +86,11 @@ is equivalent to:
 ```bash
 velo run app.velo
 ```
+
+```bash
+velo ir app.velo
+```
+Runs lexer, parser, semantic analysis, and IR lowering, then prints the generated IR without executing the program.
 
 ## Current milestone
 The project can now:

@@ -195,3 +195,17 @@ Division and modulo by zero are reported as runtime errors.
 Runtime execution happens only in `run` mode.
 
 `check` and `ast` do not execute the program, so runtime errors such as division by zero are not triggered in those modes.
+
+## IR dump mode
+The CLI supports an IR dump mode:
+```bash
+velo ir file.velo
+```
+This mode lowers the validated AST into IR and prints it without executing
+the program.
+
+This is useful for debugging:
+- expression lowering
+- jumps
+- function calls
+- local loads/stores

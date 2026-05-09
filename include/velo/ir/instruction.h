@@ -2,6 +2,7 @@
 #define INC_VELO_IR_INSTRUCTION_H
 
 #include <string>
+#include <cstddef>
 
 namespace Velo::IR {
     // Instruction kind for the minimal IR.

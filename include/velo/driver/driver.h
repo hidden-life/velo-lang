@@ -12,13 +12,18 @@ namespace Velo::Driver {
         Run,
         Check,
         Ast,
+        Ir,
     };
 
     struct DriverResult final {
         bool success {false};
+
         std::string astText {};
+        std::string irText {};
+
         std::vector<Diagnostic::Diagnostic> diagnostics {};
         std::string error {};
+
         // Process exit code produced by the interpreter
         int exitCode {0};
     };

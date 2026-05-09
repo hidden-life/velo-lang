@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <string>
 #include "velo/driver/driver.h"
 
 using Velo::Driver::Driver;
@@ -654,4 +655,51 @@ fn main(): int {
     ASSERT_TRUE(result.error.empty());
 
     EXPECT_EQ(result.exitCode, 42);
+}
+
+TEST(DriverTest, IrModeReturnsIrTextWithoutExecutingProgram) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "ir_mode.velo",
+        R"(module app;
+fn main(): int {
+    return 1 / 0;
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 0);
+    EXPECT_TRUE(result.astText.empty());
+    EXPECT_FALSE(result.irText.empty());
+}
+
+TEST(DriverTest, IrModePrintsExpectedInstructions) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "ir_print.velo",
+        R"(module app;
+fn main(): int {
+    return (1 + 2) * 3;
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.irText.find("IRModule"), std::string::npos);
+    EXPECT_NE(result.irText.find("Function main"), std::string::npos);
+    EXPECT_NE(result.irText.find("PushInt 1"), std::string::npos);
+    EXPECT_NE(result.irText.find("PushInt 2"), std::string::npos);
+    EXPECT_NE(result.irText.find("AddInt"), std::string::npos);
+    EXPECT_NE(result.irText.find("PushInt 3"), std::string::npos);
+    EXPECT_NE(result.irText.find("MulInt"), std::string::npos);
+    EXPECT_NE(result.irText.find("Return"), std::string::npos);
 }

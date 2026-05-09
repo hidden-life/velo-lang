@@ -119,6 +119,7 @@ target_link_libraries(velo_semantic
 
 add_library(velo_ir
         ir/lowerer.cpp
+        ir/ir_printer.cpp
 )
 
 add_library(Velo::IR ALIAS velo_ir)
