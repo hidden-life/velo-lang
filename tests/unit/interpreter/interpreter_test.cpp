@@ -555,3 +555,87 @@ TEST(InterpreterTest, ExecutesLogicalOperators) {
     EXPECT_EQ(result.exitCode, 1);
     EXPECT_TRUE(result.error.empty());
 }
+
+TEST(InterpreterTest, ExecutesIntegerArithmeticOperators) {
+    Module module;
+    Function mainFunction;
+    mainFunction.name = "main";
+    // (1 + 2) * 3 - 4 / 2 = 7
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .intOperand = 1
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .intOperand = 2
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::AddInt
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .intOperand = 3
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::MulInt
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .intOperand = 4
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .intOperand = 2
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::DivInt
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::SubInt
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::Return
+    });
+
+    module.functions.push_back(std::move(mainFunction));
+
+    Runtime runtime;
+    Interpreter interpreter(runtime);
+
+    const auto result = interpreter.execute(module);
+
+    EXPECT_TRUE(result.success);
+    EXPECT_EQ(result.exitCode, 7);
+    EXPECT_TRUE(result.error.empty());
+}
+
+TEST(InterpreterTest, ReportsDivisionByZero) {
+    Module module;
+    Function mainFunction;
+    mainFunction.name = "main";
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .intOperand = 10
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .intOperand = 0
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::DivInt
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::Return
+    });
+
+    module.functions.push_back(std::move(mainFunction));
+
+    Runtime runtime;
+    Interpreter interpreter(runtime);
+
+    const auto result = interpreter.execute(module);
+
+    EXPECT_FALSE(result.success);
+    EXPECT_EQ(result.exitCode, 1);
+    EXPECT_FALSE(result.error.empty());
+}

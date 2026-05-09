@@ -456,3 +456,21 @@ TEST(DriverTest, ReturnsExitCodeOneWhenFileCannotBeLoaded) {
     ASSERT_FALSE(result.error.empty());
     EXPECT_EQ(result.exitCode, 1);
 }
+
+TEST(DriverTest, ExecutesArithmeticExpressionProgram) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "arithmetic.velo",
+        R"(module app;
+fn main(): int {
+    return (1 + 2) * 3 - 4 / 2;
+}
+)"
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 7);
+}

@@ -37,6 +37,22 @@ namespace Velo::Lexer {
                 advance();
                 return makeToken(TokenKind::Plus, "+", beginOffset, beginOffset);
 
+            case '-':
+                advance();
+                return makeToken(TokenKind::Minus, "-", beginOffset, beginOffset);
+
+            case '*':
+                advance();
+                return makeToken(TokenKind::Star, "*", beginOffset, beginOffset);
+
+            case '/':
+                advance();
+                return makeToken(TokenKind::Slash, "/", beginOffset, beginOffset);
+
+            case '%':
+                advance();
+                return makeToken(TokenKind::Percent, "%", beginOffset, beginOffset);
+
             case '(':
                 advance();
                 return makeToken(TokenKind::OpenParen, "(", beginOffset, beginOffset);

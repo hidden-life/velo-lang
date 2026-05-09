@@ -30,18 +30,25 @@ namespace Velo::AST {
 
     enum class BinaryOperator {
         Add,
+        Subtract,
+        Multiply,
+        Divide,
+        Modulo,
+
         Equal,
         NotEqual,
         Less,
         Greater,
         LessEqual,
         GreaterEqual,
+
         LogicalAnd,
         LogicalOr,
     };
 
     enum class UnaryOperator {
         Not,
+        Negate,
     };
 
     struct Expression {

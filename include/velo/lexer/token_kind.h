@@ -31,7 +31,11 @@ namespace Velo::Lexer {
         OpenBrace, // {
         CloseBrace, // }
 
-        Plus,
+        Plus, // +
+        Minus, // -
+        Star, // *
+        Slash, // /
+        Percent, // %
         Equal,
         // comparison
         EqualEqual,

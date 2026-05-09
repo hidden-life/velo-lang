@@ -269,3 +269,28 @@ TEST(LexerTest, LexesLogicalOperators) {
     EXPECT_EQ(kinds, expected);
     EXPECT_FALSE(engine.hasErrors());
 }
+
+TEST(LexerTest, LexesArithmeticOperators) {
+    const SourceFile file("arithmetic.velo", "a - b * c / d % e");
+    DiagnosticEngine engine;
+    Lexer lexer(file, engine);
+
+    const auto tokens = lexer.lexAll();
+    const auto kinds = collectKinds(tokens);
+
+    const std::vector<TokenKind> expected {
+        TokenKind::Identifier,
+        TokenKind::Minus,
+        TokenKind::Identifier,
+        TokenKind::Star,
+        TokenKind::Identifier,
+        TokenKind::Slash,
+        TokenKind::Identifier,
+        TokenKind::Percent,
+        TokenKind::Identifier,
+        TokenKind::EndOfFile,
+    };
+
+    EXPECT_EQ(kinds, expected);
+    EXPECT_FALSE(engine.hasErrors());
+}

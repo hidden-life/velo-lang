@@ -205,6 +205,18 @@ namespace Velo::AST {
                         case BinaryOperator::LogicalOr:
                             stream << "||";
                             break;
+                        case BinaryOperator::Subtract:
+                            stream << "-";
+                            break;
+                        case BinaryOperator::Multiply:
+                            stream << "*";
+                            break;
+                        case BinaryOperator::Divide:
+                            stream << "/";
+                            break;
+                        case BinaryOperator::Modulo:
+                            stream << "%";
+                            break;
                     }
 
                     stream << "\n";
@@ -222,6 +234,9 @@ namespace Velo::AST {
                     switch (unaryExpression.op) {
                         case UnaryOperator::Not:
                             stream << "!";
+                            break;
+                        case UnaryOperator::Negate:
+                            stream << "-";
                             break;
                     }
 

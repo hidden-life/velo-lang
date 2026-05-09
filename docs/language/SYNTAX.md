@@ -284,6 +284,29 @@ fn main(): int {
 }
 ```
 
+## Arithmetic
+```velo
+fn main(): int {
+    return (1 + 2) * 3 - 4 / 2;
+}
+```
+
+Supported integer operators:
+- `+`
+- `-`
+- `*`
+- `/`
+- `%`
+- unary `-`
+
+Grouped expressions are supported:
+```velo
+(1 + 2) * 3
+```
+
+Current limitation:
+- arithmetic currently supports `int` only
+
 ## Current limitations
 - parameters are immutable
 - there are no local variable declarations yet

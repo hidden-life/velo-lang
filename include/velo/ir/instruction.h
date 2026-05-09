@@ -16,6 +16,12 @@ namespace Velo::IR {
         Return,
 
         AddInt,
+        SubInt,
+        MulInt,
+        DivInt,
+        ModInt,
+        NegInt,
+
         CompareEqualInt,
         CompareNotEqualInt,
         CompareLessInt,

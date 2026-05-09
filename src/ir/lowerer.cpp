@@ -224,6 +224,26 @@ namespace Velo::IR {
                             .code = OpCode::AddInt,
                         });
                         return;
+                    case BinaryOperator::Subtract:
+                        func.instructions.push_back(Instruction {
+                            .code = OpCode::SubInt,
+                        });
+                        return;
+                    case BinaryOperator::Multiply:
+                        func.instructions.push_back(Instruction {
+                            .code = OpCode::MulInt,
+                        });
+                        return;
+                    case BinaryOperator::Divide:
+                        func.instructions.push_back(Instruction {
+                            .code = OpCode::DivInt,
+                        });
+                        return;
+                    case BinaryOperator::Modulo:
+                        func.instructions.push_back(Instruction {
+                            .code = OpCode::ModInt,
+                        });
+                        return;
                     case BinaryOperator::Equal:
                         func.instructions.push_back(Instruction {
                             .code = OpCode::CompareEqualInt,
@@ -311,6 +331,11 @@ namespace Velo::IR {
                     case UnaryOperator::Not:
                         func.instructions.push_back(Instruction {
                             .code = OpCode::LogicalNot,
+                        });
+                        return;
+                    case UnaryOperator::Negate:
+                        func.instructions.push_back(Instruction {
+                            .code = OpCode::NegInt,
                         });
                         return;
                 }

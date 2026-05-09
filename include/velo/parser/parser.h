@@ -40,6 +40,7 @@ namespace Velo::Parser {
         [[nodiscard]] auto parseLogicalOr() -> std::unique_ptr<AST::Expression>;
         [[nodiscard]] auto parseLogicalAnd() -> std::unique_ptr<AST::Expression>;
         [[nodiscard]] auto parseUnary() -> std::unique_ptr<AST::Expression>;
+        [[nodiscard]] auto parseFactor() -> std::unique_ptr<AST::Expression>;
 
         [[nodiscard]] auto makeRangeFromTokens(
             const Lexer::Token &begin, const Lexer::Token &end

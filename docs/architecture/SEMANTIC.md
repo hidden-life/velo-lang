@@ -149,3 +149,9 @@ Rules:
 - unknown declared types produce `SEM030`
 - `void` is allowed only as a function return type
 - `void` parameters and local variables produce `SEM031`
+
+## Arithmetic validation
+The semantic analyzer validates arithmetic expressions:
+- binary arithmetic operators require `int` operands
+- unary `-` requires an `int` operand
+- arithmetic expressions produce `int`

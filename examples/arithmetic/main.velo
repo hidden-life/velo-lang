@@ -1,0 +1,9 @@
+module app;
+
+use std::console;
+
+fn main(): int {
+    let result: int = (1 + 2) * 3 - 4 / 2;
+    console::println(result);
+    return 0;
+}

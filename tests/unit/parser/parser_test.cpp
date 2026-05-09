@@ -395,3 +395,67 @@ fn main(): int {
     ASSERT_NE(cond, nullptr);
     EXPECT_EQ(cond->op, Velo::AST::BinaryOperator::LogicalAnd);
 }
+
+TEST(ParserTest, ParsesArithmeticPrecedence) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+fn main(): int {
+    return 1 + 2 * 3;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    const auto &mainFunc = program->functions[0];
+    ASSERT_EQ(mainFunc.statements.size(), 1U);
+    const auto *returnStmt = dynamic_cast<ReturnStatement*>(mainFunc.statements[0].get());
+    ASSERT_NE(returnStmt, nullptr);
+    ASSERT_EQ(returnStmt->expression->kind, ExpressionKind::Binary);
+    const auto *binary = dynamic_cast<Velo::AST::BinaryExpression*>(returnStmt->expression.get());
+    ASSERT_NE(binary, nullptr);
+
+    EXPECT_EQ(binary->op, Velo::AST::BinaryOperator::Add);
+    ASSERT_EQ(binary->right->kind, ExpressionKind::Binary);
+
+    const auto *right = dynamic_cast<Velo::AST::BinaryExpression*>(binary->right.get());
+    ASSERT_NE(right, nullptr);
+    EXPECT_EQ(right->op, Velo::AST::BinaryOperator::Multiply);
+}
+
+TEST(ParserTest, ParsesGroupedArithmeticExpression) {
+    DiagnosticEngine engine;
+
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    return (1 + 2) * 3;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    const auto& mainFunction = program->functions[0];
+    ASSERT_EQ(mainFunction.statements.size(), 1U);
+
+    const auto* returnStatement = dynamic_cast<ReturnStatement*>(mainFunction.statements[0].get());
+    ASSERT_NE(returnStatement, nullptr);
+
+    ASSERT_EQ(returnStatement->expression->kind, ExpressionKind::Binary);
+
+    const auto* binary = dynamic_cast<Velo::AST::BinaryExpression*>(returnStatement->expression.get());
+    ASSERT_NE(binary, nullptr);
+
+    EXPECT_EQ(binary->op, Velo::AST::BinaryOperator::Multiply);
+    ASSERT_EQ(binary->left->kind, ExpressionKind::Binary);
+
+    const auto* left = dynamic_cast<Velo::AST::BinaryExpression*>(binary->left.get());
+    ASSERT_NE(left, nullptr);
+    EXPECT_EQ(left->op, Velo::AST::BinaryOperator::Add);
+}

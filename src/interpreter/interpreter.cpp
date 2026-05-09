@@ -65,6 +65,58 @@ namespace {
 
         return {};
     }
+
+    template <typename Operation>
+    auto evaluateBinaryInt(std::vector<Velo::Runtime::Value> &stack, Operation op) -> Velo::Runtime::ExecutionResult {
+        if (stack.size() < 2U) {
+            return Velo::Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "Integer operation requires two values on the stack."
+            };
+        }
+
+        const auto right = stack.back();
+        stack.pop_back();
+
+        const auto left = stack.back();
+        stack.pop_back();
+
+        if (!std::holds_alternative<int>(left) || !std::holds_alternative<int>(right)) {
+            return Velo::Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "Integer operation expects integer operands."
+            };
+        }
+
+        return op(std::get<int>(left), std::get<int>(right), stack);
+    }
+
+    auto evaluateUnaryIntNegation(std::vector<Velo::Runtime::Value> &stack) -> Velo::Runtime::ExecutionResult {
+        if (stack.empty()) {
+            return Velo::Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "NegInt requires one value on the stack."
+            };
+        }
+
+        const auto value = stack.back();
+        stack.pop_back();
+
+        if (!std::holds_alternative<int>(value)) {
+            return Velo::Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "NegInt expects integer operand."
+            };
+        }
+
+        stack.emplace_back(-std::get<int>(value));
+
+        return {};
+    }
 }
 
 namespace Velo::Interpreter {
@@ -232,30 +284,68 @@ namespace Velo::Interpreter {
             case OpCode::CompareGreaterEqualInt:
                 return compareIntegerValues(_stack, [](int left, int right) { return left >= right; });
             case OpCode::AddInt: {
-                if (_stack.size() < 2U) {
-                    return Runtime::ExecutionResult {
-                        .success = false,
-                        .exitCode = 1,
-                        .error = "Not enough values on stack for AddInt."
-                    };
-                }
+                return evaluateBinaryInt(
+                    _stack,
+                        [](int left, int right, std::vector<Runtime::Value> &stack) {
+                            stack.emplace_back(left + right);
+                            return Runtime::ExecutionResult {};
+                        }
+                    );
+            }
+            case OpCode::SubInt: {
+                return evaluateBinaryInt(
+                    _stack,
+                    [](int left, int right, std::vector<Runtime::Value> &stack) {
+                        stack.emplace_back(left - right);
+                        return Runtime::ExecutionResult {};
+                    }
+                );
+            }
+            case OpCode::MulInt: {
+                return evaluateBinaryInt(
+                    _stack,
+                    [](int left, int right, std::vector<Runtime::Value> &stack) {
+                        stack.emplace_back(left * right);
+                        return Runtime::ExecutionResult {};
+                    }
+                );
+            }
+            case OpCode::DivInt: {
+                return evaluateBinaryInt(
+                    _stack,
+                    [](int left, int right, std::vector<Runtime::Value> &stack) {
+                        if (right == 0) {
+                            return Runtime::ExecutionResult {
+                                .success = false,
+                                .exitCode = 1,
+                                .error = "Division by zero."
+                            };
+                        }
 
-                const auto right = _stack.back();
-                _stack.pop_back();
-                const auto left = _stack.back();
-                _stack.pop_back();
+                        stack.emplace_back(left / right);
+                        return Runtime::ExecutionResult {};
+                    }
+                );
+            }
+            case OpCode::ModInt: {
+                return evaluateBinaryInt(
+                    _stack,
+                    [](int left, int right, std::vector<Runtime::Value> &stack) {
+                        if (right == 0) {
+                            return Runtime::ExecutionResult {
+                                .success = false,
+                                .exitCode = 1,
+                                .error = "Modulo by zero."
+                            };
+                        }
 
-                if (!std::holds_alternative<int>(left) || !std::holds_alternative<int>(right)) {
-                    return Runtime::ExecutionResult {
-                        .success = false,
-                        .exitCode = 1,
-                        .error = "AddInt expects integer operands."
-                    };
-                }
-
-                _stack.emplace_back(std::get<int>(left) + std::get<int>(right));
-
-                return {};
+                        stack.emplace_back(left % right);
+                        return Runtime::ExecutionResult {};
+                    }
+                );
+            }
+            case OpCode::NegInt: {
+                return evaluateUnaryIntNegation(_stack);
             }
             case OpCode::LogicalNot: {
                 if (_stack.empty()) {

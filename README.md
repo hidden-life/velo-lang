@@ -40,6 +40,9 @@ Implemented so far:
 - unknown type diagnostics
 - `void` is restricted to function return types
 - driver exposes interpreter exit code through `DriverResult.exitCode`
+- arithmetic operators: `+`, `-`, `*`, `/`, `%`
+- unary minus
+- grouped expressions with parentheses
 - GoogleTest test setup
 
 ## Build
@@ -122,6 +125,7 @@ Program
 ./build/debug/apps/velo/velo ./examples/break_continue/main.velo
 ./build/debug/apps/velo/velo ./examples/logical/main.velo
 ./build/debug/apps/velo/velo ./examples/typed_parameters/main.velo
+./build/debug/apps/velo/velo ./examples/arithmetic/main.velo
 ```
 
 ## Next milestone

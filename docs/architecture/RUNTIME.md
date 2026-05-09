@@ -159,3 +159,14 @@ The interpreter returns an `ExecutionResult` with:
 The driver forwards the interpreter exit code through `DriverResult.exitCode`.
 
 This allows integration tests to validate actual execution results, not only pipeline success.
+
+## Integer arithmetic instructions
+The VM supports integer arithmetic instructions:
+- `AddInt`
+- `SubInt`
+- `MulInt`
+- `DivInt`
+- `ModInt`
+- `NegInt`
+
+Division and modulo by zero are reported as runtime errors.

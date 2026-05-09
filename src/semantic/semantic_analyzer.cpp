@@ -501,14 +501,19 @@ namespace Velo::Semantic {
                 const auto left = analyzeExpressionType(*binaryExpr.left);
                 const auto right = analyzeExpressionType(*binaryExpr.right);
 
-                if (binaryExpr.op == BinaryOperator::Add) {
+                if (binaryExpr.op == BinaryOperator::Add ||
+                    binaryExpr.op == BinaryOperator::Subtract ||
+                    binaryExpr.op == BinaryOperator::Multiply ||
+                    binaryExpr.op == BinaryOperator::Divide ||
+                    binaryExpr.op == BinaryOperator::Modulo
+                ) {
                     if (left == ExpressionType::Int && right == ExpressionType::Int) {
                         return ExpressionType::Int;
                     }
 
                     _engine.error(
                         "SEM013",
-                        "Operator '+' requires integer operands.",
+                        "Arithmetic operators require integer operands.",
                         binaryExpr.range
                     );
 
@@ -556,18 +561,34 @@ namespace Velo::Semantic {
             case ExpressionKind::Unary: {
                 const auto &unaryExpr = static_cast<const UnaryExpression&>(expression);
                 const auto operandType = analyzeExpressionType(*unaryExpr.operand);
-                if (unaryExpr.op == UnaryOperator::Not) {
-                    if (operandType == ExpressionType::Bool) {
-                        return ExpressionType::Bool;
+                switch (unaryExpr.op) {
+                    case UnaryOperator::Not: {
+                        if (operandType == ExpressionType::Bool) {
+                            return ExpressionType::Bool;
+                        }
+
+                        _engine.error(
+                            "SEM028",
+                            "Operator '!' requires bool operand.",
+                            unaryExpr.range
+                        );
+
+                        return ExpressionType::Unknown;
                     }
 
-                    _engine.error(
-                        "SEM028",
-                        "Operator '!' requires bool operand.",
-                        unaryExpr.range
-                    );
+                    case UnaryOperator::Negate: {
+                        if (operandType == ExpressionType::Int) {
+                            return ExpressionType::Int;
+                        }
 
-                    return ExpressionType::Unknown;
+                        _engine.error(
+                            "SEM032",
+                            "Unary '-' requires int operand.",
+                            unaryExpr.range
+                        );
+
+                        return ExpressionType::Unknown;
+                    }
                 }
             }
         }

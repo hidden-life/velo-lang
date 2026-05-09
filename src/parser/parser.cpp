@@ -559,6 +559,19 @@ namespace Velo::Parser {
             return parseCallExpressionOrName();
         }
 
+        if (match(TokenKind::OpenParen)) {
+            auto expr = parseExpression();
+            if (expr == nullptr) {
+                return nullptr;
+            }
+
+            if (consume(TokenKind::CloseParen, "PAR090", "Expected ')' after grouped expression.") == nullptr) {
+                return nullptr;
+            }
+
+            return expr;
+        }
+
         reportCurrent("PAR018", "Expected expression.");
 
         return nullptr;
@@ -733,21 +746,25 @@ namespace Velo::Parser {
     }
 
     auto Parser::parseAddition() -> std::unique_ptr<AST::Expression> {
-        auto left = parseUnary();
+        auto left = parseFactor();
         if (left == nullptr) {
             return nullptr;
         }
 
-        while (match(TokenKind::Plus)) {
-            auto right = parseUnary();
+        while (match(TokenKind::Plus) || match(TokenKind::Minus)) {
+            const Token &operatorToken = previous();
+            auto right = parseFactor();
             if (right == nullptr) {
                 return nullptr;
             }
 
             const auto range = Source::SourceRange(left->range.begin(), right->range.end());
+            const auto binaryOperator = operatorToken.kind() == TokenKind::Plus ?
+                AST::BinaryOperator::Add :
+                AST::BinaryOperator::Subtract;
             left = std::make_unique<AST::BinaryExpression>(
                 std::move(left),
-                AST::BinaryOperator::Add,
+                binaryOperator,
                 std::move(right),
                 range
             );
@@ -805,7 +822,7 @@ namespace Velo::Parser {
     }
 
     auto Parser::parseUnary() -> std::unique_ptr<AST::Expression> {
-        if (match(TokenKind::Bang)) {
+        if (match(TokenKind::Bang) || match(TokenKind::Minus)) {
             const Token &operatorToken = previous();
             auto operand = parseUnary();
             if (operand == nullptr) {
@@ -813,14 +830,62 @@ namespace Velo::Parser {
             }
 
             const auto range = Source::SourceRange(operatorToken.range().begin(), operand->range.end());
+            const auto unaryOperator = operatorToken.kind() == TokenKind::Bang ?
+                AST::UnaryOperator::Not :
+                AST::UnaryOperator::Negate;
 
             return std::make_unique<AST::UnaryExpression>(
-                AST::UnaryOperator::Not,
+                unaryOperator,
                 std::move(operand),
                 range
             );
         }
 
         return parsePrimaryExpression();
+    }
+
+    auto Parser::parseFactor() -> std::unique_ptr<AST::Expression> {
+        auto left = parseUnary();
+        if (left == nullptr) {
+            return nullptr;
+        }
+
+        while (
+            match(TokenKind::Star) || match(TokenKind::Slash) || match(TokenKind::Percent)
+        ) {
+            const Token &operatorToken = previous();
+            auto right = parseUnary();
+            if (right == nullptr) {
+                return nullptr;
+            }
+
+            AST::BinaryOperator binaryOperator;
+            switch (operatorToken.kind()) {
+                case TokenKind::Star:
+                    binaryOperator = AST::BinaryOperator::Multiply;
+                    break;
+                case TokenKind::Slash:
+                    binaryOperator = AST::BinaryOperator::Divide;
+                    break;
+                case TokenKind::Percent:
+                    binaryOperator = AST::BinaryOperator::Modulo;
+                    break;
+                default:
+                    return nullptr;
+            }
+
+            const auto range = Source::SourceRange(
+                left->range.begin(), right->range.end()
+            );
+
+            left = std::make_unique<AST::BinaryExpression>(
+                std::move(left),
+                binaryOperator,
+                std::move(right),
+                range
+            );
+        }
+
+        return left;
     }
 }

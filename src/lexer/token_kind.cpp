@@ -79,6 +79,14 @@ namespace Velo::Lexer {
                 return "LogicalOr";
             case TokenKind::Bang:
                 return "Bang";
+            case TokenKind::Minus:
+                return "Minus";
+            case TokenKind::Star:
+                return "Star";
+            case TokenKind::Percent:
+                return "Percent";
+            case TokenKind::Slash:
+                return "Slash";
         }
 
         return "Unknown";
