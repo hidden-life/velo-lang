@@ -95,9 +95,7 @@ Recommended remaining work:
 1. cleanup diagnostics wording and codes
 2. refresh examples
 3. add a small release checklist
-4. add basic developer guide for adding a builtin
-5. add basic developer guide for adding a language feature
-6. ensure README and docs match actual behavior
+4. ensure README and docs match actual behavior
 
 ## Explicitly out of scope for MVP 0.1
 - structs

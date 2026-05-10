@@ -15,6 +15,9 @@ runtime, and MVP planning.
 
 ## Development
 - [MVP 0.1 status](development/mvp_0_1.md)
+- [Adding builtin](development/adding_builtin.md)
+- [Adding a language feature](development/adding_lang_features.md)
+- [Diagnostics](development/diagnostics.md)
 - [Examples](examples.md)
 
 ## Documentation rules

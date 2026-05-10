@@ -124,6 +124,9 @@ Start here:
 - [Semantic analyzer](docs/architecture/semantic.md)
 - [Runtime and VM](docs/architecture/runtime.md)
 - [IR](docs/architecture/ir.md)
+- [Adding a builtin](docs/development/adding_builtin.md)
+- [Adding a language feature](docs/development/adding_lang_features.md)
+- [Diagnostics](docs/development/diagnostics.md)
 - [MVP 0.1 status](docs/development/mvp_0_1.md)
 
 ## Current development focus
