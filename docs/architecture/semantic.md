@@ -1,0 +1,255 @@
+# Semantic analyzer
+
+The semantic analyzer validates parsed AST before IR lowering.
+
+## Responsibilities
+
+The semantic analyzer currently checks:
+
+- duplicate imports
+- duplicate visible import names
+- duplicate functions
+- entry point validity
+- function parameter types
+- function return types
+- duplicate parameters
+- local variable declarations
+- local variable scopes
+- assignments
+- expression types
+- function calls
+- builtin calls
+- return statements
+- `if` conditions
+- `while` conditions
+- `break` / `continue` placement
+- declared type names
+- builtin argument types
+
+## Entry point
+
+The program entry point is:
+
+```velo
+fn main(): int {
+    return 0;
+}
+```
+
+Rules:
+
+- `main` must exist
+- `main` must not have parameters
+- `main` must return `int`
+
+## Types
+
+Supported semantic types:
+
+- `int`
+- `string`
+- `bool`
+- `void`
+- `unknown`
+
+`unknown` is used internally to reduce cascading diagnostics.
+
+## Declared type validation
+
+The semantic analyzer validates declared types in:
+
+- function return types
+- function parameters
+- local variable declarations
+
+Rules:
+
+- unknown declared types produce `SEM030`
+- `void` is allowed only as a function return type
+- `void` parameters and local variables produce `SEM031`
+
+## Parameters
+
+Function parameters are stored with actual semantic types.
+
+Example:
+
+```velo
+fn echo(value: string): string {
+    return value;
+}
+```
+
+The parameter `value` resolves to `string`.
+
+## Local scopes
+
+The semantic analyzer uses a scope stack for local variables.
+
+Rules:
+
+- each function creates a function scope
+- each `if` branch creates a nested scope
+- each `while` body creates a nested scope
+- variables resolve from inner scope to outer scope
+- duplicate locals are forbidden only in the same scope
+- shadowing from outer scopes is allowed
+
+Example:
+
+```velo
+fn main(): int {
+    let value: int = 1;
+
+    if (true) {
+        let value: int = 2;
+        return value;
+    }
+
+    return value;
+}
+```
+
+## Assignments
+
+Rules:
+
+- only mutable `var` locals can be assigned
+- `let` locals are immutable
+- assignment value type must match local type
+
+## Return validation
+
+Rules:
+
+- non-void functions must return a value
+- void functions must not return a value
+- returned expression type must match function return type
+- non-void functions must end with a guaranteed return statement
+
+Current limitation:
+
+- full control-flow graph analysis is not implemented yet
+
+## If validation
+
+`if` conditions must be `bool`.
+
+```velo
+if (true) {
+    return 1;
+}
+```
+
+## While validation
+
+`while` conditions must be `bool`.
+
+```velo
+while (x < 10) {
+    x = x + 1;
+}
+```
+
+## break / continue validation
+
+Rules:
+
+- `break` is valid only inside loops
+- `continue` is valid only inside loops
+- nested loops are tracked using loop depth
+
+## Arithmetic validation
+
+Binary arithmetic operators require `int` operands:
+
+- `+`
+- `-`
+- `*`
+- `/`
+- `%`
+
+Unary `-` requires an `int` operand.
+
+Arithmetic expressions produce `int`.
+
+## Comparison validation
+
+Comparison operators currently require `int` operands:
+
+- `==`
+- `!=`
+- `<`
+- `>`
+- `<=`
+- `>=`
+
+Comparison expressions produce `bool`.
+
+## Logical validation
+
+Rules:
+
+- `!` requires `bool`
+- `&&` requires `bool && bool`
+- `||` requires `bool || bool`
+- logical expressions produce `bool`
+
+Short-circuit behavior is implemented in IR lowering, not semantic analysis.
+
+## Builtin return type metadata
+
+Builtin return types are mirrored into `ModuleRegistry`.
+
+Example:
+
+```velo
+use std::string as str;
+
+fn main(): int {
+    return str::len("hello");
+}
+```
+
+`str::len(...)` resolves to `int`.
+
+## Builtin argument type validation
+
+Builtin functions also expose parameter type metadata.
+
+Example:
+
+```velo
+use std::string as str;
+
+fn main(): int {
+    return str::len(123); // error
+}
+```
+
+`str::len` expects `string`, but `123` is `int`.
+
+Special parameter type:
+
+```text
+any
+```
+
+`any` accepts all current runtime value types.
+
+Used by:
+
+```text
+console::println(any): void
+```
+
+## Diagnostic philosophy
+
+Semantic diagnostics should be:
+
+- precise
+- stable
+- non-cascading where possible
+- tied to source ranges
+
+When an expression already produced an error, later checks should avoid adding redundant diagnostics.

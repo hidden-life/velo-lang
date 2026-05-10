@@ -1,171 +1,137 @@
 # Velo
-Velo is an experimental programming language and runtime focused on API and backend development.
+Velo is an experimental programming language and virtual machine focused on backend
+and API-oriented development.
+
+The current goal is **Velo MVP 0.1**: a small, strict, statically checked language
+with a simple VM, standard modules, and developer-friendly CLI tooling.
 
 ## Current status
-Implemented so far:
-- bootstrap CLI
-- source file model
-- source locations and ranges
-- diagnostic engine
-- handwritten lexer
-- minimal AST for the first executable program
-- minimal recursive descent parser
-- minimal semantic analyzer
-- AST printer
-- first driver for the source -> lexer -> parser -> semantic pipeline
-- minimal runtime layer
-- builtin function registry
-- registered `console::println` builtin
-- interpreter execution result model
-- user-defined function calls without parameters
-- function parameter references through local loading
-- binary `+` expressions for integers
-- builtin return types are stored in module metadata
-- import aliases are respected during builtin call type resolution
-- `void` function return validation
-- `return;` without expression
-- non-void functions must end with a return statement
-- local variable declarations via `let`
-- mutable local variables via `var`
-- reassignment support
-- boolean literals
-- `if/else` statements
-- basic conditional jumps in IR
-- integer comparison operators: `==`, `!=`, `<`, `>`, `<=`, `>=`
-- `while` loops
-- block scoping for local variables
-- `break` and `continue` statements inside loops
-- logical operators: `&&`, `||`, `!`
-- declared type validation for function returns, parameters, and locals
-- unknown type diagnostics
-- `void` is restricted to function return types
-- driver exposes interpreter exit code through `DriverResult.exitCode`
+- modules
+- `use` imports
+- functions
+- typed parameters
+- typed return values
+- `int`, `string`, `bool`, `void`
+- `let` immutable locals
+- `var` mutable locals
+- lexical block scoping
+- assignments
+- `if / else`
+- `while`
+- `break`
+- `continue`
 - arithmetic operators: `+`, `-`, `*`, `/`, `%`
 - unary minus
-- grouped expressions with parentheses
-- short-circuit logical operators: `&&` and `||`
-- IR dump mode via `velo ir`
-- `std::string` module foundation
-- `std::string::len(value)` builtin
-- `std::int::toString(value)`
-- `std::bool::toString(value)`
-- GoogleTest test setup
+- comparison operators: `==`, `!=`, `<`, `>`, `<=`, `>=`
+- logical operators: `&&`, `||`, `!`
+- short-circuit evaluation for `&&` and `||`
+- user-defined function calls
+- builtin function calls
+- semantic diagnostics
+- IR lowering
+- VM execution
+- CLI modes: `run`, `check`, `ast`, `ir`
 
-## Build
-```bash
-cmake --preset debug
-cmake --build --preset debug
-ctest --preset debug
-```
+## Standard modules
+Current standard modules:
+- `std::console`
+    - `console::println(any): void`
+- `std::string`
+    - `string::len(string): int`
+- `std::int`
+    - `int::toString(int): string`
+- `std::bool`
+    - `bool::toString(bool): string`
 
-## Run
-The `velo` CLI returns the Velo `main()` return value as the process exit code.
+Examples:
+```velo
+use std::console;
+use std::string as str;
+use std::int as ints;
 
-For demo examples, prefer returning `0` after printing output, so the shell treats the command as successful.
-```bash
-./build/debug/apps/velo/velo ./examples/hello_world/main.velo
+fn main(): int {
+    let text: string = ints::toString(123);
+    let length: int = str::len(text);
+    
+    console::println(length);
+    
+    return 0;
+}
 ```
 
 ## CLI
+Run a program:
 ```bash
-velo run app.velo
+./build/debug/apps/velo/velo run ./examples/arithmetic/main.velo
 ```
-Runs a Velo source file.
 
+Check a program without executing it:
 ```bash
-velo check app.velo
+./build/debug/apps/velo/velo check ./examples/arithmetic/main.velo
 ```
-Runs lexer, parser, and semantic analysis without executing the program.
 
+Print AST:
 ```bash
-velo ast app.velo
+./build/debug/apps/velo/velo ast ./examples/arithmetic/main.velo
 ```
-Prints the AST without executing program.
+
+Print IR:
+```bash
+./build/debug/apps/velo/velo ir ./examples/arithmetic/main.velo
+```
 
 Backward-compatible shorthand:
 ```bash
-velo app.velo
+./build/debug/apps/velo/velo ./examples/arithmetic/main.velo
 ```
 is equivalent to:
 ```bash
-velo run app.velo
+./build/debug/apps/velo/velo run ./examples/arithmetic/main.velo
 ```
 
+## Build
+Debug build:
 ```bash
-velo ir app.velo
-```
-Runs lexer, parser, semantic analysis, and IR lowering, then prints the generated IR without executing the program.
-
-## Current milestone
-The project can now:
-- load source text
-- map offsets to line/column
-- collect diagnostics
-- tokenize basic Velo syntax
-- build minimal AST
-- parse the first executable Velo program shape
-- run minimal semantic validation
-- lower AST into minimal IR
-- execute minimal IR through the interpreter
-- call registered builtin functions through the runtime registry
-- lower user-defined function calls into IR
-- execute user-defined function calls through the interpreter
-- prevents stack pollution via Pop instruction
-- correct return value propagation between functions
-- isolated stack frames for user-defined calls
-- parse typed function parameters
-- pass arguments to user-defined functions
-- read parameter values through `LoadLocal`
-- parse binary addition expressions
-- lower integer addition into `AddInt`
-- execute integer addition in the interpreter
-- semantic type checking for expressions
-- integer-only validation for binary `+`
-- return type validation
-- typed function parameters for `int`, `string`, and `bool`
-
-Current semantic checks:
-- `main` must exist
-- `main` must have no parameters
-- `main` must return `int`
-- visible import names must be unique
-- function names must be unique
-- qualified call roots must resolve through `use`
-- builtin function argument count must match module metadata
-- user-defined call expressions use declared function return types
-- `console::println` is treated as `void`
-
-Example output:
-```
-Program
-    Module app
-    Use std::console
-    Function main -> int
-        ExprStmt
-            Call console::println
-                String "Hello, Velo!"
-        Return
-            Integer 0
+cmake --preset debug
+cmake --build --preset debug
 ```
 
-## Examples
+Run tests:
 ```bash
-./build/debug/apps/velo/velo ./examples/hello_world/main.velo
-./build/debug/apps/velo/velo ./examples/user_funtion/main.velo
-./build/debug/apps/velo/velo ./examples/parameter/main.velo
-./build/debug/apps/velo/velo ./examples/add/main.velo
-./build/debug/apps/velo/velo ./examples/void_function/main.velo
-./build/debug/apps/velo/velo ./examples/locals/main.velo
-./build/debug/apps/velo/velo ./examples/comparison/main.velo
-./build/debug/apps/velo/velo ./examples/while_loop/main.velo
-./build/debug/apps/velo/velo ./examples/break_continue/main.velo
-./build/debug/apps/velo/velo ./examples/logical/main.velo
-./build/debug/apps/velo/velo ./examples/typed_parameters/main.velo
-./build/debug/apps/velo/velo ./examples/arithmetic/main.velo
-./build/debug/apps/velo/velo ./examples/short_circuit/main.velo
-./build/debug/apps/velo/velo ./examples/std_string/main.velo
-./build/debug/apps/velo/velo ./examples/std_to_string/main.velo
+ctest --preset debug --output-on-failure
 ```
 
-## Next milestone
-Next step: start lowering the validated AST into a very small executable representation.
+## Project layout
+```text
+apps/
+    velo/           Main CLI application
+    veloc/          Reserved for future compiler frontend
+    velovm/         Reserved for future standalone VM runner
+include/velo/       Public project headers
+src/                Implementation files
+tests/              GoogleTest-based unit tests
+examples/           Velo source examples
+docs/               Language, architecture, and development documentation
+```
+
+## Documentation
+Start here:
+- [Documentation index](docs/index.md)
+- [Language syntax](docs/language/syntax.md)
+- [Types](docs/language/types.md)
+- [Modules](docs/language/modules.md)
+- [Architecture overview](docs/architecture/overview.md)
+- [Semantic analyzer](docs/architecture/semantic.md)
+- [Runtime and VM](docs/architecture/runtime.md)
+- [IR](docs/architecture/ir.md)
+- [MVP 0.1 status](docs/development/mvp_0_1.md)
+
+## Current development focus
+The project is currently moving toward **MVP 0.1**.
+
+Main properties:
+- keep the language small and strict
+- keep the compiler pipeline understandable
+- keep modules easy to extend
+- keep tests close to every feature
+- avoid adding large language features before the MVP foundation is stable
