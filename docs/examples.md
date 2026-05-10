@@ -147,6 +147,17 @@ examples/errors/
 
 Contains intentionally invalid programs used to demonstrate diagnostics.
 
+### Struct declarations
+```text
+examples/struct_declaration/main.velo
+```
+Demonstrates:
+- `struct`
+- `pub struct`
+- public fields
+- private fields
+- field type validation
+
 ### MVP showcase
 ```text
 examples/mvp_showcase/main.velo

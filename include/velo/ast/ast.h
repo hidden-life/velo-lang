@@ -4,6 +4,8 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <optional>
+#include <utility>
 
 #include "velo/source/source_range.h"
 
@@ -232,6 +234,20 @@ namespace Velo::AST {
         Source::SourceRange range;
     };
 
+    struct StructField final {
+        bool isPublic {false};
+        std::string name;
+        TypeName type {};
+        Source::SourceRange range;
+    };
+
+    struct StructDeclaration final {
+        bool isPublic {false};
+        std::string name;
+        std::vector<StructField> fields {};
+        Source::SourceRange range;
+    };
+
     struct ModuleDeclaration final {
         QualifiedName name;
         Source::SourceRange range;
@@ -255,6 +271,7 @@ namespace Velo::AST {
     struct Program final {
         std::optional<ModuleDeclaration> module {};
         std::vector<UseDeclaration> uses {};
+        std::vector<StructDeclaration> structs {};
         std::vector<FunctionDeclaration> functions {};
         Source::SourceRange range {};
     };

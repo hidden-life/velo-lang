@@ -2,6 +2,8 @@
 #define INC_VELO_SEMANTIC_SEMATIC_ANALYZER_H
 
 #include <unordered_map>
+#include <string>
+#include <unordered_set>
 
 #include "velo/ast/ast.h"
 #include "velo/diagnostic/diagnostic_engine.h"
@@ -25,8 +27,10 @@ namespace Velo::Semantic {
 
     private:
         void collectImports();
+        void collectStructs();
         void collectFunctions();
         void validateEntryPoint();
+        void analyzeStruct(const AST::StructDeclaration &structDecl);
         void analyzeFunction(const AST::FunctionDeclaration &func);
         void analyzeStatement(const AST::Statement &stmt);
         void analyzeExpression(const AST::Expression &expr);
@@ -64,6 +68,7 @@ namespace Velo::Semantic {
         Diagnostic::DiagnosticEngine &_engine;
 
         std::unordered_map<std::string, const AST::UseDeclaration*> _visibleImports {};
+        std::unordered_map<std::string, const AST::StructDeclaration> _structs {};
         std::unordered_map<std::string, const AST::FunctionDeclaration*> _functions {};
 
         struct LocalSymbol final {

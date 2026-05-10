@@ -58,6 +58,8 @@ namespace Velo::Lexer {
         LogicalAnd,
         LogicalOr,
         Bang,
+
+        KwStruct, // "struct"
     };
 
     [[nodiscard]] auto toString(TokenKind kind) -> std::string_view;

@@ -53,3 +53,32 @@ fn main(): int {
 
     EXPECT_EQ(out, expected);
 }
+
+TEST(AstPrinterTest, PrintsStructDeclaration) {
+    DiagnosticEngine engine;
+
+    const auto program = parseProgram(
+        R"(module app;
+
+pub struct User {
+    pub id: int;
+    name: string;
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    ASTPrinter printer;
+    const std::string output = printer.print(*program);
+
+    EXPECT_NE(output.find("Struct pub User"), std::string::npos);
+    EXPECT_NE(output.find("Field pub id : int"), std::string::npos);
+    EXPECT_NE(output.find("Field name : string"), std::string::npos);
+}

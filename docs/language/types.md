@@ -85,10 +85,24 @@ fn broken(value: mystery): int {
 
 This is invalid because `mystery` is not a known type.
 
+## User-defined struct types
+Struct declarations are supported in MVP 0.2.1.
+
+Example:
+```velo
+struct User {
+    id: int;
+    name: string;
+}
+```
+
+Current limitation:
+- struct type declarations exist
+- using struct names as value types is planned for MVP 0.2.2 and 0.2.3
+
 ## Current limitations
 Velo does not yet support:
 - arrays
-- structs
 - maps
 - nullable types
 - generics

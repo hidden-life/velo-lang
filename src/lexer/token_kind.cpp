@@ -87,6 +87,8 @@ namespace Velo::Lexer {
                 return "Percent";
             case TokenKind::Slash:
                 return "Slash";
+            case TokenKind::KwStruct:
+                return "KwStruct";
         }
 
         return "Unknown";

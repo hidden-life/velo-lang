@@ -10,8 +10,13 @@ namespace Velo::Semantic {
 
     auto SemanticAnalyzer::analyze() -> bool {
         collectImports();
+        collectStructs();
         collectFunctions();
         validateEntryPoint();
+
+        for (const auto &strDecl : _program.structs) {
+            analyzeStruct(strDecl);
+        }
 
         for (const auto &func : _program.functions) {
             analyzeFunction(func);
@@ -819,5 +824,38 @@ namespace Velo::Semantic {
         }
 
         return false;
+    }
+
+    void SemanticAnalyzer::collectStructs() {
+        for (const auto &structDecl : _program.structs) {
+            const auto [it, inserted] = _structs.emplace(structDecl.name, &structDecl);
+            static_cast<void>(it);
+
+            if (!inserted) {
+                _engine.error(
+                    "SEM034",
+                    "Duplicate struct declaration '" + structDecl.name + "'.",
+                    structDecl.range
+                );
+            }
+        }
+    }
+
+    void SemanticAnalyzer::analyzeStruct(const AST::StructDeclaration &structDecl) {
+        std::unordered_set<std::string> fieldNames;
+        for (const auto &field : structDecl.fields) {
+            const auto [it, inserted] = fieldNames.insert(field.name);
+            static_cast<void>(it);
+
+            if (!inserted) {
+                _engine.error(
+                    "SEM035",
+                    "Duplicate field '" + field.name + "' in struct '" + structDecl.name + "'.",
+                    field.range
+                );
+            }
+
+            validateDeclaredType(field.type, false, "field '" + structDecl.name + "::" + field.name + "'");
+        }
     }
 }

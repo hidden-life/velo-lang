@@ -34,24 +34,28 @@ namespace Velo::Parser {
                 isPublic = true;
             }
 
-            if (!check(TokenKind::KwFn)) {
-                reportCurrent("PAR001", "Expected function declaration.");
-                sync();
-                continue;
+            if (check(TokenKind::KwStruct)) {
+                if (auto structDecl = parseStructDeclaration(isPublic); structDecl.has_value()) {
+                    program->structs.push_back(std::move(*structDecl));
+                }
+
+                continue;;
             }
 
-            auto func = parseFunctionDeclaration(isPublic);
-            if (func.has_value()) {
-                program->functions.push_back(std::move(*func));
+            if (check(TokenKind::KwFn)) {
+                if (auto func = parseFunctionDeclaration(isPublic); func.has_value()) {
+                    program->functions.push_back(std::move(*func));
+                }
+
+                continue;;
             }
+
+            reportCurrent("PAR001", "Expected top-level declaration.");
+            sync();
         }
 
-        if (program->module.has_value()) {
-            if (!program->functions.empty()) {
-                program->range = makeRangeFromTokens(_tokens.front(), _tokens[_tokens.size() - 2U]);
-            } else {
-                program->range = program->module->range;
-            }
+        if (!_tokens.empty() && _tokens.size() >= 2U) {
+            program->range = makeRangeFromTokens(_tokens.front(), _tokens[_tokens.size() - 2U]);
         } else if (!_tokens.empty()) {
             program->range = _tokens.front().range();
         }
@@ -630,7 +634,13 @@ namespace Velo::Parser {
                 }
             }
 
-            if (check(TokenKind::KwFn) || check(TokenKind::KwUse) || check(TokenKind::KwModule) || check(TokenKind::KwPub)) {
+            if (
+                check(TokenKind::KwFn) ||
+                check(TokenKind::KwStruct) ||
+                check(TokenKind::KwUse) ||
+                check(TokenKind::KwModule) ||
+                check(TokenKind::KwPub)
+            ) {
                 return;
             }
 
@@ -887,5 +897,78 @@ namespace Velo::Parser {
         }
 
         return left;
+    }
+
+    auto Parser::parseStructDeclaration(bool isPublic) -> std::optional<AST::StructDeclaration> {
+        const Token *structKw = consume(TokenKind::KwStruct, "PAR100", "Expected 'struct'.");
+        if (structKw == nullptr) {
+            return std::nullopt;
+        }
+
+        const Token *nameToken = consume(TokenKind::Identifier, "PAR101", "Expected struct name.");
+        if (nameToken == nullptr) {
+            return std::nullopt;
+        }
+
+        if (consume(TokenKind::OpenBrace, "PAR102", "Expected '{' before struct body.") == nullptr) {
+            return std::nullopt;
+        }
+
+        std::vector<AST::StructField> fields;
+
+        while (!check(TokenKind::CloseBrace) && !isAtEnd()) {
+            bool fieldIsPublic = false;
+            if (match(TokenKind::KwPub)) {
+                fieldIsPublic = true;
+            }
+
+            auto field = parseStructField(fieldIsPublic);
+            if (!field.has_value()) {
+                sync();
+                continue;;
+            }
+
+            fields.push_back(std::move(*field));
+        }
+
+        const Token *closeBrace = consume(TokenKind::CloseBrace, "PAR103", "Expected '}' after struct body.");
+        if (closeBrace == nullptr) {
+            return std::nullopt;
+        }
+
+        return AST::StructDeclaration {
+            .isPublic = isPublic,
+            .name = std::string(nameToken->text()),
+            .fields = std::move(fields),
+            .range = makeRangeFromTokens(*structKw, *closeBrace)
+        };
+    }
+
+    auto Parser::parseStructField(bool isPublic) -> std::optional<AST::StructField> {
+        const Token *nameToken = consume(TokenKind::Identifier, "PAR104", "Expected struct field name.");
+        if (nameToken == nullptr) {
+            return std::nullopt;
+        }
+
+        if (consume(TokenKind::Colon, "PAR105", "Expected ':' after struct field name.") == nullptr) {
+            return std::nullopt;
+        }
+
+        const auto fieldType = parseTypeName();
+        if (!fieldType.has_value()) {
+            return std::nullopt;
+        }
+
+        const Token *semicolon = consume(TokenKind::Semicolon, "PAR106", "Expected '; after struct field declaration." );
+        if (semicolon == nullptr) {
+            return std::nullopt;
+        }
+
+        return AST::StructField {
+            .isPublic = isPublic,
+            .name = std::string(nameToken->text()),
+            .type = std::move(*fieldType),
+            .range = makeRangeFromTokens(*nameToken, *semicolon)
+        };
     }
 }

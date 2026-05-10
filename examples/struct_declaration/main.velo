@@ -1,0 +1,15 @@
+module app;
+
+use std::console;
+
+pub struct User {
+    pub id: int;
+    pub name: string;
+    active: bool;
+}
+
+fn main(): int {
+    console::println("struct declarations work");
+
+    return 0;
+}

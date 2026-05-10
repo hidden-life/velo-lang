@@ -27,6 +27,8 @@ namespace Velo::Parser {
 
         [[nodiscard]] auto parseModuleDeclaration() -> std::optional<AST::ModuleDeclaration>;
         [[nodiscard]] auto parseUseDeclaration() -> std::optional<AST::UseDeclaration>;
+        [[nodiscard]] auto parseStructDeclaration(bool isPublic) -> std::optional<AST::StructDeclaration>;
+        [[nodiscard]] auto parseStructField(bool isPublic) -> std::optional<AST::StructField>;
         [[nodiscard]] auto parseFunctionDeclaration(bool isPublic) -> std::optional<AST::FunctionDeclaration>;
         [[nodiscard]] auto parseTypeName() -> std::optional<AST::TypeName>;
         [[nodiscard]] auto parseQualifiedName() -> std::optional<AST::QualifiedName>;

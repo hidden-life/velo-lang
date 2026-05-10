@@ -459,3 +459,80 @@ fn main(): int {
     ASSERT_NE(left, nullptr);
     EXPECT_EQ(left->op, Velo::AST::BinaryOperator::Add);
 }
+
+TEST(ParserTest, ParsesStructDeclaration) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+struct User {
+    id: int;
+    name: string;
+    active: bool;
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    ASSERT_EQ(program->structs.size(), 1U);
+
+    const auto &user = program->structs[0];
+    EXPECT_FALSE(user.isPublic);
+    EXPECT_EQ(user.name, "User");
+
+    ASSERT_EQ(user.fields.size(), 3U);
+
+    EXPECT_FALSE(user.fields[0].isPublic);
+    EXPECT_EQ(user.fields[0].name, "id");
+    ASSERT_EQ(user.fields[0].type.name.segments.size(), 1U);
+    EXPECT_EQ(user.fields[0].type.name.segments[0], "int");
+
+    EXPECT_EQ(user.fields[1].name, "name");
+    ASSERT_EQ(user.fields[1].type.name.segments.size(), 1U);
+    EXPECT_EQ(user.fields[1].type.name.segments[0], "string");
+
+    EXPECT_EQ(user.fields[2].name, "active");
+    ASSERT_EQ(user.fields[2].type.name.segments.size(), 1U);
+    EXPECT_EQ(user.fields[2].type.name.segments[0], "bool");
+}
+
+TEST(ParserTest, ParsesPublicStructDeclarationAndFields) {
+    DiagnosticEngine engine;
+
+    const auto program = parseProgram(
+        R"(module app;
+
+pub struct User {
+    pub id: int;
+    name: string;
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    ASSERT_EQ(program->structs.size(), 1U);
+
+    const auto &user = program->structs[0];
+    EXPECT_TRUE(user.isPublic);
+    EXPECT_EQ(user.name, "User");
+
+    ASSERT_EQ(user.fields.size(), 2U);
+
+    EXPECT_TRUE(user.fields[0].isPublic);
+    EXPECT_EQ(user.fields[0].name, "id");
+
+    EXPECT_FALSE(user.fields[1].isPublic);
+    EXPECT_EQ(user.fields[1].name, "name");
+}

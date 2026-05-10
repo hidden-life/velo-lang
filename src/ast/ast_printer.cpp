@@ -24,6 +24,10 @@ namespace Velo::AST {
             return stream.str();
         }
 
+        auto joinTypeName(const TypeName &typeName) -> std::string {
+            return joinQualifiedName(typeName.name);
+        }
+
         void printExpression(std::ostringstream &stream, const Expression &expression, std::size_t indentLevel);
 
         void printStatement(std::ostringstream &stream, const Statement &statement, std::size_t indentLevel) {
@@ -268,6 +272,27 @@ namespace Velo::AST {
             }
 
             stream << "\n";
+        }
+
+        for (const auto &structDecl : program.structs) {
+            writeIndent(stream, 1U);
+            stream << "Struct ";
+
+            if (structDecl.isPublic) {
+                stream << "pub ";
+            }
+
+            stream << structDecl.name << "\n";
+
+            for (const auto &field : structDecl.fields) {
+                writeIndent(stream, 2U);
+                stream << "Field ";
+                if (field.isPublic) {
+                    stream << "pub ";
+                }
+
+                stream << field.name << " : " << joinTypeName(field.type) << "\n";
+            }
         }
 
         for (const auto &func : program.functions) {

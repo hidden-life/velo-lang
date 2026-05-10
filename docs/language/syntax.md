@@ -26,6 +26,28 @@ use std::string as str;
 str::len("hello");
 ```
 
+## Struct declarations
+Struct declarations define named data shapes.
+```velo
+pub struct User {
+    pub id: int;
+    pub name: string;
+    active: bool;
+}
+```
+Rules:
+- structs are private by default
+- `pub struct` marks a struct as public
+- fields are private by default
+- `pub` fields are public
+- field types are validated
+- duplicate field names are rejected
+
+Current limitation:
+- structs cannot be instantiated yet
+- struct cannot be used as parameter/local/return types yet
+- field access is not implemented yet
+
 ## Functions
 Function declaration:
 ```velo

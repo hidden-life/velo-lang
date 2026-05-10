@@ -393,6 +393,10 @@ namespace Velo::Lexer {
             return TokenKind::KwContinue;
         }
 
+        if (text == "struct") {
+            return TokenKind::KwStruct;
+        }
+
         return TokenKind::Identifier;
     }
 
