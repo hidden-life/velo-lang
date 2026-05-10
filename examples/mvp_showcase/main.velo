@@ -1,0 +1,31 @@
+module app;
+
+use std::console;
+use std::string as str;
+use std::int as ints;
+use std::bool as bools;
+
+fn isSmall(val: int): bool {
+    return val > 0 && val < 10;
+}
+
+fn main(): int {
+    var x: int = 0;
+
+    while(x < 5) {
+        x = x + 1;
+    }
+
+    if (isSmall(x)) {
+        console::println("x is small");
+        console::println(ints::toString(x));
+        console::println(bools::toString(true));
+        console::println(str::len("hello"));
+
+        return 0;
+    }
+
+    console::println("x is not small");
+
+    return 0;
+}

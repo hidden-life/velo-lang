@@ -89,6 +89,20 @@ is equivalent to:
 ./build/debug/apps/velo/velo run ./examples/arithmetic/main.velo
 ```
 
+## MVP showcase
+Run the MVP showcase example:
+```bash
+./build/debug/apps/velo/velo run ./examples/mvp_showcase/main.velo
+```
+
+Expected output:
+```text
+x is small
+5
+true
+5
+```
+
 ## Build
 Debug build:
 ```bash

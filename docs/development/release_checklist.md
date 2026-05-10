@@ -67,8 +67,9 @@ Run the most important examples:
 ./build/debug/apps/velo/velo run ./examples/while_loop/main.velo
 ./build/debug/apps/velo/velo run ./examples/break_continue/main.velo
 ./build/debug/apps/velo/velo run ./examples/typed_parameters/main.velo
-./build/debug/apps/velo/velo run ./examples/std_string_len/main.velo
+./build/debug/apps/velo/velo run ./examples/std_string/main.velo
 ./build/debug/apps/velo/velo run ./examples/std_to_string/main.velo
+./build/debug/apps/velo/velo run ./examples/mvp_showcase/main.velo
 ```
 
 Expected:

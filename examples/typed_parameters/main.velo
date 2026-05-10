@@ -16,5 +16,6 @@ fn main(): int {
         return 0;
     }
 
+    console::println("typed parameters failed");
     return 0;
 }

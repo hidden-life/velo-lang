@@ -34,6 +34,11 @@ Demo examples should usually exit with code `0`.
 ./build/debug/apps/velo/velo ir ./examples/arithmetic/main.velo
 ```
 
+## MVP showcase
+```bash
+./build/debug/apps/velo/velo run ./examples/mvp_showcase/main.velo
+```
+
 ## Current examples
 
 ### Arithmetic
@@ -141,3 +146,20 @@ examples/errors/
 ```
 
 Contains intentionally invalid programs used to demonstrate diagnostics.
+
+### MVP showcase
+```text
+examples/mvp_showcase/main.velo
+```
+Demonstrates the current MVP 0.1 feature set:
+- imports
+- aliases
+- user functions
+- typed parameters
+- typed return values
+- mutable locals
+- while loop
+- if
+- comparisons
+- logical operators
+- standard modules

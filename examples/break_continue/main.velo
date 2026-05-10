@@ -9,6 +9,7 @@ fn main(): int {
             break;
         }
         x = x + 1;
+        continue;
     }
 
     console::println(x);
