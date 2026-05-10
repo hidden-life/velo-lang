@@ -229,21 +229,5 @@ git push origin v0.1.0
 Use only when the project is actually ready to publish the tag.
 
 ## 13. Release notes draft
-Suggested MVP 0.1 notes:
-```text
-Velo MVP 0.1 introduces the first working language and VM foundation.
-
-Highlights:
-- hand-written lexer and parser
-- semantic analyzer
-- IR lowerer
-- stack-based VM
-- CLI modes: run/check/ast/ir
-- functions, locals, scopes, if/while/break/continue
-- int/string/bool/void
-- arithmetic, comparison, logical operators
-- short-circuit && and ||
-- standard modules: console, string, int, bool
-- GoogleTest coverage
-- documentation and development guides
-```
+Release notes are tracked here:
+- [Velo v0.1.0 release notes draft](release_notes_v0_1.md)

@@ -144,6 +144,7 @@ Start here:
 - [Example guidelines](docs/development/example_guidelines.md)
 - [MVP release checklist](docs/development/release_checklist.md)
 - [MVP 0.1 status](docs/development/mvp_0_1.md)
+- [MVP v0.1.0 release notes draft](docs/development/release_notes_v0_1.md)
 
 ## Current development focus
 The project is currently moving toward **MVP 0.1**.
@@ -154,3 +155,12 @@ Main properties:
 - keep modules easy to extend
 - keep tests close to every feature
 - avoid adding large language features before the MVP foundation is stable
+
+## MVP 0.1 status
+The Velo MVP 0.1 core scope is complete.
+
+Before tagging or announcing `v0.1.0`, run the release checklist:
+- [MVP release checklist](docs/development/release_checklist.md)
+
+Release notes draft:
+- [Velo v0.1.0 release notes draft](docs/development/release_notes_v0_1.md)

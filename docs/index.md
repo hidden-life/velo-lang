@@ -21,6 +21,7 @@ runtime, and MVP planning.
 - [Example guidelines](development/example_guidelines.md)
 - [MVP release checklist](development/release_checklist.md)
 - [Examples](examples.md)
+- [Velo 0.1.0 release notes draft](development/release_notes_v0_1.md)
 
 ## Documentation rules
 When adding a new feature:
