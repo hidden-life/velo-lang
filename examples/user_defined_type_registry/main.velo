@@ -1,0 +1,18 @@
+module app;
+
+use std::console;
+
+struct Profile {
+    id: int;
+}
+
+pub struct User {
+    pub profile: Profile;
+    name: string;
+}
+
+fn main(): int {
+    console::println("user-defined type registry works");
+
+    return 0;
+}

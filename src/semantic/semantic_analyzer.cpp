@@ -757,24 +757,31 @@ namespace Velo::Semantic {
     void SemanticAnalyzer::validateDeclaredType(
         const AST::TypeName &typeName,
         bool allowVoid,
-        const std::string &subject) {
+        const std::string &subject,
+        bool allowUserDefinedTypes
+    ) {
         const auto type = typeFromTypeName(typeName);
-        if (type == ExpressionType::Unknown) {
-            _engine.error(
-                "SEM030",
-                "Unknown type '" + typeNameToString(typeName) + "' in " + subject + ".",
-                typeName.range
-            );
+        if (type != ExpressionType::Unknown) {
+            if (!allowVoid && type == ExpressionType::Void) {
+                _engine.error(
+                    "SEM031",
+                    "Type 'void' cannot be used in " + subject + ".",
+                    typeName.range
+                );
+            }
+
             return;
         }
 
-        if (!allowVoid && type == ExpressionType::Void) {
-            _engine.error(
-                "SEM031",
-                "Type 'void' cannot be used in " + subject + ".",
-                typeName.range
-            );
+        if (allowUserDefinedTypes && resolveUserDefinedType(typeName) != nullptr) {
+            return;
         }
+
+        _engine.error(
+            "SEM030",
+            "Unknown type '" + typeNameToString(typeName) + "' in " + subject + ".",
+            typeName.range
+        );
     }
 
     auto SemanticAnalyzer::typeNameToString(const AST::TypeName &typeName) -> std::string {
@@ -828,6 +835,15 @@ namespace Velo::Semantic {
 
     void SemanticAnalyzer::collectStructs() {
         for (const auto &structDecl : _program.structs) {
+            if (isBuiltinTypeName(structDecl.name)) {
+                _engine.error(
+                    "SEM036",
+                    "Struct name '" + structDecl.name + "' conflicts with a built-in type.",
+                    structDecl.range
+                );
+                continue;
+            }
+
             const auto [it, inserted] = _structs.emplace(structDecl.name, &structDecl);
             static_cast<void>(it);
 
@@ -855,7 +871,33 @@ namespace Velo::Semantic {
                 );
             }
 
-            validateDeclaredType(field.type, false, "field '" + structDecl.name + "::" + field.name + "'");
+            validateDeclaredType(
+                field.type,
+                false,
+                "field '" + structDecl.name + "::" + field.name + "'",
+                true
+            );
         }
+    }
+
+    auto SemanticAnalyzer::resolveUserDefinedType(const AST::TypeName &typeName) const -> const AST::StructDeclaration* {
+        if (typeName.name.segments.size() != 1U) {
+            return nullptr;
+        }
+
+        const std::string &name = typeName.name.segments.front();
+        const auto it = _structs.find(name);
+        if (it == _structs.end()) {
+            return nullptr;
+        }
+
+        return &it->second;
+    }
+
+    auto SemanticAnalyzer::isBuiltinTypeName(const std::string &typeName) -> bool {
+        return typeName == "int" ||
+            typeName == "string" ||
+            typeName == "bool" ||
+            typeName == "void";
     }
 }

@@ -86,19 +86,39 @@ fn broken(value: mystery): int {
 This is invalid because `mystery` is not a known type.
 
 ## User-defined struct types
-Struct declarations are supported in MVP 0.2.1.
+Struct declarations are supported.
 
 Example:
 ```velo
-struct User {
+struct Profile {
     id: int;
+}
+
+struct User {
+    profile: Profile;
     name: string;
+}
+```
+
+A struct field can reference another declared struct type.
+
+Forward references between struct declarations are supported:
+```velo
+struct User {
+    profile: Profile;
+}
+
+struct Profile {
+    id: int;
 }
 ```
 
 Current limitation:
 - struct type declarations exist
-- using struct names as value types is planned for MVP 0.2.2 and 0.2.3
+- struct field types can reference declared structs
+- using struct types in parameters, local variables and return values is planned for MVP 0.2.3
+- struct literals are planned for MVP 0.2.4
+- field access is planned for MVP 0.2.5
 
 ## Current limitations
 Velo does not yet support:

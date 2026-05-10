@@ -43,6 +43,34 @@ Rules:
 - field types are validated
 - duplicate field names are rejected
 
+Struct fields can reference other declared structs:
+```velo
+struct Profile {
+    id: int;
+}
+
+struct User {
+    profile: Profile;
+}
+```
+Forward references are allowed:
+```velo
+struct User {
+    profile: Profile;
+}
+
+struct Profile {
+    id: int;
+}
+```
+Struct names cannot conflict with built-in type names:
+```velo
+struct int {
+    value: int
+}
+```
+This is invalid!
+
 Current limitation:
 - structs cannot be instantiated yet
 - struct cannot be used as parameter/local/return types yet

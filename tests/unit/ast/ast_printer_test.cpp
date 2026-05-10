@@ -82,3 +82,35 @@ fn main(): int {
     EXPECT_NE(output.find("Field pub id : int"), std::string::npos);
     EXPECT_NE(output.find("Field name : string"), std::string::npos);
 }
+
+TEST(AstPrinterTest, PrintsStructFieldWithUserDefinedType) {
+    DiagnosticEngine engine;
+
+    const auto program = parseProgram(
+        R"(module app;
+
+struct Profile {
+    id: int;
+}
+
+struct User {
+    profile: Profile;
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    ASTPrinter printer;
+    const std::string output = printer.print(*program);
+
+    EXPECT_NE(output.find("Struct Profile"), std::string::npos);
+    EXPECT_NE(output.find("Struct User"), std::string::npos);
+    EXPECT_NE(output.find("Field profile : Profile"), std::string::npos);
+}

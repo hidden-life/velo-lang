@@ -13,7 +13,7 @@ MVP 0.2 focuses on data model foundation.
 
 ## Current step
 ```text
-0.2.1   struct declarations
+0.2.2   user-defined type registry
 ```
 
 ## 0.2.1 scope
@@ -51,3 +51,45 @@ fn main(): int {
     return 0;
 }
 ```
+
+## 0.2.2 scope
+Implemented in this step:
+- user-defined struct type registry
+- struct field types can reference declared structs
+- forward references between struct declarations
+- builtin type name conflict diagnostics
+
+Example:
+```velo
+module app;
+
+struct Profile {
+    id: int;
+}
+
+struct User {
+    profile: Profile;
+}
+
+fn main(): int {
+    return 0;
+}
+```
+
+Forward references are supported:
+```velo
+struct User {
+    profile: Profile;
+}
+
+struct Profile {
+    id: int;
+}
+```
+
+Not implemented in 0.2.2:
+- struct types in function parameters
+- struct types in local variables
+- struct types as function return types
+- struct literals
+- field access

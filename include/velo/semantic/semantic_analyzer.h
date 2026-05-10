@@ -51,7 +51,8 @@ namespace Velo::Semantic {
         void validateDeclaredType(
             const AST::TypeName &typeName,
             bool allowVoid,
-            const std::string &subject
+            const std::string &subject,
+            bool allowUserDefinedTypes = false
         );
         [[nodiscard]] static auto typeNameToString(const AST::TypeName &typeName) -> std::string;
 
@@ -63,6 +64,9 @@ namespace Velo::Semantic {
         void popScope();
 
         [[nodiscard]] static auto builtinParameterAcceptsType(const std::string &expected, ExpressionType actual) -> bool;
+
+        [[nodiscard]] auto resolveUserDefinedType(const AST::TypeName &typeName) const -> const AST::StructDeclaration*;
+        [[nodiscard]] static auto isBuiltinTypeName(const std::string &typeName) -> bool;
 
         const AST::Program &_program;
         Diagnostic::DiagnosticEngine &_engine;

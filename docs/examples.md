@@ -158,6 +158,15 @@ Demonstrates:
 - private fields
 - field type validation
 
+### User-defined type registry
+```text
+examples/user_defined_type_registry/main.velo
+```
+Demonstrates:
+- struct field using another struct type
+- user-defined type registry
+- public struct with user-defined field type
+
 ### MVP showcase
 ```text
 examples/mvp_showcase/main.velo
