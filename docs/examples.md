@@ -2,8 +2,16 @@
 
 This document lists useful examples available under `examples/`.
 
-## Run
+## Guidelines
+Example style is documented here:
+- [Example guidelines](development/example_guidelines.md)
 
+General rule:
+- valid demo examples should return `0`
+- non-zero return values should usually be asserted in driver tests
+
+## Run
+Demo examples should usually exit with code `0`.
 ```bash
 ./build/debug/apps/velo/velo run ./examples/arithmetic/main.velo
 ```

@@ -127,6 +127,8 @@ Start here:
 - [Adding a builtin](docs/development/adding_builtin.md)
 - [Adding a language feature](docs/development/adding_lang_features.md)
 - [Diagnostics](docs/development/diagnostics.md)
+- [Example guidelines](docs/development/example_guidelines.md)
+- [MVP release checklist](docs/development/release_checklist.md)
 - [MVP 0.1 status](docs/development/mvp_0_1.md)
 
 ## Current development focus

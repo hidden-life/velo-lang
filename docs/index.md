@@ -18,6 +18,8 @@ runtime, and MVP planning.
 - [Adding builtin](development/adding_builtin.md)
 - [Adding a language feature](development/adding_lang_features.md)
 - [Diagnostics](development/diagnostics.md)
+- [Example guidelines](development/example_guidelines.md)
+- [MVP release checklist](development/release_checklist.md)
 - [Examples](examples.md)
 
 ## Documentation rules

@@ -93,9 +93,9 @@ bool::toString(bool): string
 ## Remaining before MVP 0.1
 Recommended remaining work:
 1. cleanup diagnostics wording and codes
-2. refresh examples
-3. add a small release checklist
-4. ensure README and docs match actual behavior
+2. refresh examples and make sure demo examples return `0`
+3. ensure README and docs match actual behavior
+4. run the MVP release checklist
 
 ## Explicitly out of scope for MVP 0.1
 - structs
@@ -135,3 +135,12 @@ Future API-oriented features may include:
 - validation helpers
 - routing helpers
 - result/error types
+
+## Release checklist
+Before considering MVP 0.1 complete, run:
+```bash
+cmake --build --preset debug
+ctest --preset debug --output-on-failure
+```
+Then follow:
+- [MVP release checklist](release_checklist.md)
