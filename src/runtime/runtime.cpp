@@ -21,6 +21,9 @@ namespace Velo::Runtime {
     Runtime::Runtime() {
         registerStdConsole();
         registerStdString();
+        registerStdInt();
+        registerStdBool();
+
         buildModulesFromBuiltins();
     }
 
@@ -120,6 +123,76 @@ namespace Velo::Runtime {
                         .exitCode = 0,
                         .error = {},
                         .returnValue = static_cast<int>(text.size())
+                    };
+                }
+            }
+        );
+    }
+
+    void Runtime::registerStdInt() {
+        _registry.registerFunc(
+            BuiltinFunction {
+                "int::toString",
+                {"int"},
+                "string",
+                [](const std::vector<Value> &args) -> ExecutionResult {
+                    if (args.size() != 1U) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "int::toString expects exactly one argument."
+                        };
+                    }
+
+                    const auto &value = args.front();
+                    if (!std::holds_alternative<int>(value)) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "int::toString expects an int argument."
+                        };
+                    }
+
+                    return ExecutionResult {
+                        .success = true,
+                        .exitCode = 0,
+                        .error = {},
+                        .returnValue = std::to_string(std::get<int>(value))
+                    };
+                }
+            }
+        );
+    }
+
+    void Runtime::registerStdBool() {
+        _registry.registerFunc(
+            BuiltinFunction {
+                "bool::toString",
+                {"bool"},
+                "string",
+                [](const std::vector<Value> &args) -> ExecutionResult {
+                    if (args.size() != 1U) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "bool::toString expects exactly one argument."
+                        };
+                    }
+
+                    const auto &value = args.front();
+                    if (!std::holds_alternative<bool>(value)) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "bool::toString expects a bool argument."
+                        };
+                    }
+
+                    return ExecutionResult {
+                        .success = true,
+                        .exitCode = 0,
+                        .error = {},
+                        .returnValue = std::get<bool>(value) ? std::string("true") : std::string("false")
                     };
                 }
             }

@@ -699,3 +699,75 @@ TEST(InterpreterTest, ReportsStringLenRuntimeTypeError) {
     EXPECT_EQ(result.exitCode, 1);
     EXPECT_FALSE(result.error.empty());
 }
+
+TEST(InterpreterTest, ExecutesIntToStringBuiltin) {
+    Module module;
+
+    Function mainFunction;
+    mainFunction.name = "main";
+
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .intOperand = 123
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::CallBuiltin,
+        .stringOperand = "int::toString",
+        .argsCount = 1U
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::CallBuiltin,
+        .stringOperand = "string::len",
+        .argsCount = 1U
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::Return
+    });
+
+    module.functions.push_back(std::move(mainFunction));
+
+    Runtime runtime;
+    Interpreter interpreter(runtime);
+
+    const auto result = interpreter.execute(module);
+
+    EXPECT_TRUE(result.success);
+    EXPECT_EQ(result.exitCode, 3);
+    EXPECT_TRUE(result.error.empty());
+}
+
+TEST(InterpreterTest, ExecutesBoolToStringBuiltin) {
+    Module module;
+
+    Function mainFunction;
+    mainFunction.name = "main";
+
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::PushBool,
+        .boolOperand = true
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::CallBuiltin,
+        .stringOperand = "bool::toString",
+        .argsCount = 1U
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::CallBuiltin,
+        .stringOperand = "string::len",
+        .argsCount = 1U
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::Return
+    });
+
+    module.functions.push_back(std::move(mainFunction));
+
+    Runtime runtime;
+    Interpreter interpreter(runtime);
+
+    const auto result = interpreter.execute(module);
+
+    EXPECT_TRUE(result.success);
+    EXPECT_EQ(result.exitCode, 4);
+    EXPECT_TRUE(result.error.empty());
+}

@@ -802,3 +802,75 @@ fn main(): int {
     EXPECT_EQ(result.diagnostics.front().code(), "SEM033");
     EXPECT_EQ(result.exitCode, 1);
 }
+
+TEST(DriverTest, ExecutesIntToStringBuiltinProgram) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "int_to_string.velo",
+        R"(module app;
+use std::int as ints;
+use std::string as str;
+
+fn main(): int {
+    return str::len(ints::toString(123));
+}
+)"
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 3);
+}
+
+TEST(DriverTest, ExecutesBoolToStringBuiltinProgram) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "bool_to_string.velo",
+        R"(module app;
+use std::bool as bools;
+use std::string as str;
+
+fn main(): int {
+    return str::len(bools::toString(false));
+}
+)"
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 5);
+}
+
+TEST(DriverTest, IrModuleResolvesStdIntAlias) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "int_to_string_ir_alias.velo",
+        R"(module app;
+use std::int as ints;
+use std::string as str;
+
+fn main(): int {
+    return str::len(ints::toString(123));
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.irText.find("CallBuiltin int::toString args=1"), std::string::npos);
+    EXPECT_EQ(result.irText.find("CallBuiltin ints::toString args=1"), std::string::npos);
+}

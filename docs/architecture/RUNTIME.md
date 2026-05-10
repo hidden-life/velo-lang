@@ -235,3 +235,7 @@ Examples:
 
 The runtime still validates builtin argument values defensively, but semantic
 analysis can now catch builtin argument type errors before execution.
+
+Additional builtin signatures:
+- `int::toString(int): string`
+- `bool::toString(bool): string`

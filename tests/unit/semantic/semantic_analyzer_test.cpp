@@ -1246,3 +1246,97 @@ fn main(): int {
     EXPECT_TRUE(analyzer.analyze());
     EXPECT_FALSE(engine.hasErrors());
 }
+
+TEST(SemanticAnalyzerTest, AcceptsIntToStringBuiltinReturnType) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+use std::int as ints;
+use std::string as str;
+
+fn main(): int {
+    return str::len(ints::toString(123));
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+    const bool isOk = analyzer.analyze();
+    if (!isOk) {
+        for (const auto &diag : engine.diagnostics()) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+    EXPECT_TRUE(isOk);
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, AcceptsBoolToStringBuiltinReturnType) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+use std::bool as bools;
+use std::string as str;
+
+fn main(): int {
+    return str::len(bools::toString(true));
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, ReportsIntToStringArgumentTypeMismatch) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+use std::int as ints;
+
+fn main(): int {
+    return ints::toString("bad");
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM033");
+}
+
+TEST(SemanticAnalyzerTest, ReportsBoolToStringArgumentTypeMismatch) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+use std::bool as bools;
+
+fn main(): int {
+    return bools::toString(1);
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM033");
+}

@@ -35,3 +35,20 @@ use std::string as str;
 str::len("hello"); // int
 ```
 `str::len` expects a `string` argument.
+
+##### std::int
+```velo
+use std::int as ints;
+
+ints::toString(123);
+```
+`ints::toString` expects an `int` argument and returns `string`.
+
+##### std::bool
+```velo
+use std::bool as bools;
+
+bools::toString(true); // string
+bools::toString(false); // string
+```
+`bools::toString` expects `bool` argument and returns `string`.

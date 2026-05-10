@@ -30,4 +30,28 @@ TEST(RuntimeTest, BuildsModulesFromBuiltins) {
     EXPECT_EQ(len->returnType, "int");
     ASSERT_EQ(len->parameterTypes.size(), 1U);
     EXPECT_EQ(len->parameterTypes[0], "string");
+
+    const auto *intModule = modules.find("int");
+    ASSERT_NE(intModule, nullptr);
+
+    const auto *intToStr = intModule->findFunction("toString");
+    ASSERT_NE(intToStr, nullptr);
+
+    EXPECT_EQ(intToStr->name, "toString");
+    EXPECT_EQ(intToStr->arity, 1U);
+    EXPECT_EQ(intToStr->returnType, "string");
+    ASSERT_EQ(intToStr->parameterTypes.size(), 1U);
+    EXPECT_EQ(intToStr->parameterTypes[0], "int");
+
+    const auto *boolModule = modules.find("bool");
+    ASSERT_NE(boolModule, nullptr);
+
+    const auto *boolToStr = boolModule->findFunction("toString");
+    ASSERT_NE(boolToStr, nullptr);
+
+    EXPECT_EQ(boolToStr->name, "toString");
+    EXPECT_EQ(boolToStr->arity, 1U);
+    EXPECT_EQ(boolToStr->returnType, "string");
+    ASSERT_EQ(boolToStr->parameterTypes.size(), 1U);
+    EXPECT_EQ(boolToStr->parameterTypes[0], "bool");
 }

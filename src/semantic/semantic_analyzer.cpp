@@ -651,7 +651,8 @@ namespace Velo::Semantic {
             if (!builtinParameterAcceptsType(expectedTypeName, actualType)) {
                 _engine.error(
                     "SEM033",
-                    "Builtin argument type mismatch.",
+                    // "Builtin argument type mismatch.",
+                    "Builtin argument type mismatch. Expected '" + expectedTypeName + "'.",
                     callExpr.arguments[idx]->range
                 );
             }

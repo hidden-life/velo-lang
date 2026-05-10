@@ -1,0 +1,13 @@
+module app;
+
+use std::console;
+use std::int as ints;
+use std::bool as bools;
+
+fn main(): int {
+    console::println(ints::toString(123));
+    console::println(bools::toString(true));
+    console::println(bools::toString(false));
+
+    return 0;
+}

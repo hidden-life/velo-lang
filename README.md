@@ -47,6 +47,8 @@ Implemented so far:
 - IR dump mode via `velo ir`
 - `std::string` module foundation
 - `std::string::len(value)` builtin
+- `std::int::toString(value)`
+- `std::bool::toString(value)`
 - GoogleTest test setup
 
 ## Build
@@ -162,6 +164,7 @@ Program
 ./build/debug/apps/velo/velo ./examples/arithmetic/main.velo
 ./build/debug/apps/velo/velo ./examples/short_circuit/main.velo
 ./build/debug/apps/velo/velo ./examples/std_string/main.velo
+./build/debug/apps/velo/velo ./examples/std_to_string/main.velo
 ```
 
 ## Next milestone
