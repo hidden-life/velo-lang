@@ -1582,15 +1582,190 @@ fn main(): int {
     EXPECT_EQ(engine.diagnostics().front().code(), "SEM036");
 }
 
-TEST(SemanticAnalyzerTest, ReportsStructTypeInFunctionParameterBeforeTypeUsageSupport) {
+TEST(SemanticAnalyzerTest, AcceptsStructTypeInFunctionParameterAndReturnType) {
     DiagnosticEngine engine;
-
     const auto program = parseProgram(
         R"(module app;
+struct User {
+    id: int;
+    name: string;
+}
 
+fn identity(user: User): User {
+    return user;
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, AcceptsStructTypeInLocalVariableDeclaration) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
 struct User {
     id: int;
 }
+
+fn useUser(user: User): int {
+    let copy: User = user;
+    return 0;
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, ReportsStructLocalIntializerTypeMismatch) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+struct User {
+    id: int;
+}
+
+struct Profile {
+    id: int;
+}
+
+fn useProfile(profile: Profile): int {
+    let user: User = profile;
+    return 0;
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM019");
+}
+
+TEST(SemanticAnalyzerTest, ReportsStructReturnTypeMismatch) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+struct User {
+    id: int;
+}
+
+struct Profile {
+    id: int;
+}
+
+fn getUser(profile: Profile): User {
+    return profile;
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM014");
+}
+
+TEST(SemanticAnalyzerTest, AcceptsStructFunctionArgumentType) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+struct User {
+    id: int;
+}
+
+fn accept(user: User): int {
+    return 1;
+}
+
+fn callAccept(user: User): int {
+    return accept(user);
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, ReportsStructFunctionArgumentTypeMismatch) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+struct User {
+    id: int;
+}
+
+fn accept(user: User): int {
+    return 1;
+}
+
+fn main(): int {
+    return accept(123);
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM037");
+}
+
+TEST(SemanticAnalyzerTest, ReportsUnknownStructTypeInFunctionParameter) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
 
 fn accept(user: User): int {
     return 0;
@@ -1605,12 +1780,9 @@ fn main(): int {
 
     ASSERT_NE(program, nullptr);
     ASSERT_FALSE(engine.hasErrors());
-
     Velo::Runtime::Runtime runtime;
     SemanticAnalyzer analyzer(*program, engine, runtime.modules());
-
     EXPECT_FALSE(analyzer.analyze());
-
     ASSERT_TRUE(engine.hasErrors());
     EXPECT_EQ(engine.diagnostics().front().code(), "SEM030");
 }

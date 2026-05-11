@@ -253,3 +253,40 @@ Semantic diagnostics should be:
 - tied to source ranges
 
 When an expression already produced an error, later checks should avoid adding redundant diagnostics.
+
+## User-defined semantic types
+The semantic analyzer supports named struct types.
+
+Builtin semantic types:
+- `int`
+- `string`
+- `bool`
+- `void`
+
+User-defined semantic type:
+```text
+Struct(name)
+```
+
+Example:
+```velo
+struct User {
+    id: int;
+}
+
+fn identity(u: User): User {
+    return u;
+}
+```
+The semantic analyzer compares struct types by name.
+
+Examples:
+```text
+User == User
+User != Profile
+```
+This is used for:
+- return type validation
+- local initializer validation
+- assignment validation
+- function argument validation

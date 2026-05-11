@@ -73,7 +73,7 @@ namespace Velo::Semantic {
         }
 
         const auto mainReturnType = typeFromTypeName(mainFunc.returnType);
-        if (mainReturnType != ExpressionType::Unknown && mainReturnType != ExpressionType::Int) {
+        if (!isUnknownType(mainReturnType) && !isIntType(mainReturnType)) {
             _engine.error(
                 "SEM005",
                 "Entry point 'main' must return int.",
@@ -85,14 +85,8 @@ namespace Velo::Semantic {
     void SemanticAnalyzer::analyzeFunction(const AST::FunctionDeclaration &func) {
         _currentParameters.clear();
         _scopeStack.clear();
-
-        if (!func.returnType.name.segments.empty()) {
-            _currentFunctionReturnType = func.returnType.name.segments.front();
-        } else {
-            _currentFunctionReturnType.clear();
-        }
-
         validateDeclaredType(func.returnType, true, "function '" + func.name + "' return type");
+        _currentFunctionReturnType = typeFromTypeName(func.returnType);
         pushScope();
 
         for (const auto &param : func.parameters) {
@@ -100,8 +94,8 @@ namespace Velo::Semantic {
             auto paramType = typeFromTypeName(param.type);
             // If the parameter type is invalid for value position, keep it Unknown
             // to reduce follow-up type mismatch diagnostics.
-            if (paramType == ExpressionType::Void) {
-                paramType = ExpressionType::Unknown;
+            if (isVoidType(paramType)) {
+                paramType = {};
             }
             const auto [it, inserted] = _currentParameters.emplace(param.name, paramType);
             if (!inserted) {
@@ -118,8 +112,8 @@ namespace Velo::Semantic {
         }
 
         // Guaranteed return check must run only after all statements are analyzed.
-        // Otherwise a function with console::println(...); return 0; would incorrectly get SEM017 on the first statement.
-        if (_currentFunctionReturnType != "void") {
+        // Otherwise, a function with console::println(...); return 0; would incorrectly get SEM017 on the first statement.
+        if (!isVoidType(_currentFunctionReturnType)) {
             if (func.statements.empty() || !statementGuaranteesReturn(*func.statements.back())) {
                 _engine.error(
                     "SEM017",
@@ -131,7 +125,7 @@ namespace Velo::Semantic {
 
         _currentParameters.clear();
         _scopeStack.clear();
-        _currentFunctionReturnType.clear();
+        _currentFunctionReturnType = {};
     }
 
     void SemanticAnalyzer::analyzeStatement(const AST::Statement &stmt) {
@@ -143,9 +137,9 @@ namespace Velo::Semantic {
             }
             case AST::StatementKind::Return: {
                 const auto &returnStmt = static_cast<const AST::ReturnStatement&>(stmt);
-                const auto expectedType = typeFromString(_currentFunctionReturnType);
+                const auto expectedType = _currentFunctionReturnType;
                 if (returnStmt.expression == nullptr) {
-                    if (expectedType != ExpressionType::Void) {
+                    if (!isVoidType(expectedType)) {
                         _engine.error(
                             "SEM015",
                             "non-void function must return a value.",
@@ -156,7 +150,7 @@ namespace Velo::Semantic {
                 }
 
                 const auto actual = analyzeCheckedExpressionType(*returnStmt.expression);
-                if (expectedType == ExpressionType::Void) {
+                if (isVoidType(expectedType)) {
                     _engine.error(
                         "SEM016",
                         "Void function must not return a value.",
@@ -165,10 +159,11 @@ namespace Velo::Semantic {
                     return;
                 }
 
-                if (expectedType != ExpressionType::Unknown && actual != expectedType && actual != ExpressionType::Unknown) {
+                if (!isUnknownType(expectedType) && !isUnknownType(actual) && !typesEqual(actual, expectedType)) {
                     _engine.error(
                         "SEM014",
-                        "Return type mismatch.",
+                        "Return type mismatch. Expected '" + semanticTypeToString(expectedType) + "', actual '" +
+                        semanticTypeToString(actual) + "'.",
                         returnStmt.range
                     );
                 }
@@ -179,15 +174,17 @@ namespace Velo::Semantic {
                 const auto &varDecl = static_cast<const AST::VariableDeclarationStatement&>(stmt);
                 validateDeclaredType(varDecl.type, false, "local variable '" + varDecl.name + "'");
                 auto declType = typeFromTypeName(varDecl.type);
-                if (declType == ExpressionType::Void) {
-                    declType = ExpressionType::Unknown;
+                if (isVoidType(declType)) {
+                    declType = {};
                 }
                 const auto initType = analyzeCheckedExpressionType(*varDecl.initializer);
 
-                if (declType != ExpressionType::Unknown && initType != ExpressionType::Unknown && initType != declType) {
+                if (!isUnknownType(declType) && !isUnknownType(initType) && !typesEqual(initType, declType)) {
                     _engine.error(
                         "SEM019",
-                        "Local variable initializer type mismatch.",
+                        "Local variable initializer type mismatch. Expected '"
+                        + semanticTypeToString(declType) + "', actual '" +
+                        semanticTypeToString(initType) + "'.",
                         varDecl.range
                     );
                 }
@@ -230,10 +227,11 @@ namespace Velo::Semantic {
 
                 const auto valueType = analyzeCheckedExpressionType(*assignment.value);
 
-                if (valueType != ExpressionType::Unknown && local->type != ExpressionType::Unknown && valueType != local->type) {
+                if (isUnknownType(valueType) && !isUnknownType(local->type) && !typesEqual(valueType, local->type)) {
                     _engine.error(
                         "SEM022",
-                        "Assignment type mismatch.",
+                        "Assignment type mismatch. Expected '" + semanticTypeToString(local->type) + "', actual '" +
+                        semanticTypeToString(valueType) + "'.",
                         assignment.range
                     );
                 }
@@ -244,7 +242,7 @@ namespace Velo::Semantic {
             case AST::StatementKind::If: {
                 const auto &ifStmt = static_cast<const AST::IfStatement&>(stmt);
                 const auto conditionType = analyzeCheckedExpressionType(*ifStmt.condition);
-                if (conditionType != ExpressionType::Bool && conditionType != ExpressionType::Unknown) {
+                if (!isBoolType(conditionType) && !isUnknownType(conditionType)) {
                     _engine.error(
                         "SEM023",
                         "If condition must be bool.",
@@ -270,7 +268,7 @@ namespace Velo::Semantic {
             case AST::StatementKind::While: {
                 const auto &whileStmt = static_cast<const AST::WhileStatement&>(stmt);
                 const auto conditionType = analyzeCheckedExpressionType(*whileStmt.condition);
-                if (conditionType != ExpressionType::Bool && conditionType != ExpressionType::Unknown) {
+                if (!isBoolType(conditionType) && !isUnknownType(conditionType)) {
                     _engine.error(
                         "SEM025",
                         "While condition must be bool.",
@@ -473,15 +471,19 @@ namespace Velo::Semantic {
         return typeName.name.segments.size() == 1U && typeName.name.segments[0] == "int";
     }
 
-    auto SemanticAnalyzer::analyzeExpressionType(const AST::Expression &expression) -> ExpressionType {
+    auto SemanticAnalyzer::analyzeExpressionType(const AST::Expression &expression) -> SemanticType {
         using namespace AST;
 
         switch (expression.kind) {
             case ExpressionKind::IntegerLiteral:
-                return ExpressionType::Int;
+                return SemanticType {
+                    .kind = SemanticTypeKind::Int
+                };
 
             case ExpressionKind::StringLiteral:
-                return ExpressionType::String;
+                return SemanticType {
+                    .kind = SemanticTypeKind::String
+                };
 
             case ExpressionKind::Name: {
                 const auto &nameExpr = static_cast<const NameExpression&>(expression);
@@ -498,7 +500,7 @@ namespace Velo::Semantic {
                     }
                 }
 
-                return ExpressionType::Unknown;
+                return {};
             }
 
             case ExpressionKind::Binary: {
@@ -512,45 +514,57 @@ namespace Velo::Semantic {
                     binaryExpr.op == BinaryOperator::Divide ||
                     binaryExpr.op == BinaryOperator::Modulo
                 ) {
-                    if (left == ExpressionType::Int && right == ExpressionType::Int) {
-                        return ExpressionType::Int;
+                    if (isIntType(left) && isIntType(right)) {
+                        return SemanticType {
+                            .kind = SemanticTypeKind::Int
+                        };
                     }
 
-                    _engine.error(
+                    if (!isUnknownType(left) && !isUnknownType(right)) {
+                        _engine.error(
                         "SEM013",
                         "Arithmetic operators require integer operands.",
-                        binaryExpr.range
-                    );
+                            binaryExpr.range
+                        );
+                    }
 
-                    return ExpressionType::Unknown;
+                    return {};
                 }
 
                 if (binaryExpr.op == BinaryOperator::LogicalAnd || binaryExpr.op == BinaryOperator::LogicalOr) {
-                    if (left == ExpressionType::Bool && right == ExpressionType::Bool) {
-                        return ExpressionType::Bool;
+                    if (isBoolType(left) && isBoolType(right)) {
+                        return SemanticType {
+                            .kind = SemanticTypeKind::Bool
+                        };
                     }
 
-                    _engine.error(
+                    if (!isUnknownType(left) && !isUnknownType(right)) {
+                        _engine.error(
                         "SEM029",
                         "Logical operators require bool operands.",
-                        binaryExpr.range
-                    );
+                            binaryExpr.range
+                        );
+                    }
 
-                    return ExpressionType::Unknown;
+                    return {};
                 }
 
                 // At this stage all comparison/equality operators support int operands only.
-                if (left == ExpressionType::Int && right == ExpressionType::Int) {
-                    return ExpressionType::Bool;
+                if (isIntType(left) && isIntType(right)) {
+                    return SemanticType {
+                        .kind = SemanticTypeKind::Bool
+                    };
                 }
 
-                _engine.error(
+                if (!isUnknownType(left) && !isUnknownType(right)) {
+                    _engine.error(
                     "SEM024",
                     "Comparison operators require integer operands.",
-                    binaryExpr.range
-                );
+                        binaryExpr.range
+                    );
+                }
 
-                return ExpressionType::Unknown;
+                return {};
             }
 
             case ExpressionKind::Call: {
@@ -560,7 +574,9 @@ namespace Velo::Semantic {
             }
 
             case ExpressionKind::BooleanLiteral: {
-                return ExpressionType::Bool;
+                return SemanticType {
+                    .kind = SemanticTypeKind::Bool
+                };
             }
 
             case ExpressionKind::Unary: {
@@ -568,50 +584,71 @@ namespace Velo::Semantic {
                 const auto operandType = analyzeExpressionType(*unaryExpr.operand);
                 switch (unaryExpr.op) {
                     case UnaryOperator::Not: {
-                        if (operandType == ExpressionType::Bool) {
-                            return ExpressionType::Bool;
+                        if (isBoolType(operandType)) {
+                            return SemanticType {
+                                .kind = SemanticTypeKind::Bool
+                            };
                         }
 
-                        _engine.error(
+                        if (!isUnknownType(operandType)) {
+                            _engine.error(
                             "SEM028",
                             "Operator '!' requires bool operand.",
-                            unaryExpr.range
-                        );
+                                unaryExpr.range
+                            );
+                        }
 
-                        return ExpressionType::Unknown;
+                        return {};
                     }
 
                     case UnaryOperator::Negate: {
-                        if (operandType == ExpressionType::Int) {
-                            return ExpressionType::Int;
+                        if (isIntType(operandType)) {
+                            return SemanticType {
+                                .kind = SemanticTypeKind::Int
+                            };
                         }
 
-                        _engine.error(
+                        if (!isUnknownType(operandType)) {
+                            _engine.error(
                             "SEM032",
                             "Unary '-' requires int operand.",
-                            unaryExpr.range
-                        );
+                                unaryExpr.range
+                            );
+                        }
 
-                        return ExpressionType::Unknown;
+                        return {};
                     }
                 }
             }
         }
 
-        return ExpressionType::Unknown;
+        return {};
     }
 
-    auto SemanticAnalyzer::typeFromTypeName(const AST::TypeName &typeName) -> ExpressionType {
+    auto SemanticAnalyzer::typeFromTypeName(const AST::TypeName &typeName) -> SemanticType {
         if (typeName.name.segments.size() != 1U) {
-            return ExpressionType::Unknown;
+            return {};
         }
 
-        return typeFromString(typeName.name.segments.front());
+        const std::string &name = typeName.name.segments.front();
+        const auto builtinType = typeFromString(name);
+        if (!isUnknownType(builtinType)) {
+            return builtinType;
+        }
+
+        if (resolveUserDefinedType(typeName) != nullptr) {
+            return SemanticType {
+                .kind = SemanticTypeKind::Struct,
+                .name = name
+            };
+        }
+
+        return {};
     }
 
-    auto SemanticAnalyzer::analyzeCallExpressionType(const AST::CallExpression &callExpr) -> ExpressionType {
+    auto SemanticAnalyzer::analyzeCallExpressionType(const AST::CallExpression &callExpr) -> SemanticType {
         if (callExpr.callee.segments.empty()) {
-            return ExpressionType::Unknown;
+            return {};
         }
 
         // Single-segment call is a user-defined function call: helper().
@@ -619,10 +656,30 @@ namespace Velo::Semantic {
             const std::string &funcName = callExpr.callee.segments.front();
             const auto it = _functions.find(funcName);
             if (it == _functions.end()) {
-                return ExpressionType::Unknown;
+                return {};
             }
 
-            return typeFromTypeName(it->second->returnType);
+            const auto &targetFunc = *it->second;
+            for (std::size_t idx = 0; idx < callExpr.arguments.size(); ++idx) {
+                if (idx >= targetFunc.parameters.size()) {
+                    break;
+                }
+
+                const auto expectedType = typeFromTypeName(targetFunc.parameters[idx].type);
+                const auto actualType = analyzeCheckedExpressionType(*callExpr.arguments[idx]);
+
+                if (!isUnknownType(expectedType) && !isUnknownType(actualType) && !typesEqual(actualType, expectedType)) {
+                    _engine.error(
+                        "SEM037",
+                        "Function argument type mismatch. Expected '" +
+                        semanticTypeToString(expectedType) +
+                        "', actual '" + semanticTypeToString(actualType) + "'.",
+                        callExpr.arguments[idx]->range
+                    );
+                }
+            }
+
+            return typeFromTypeName(targetFunc.returnType);
         }
 
         // At this stage builtins only support console::println.
@@ -632,16 +689,20 @@ namespace Velo::Semantic {
 
         const auto importIt = _visibleImports.find(moduleName);
         if (importIt == _visibleImports.end()) {
-            return ExpressionType::Unknown;
+            return {};
         }
 
         const std::string actual = importedModuleName(*importIt->second);
         const auto *module = _modules.find(actual);
         if (module == nullptr) {
-            return ExpressionType::Unknown;
+            return {};
         }
 
         const auto *func = module->findFunction(funcName);
+        if (func == nullptr) {
+            return {};
+        }
+
         for (std::size_t idx = 0; idx < callExpr.arguments.size(); ++idx) {
             if (idx >= func->parameterTypes.size()) {
                 break;
@@ -656,39 +717,43 @@ namespace Velo::Semantic {
             if (!builtinParameterAcceptsType(expectedTypeName, actualType)) {
                 _engine.error(
                     "SEM033",
-                    // "Builtin argument type mismatch.",
-                    "Builtin argument type mismatch. Expected '" + expectedTypeName + "'.",
+                    "Builtin argument type mismatch. Expected '" + expectedTypeName + "', actual '" +
+                    semanticTypeToString(actualType) + "'.",
                     callExpr.arguments[idx]->range
                 );
             }
-        }
-
-        if (func == nullptr) {
-            return ExpressionType::Unknown;
         }
 
         // Builtin function types is now read from ModuleRegistry metadata.
         return typeFromString(func->returnType);
     }
 
-    auto SemanticAnalyzer::typeFromString(const std::string &typeName) -> ExpressionType {
+    auto SemanticAnalyzer::typeFromString(const std::string &typeName) -> SemanticType {
         if (typeName == "int") {
-            return ExpressionType::Int;
+            return SemanticType {
+                .kind = SemanticTypeKind::Int,
+            };
         }
 
         if (typeName == "string") {
-            return ExpressionType::String;
+            return SemanticType {
+                .kind = SemanticTypeKind::String,
+            };
         }
 
         if (typeName == "void") {
-            return ExpressionType::Void;
+            return SemanticType {
+                .kind = SemanticTypeKind::Void,
+            };
         }
 
         if (typeName == "bool") {
-            return ExpressionType::Bool;
+            return SemanticType {
+                .kind = SemanticTypeKind::Bool,
+            };
         }
 
-        return ExpressionType::Unknown;
+        return {};
     }
 
     auto SemanticAnalyzer::importedModuleName(const AST::UseDeclaration &useDecl) -> std::string {
@@ -757,31 +822,26 @@ namespace Velo::Semantic {
     void SemanticAnalyzer::validateDeclaredType(
         const AST::TypeName &typeName,
         bool allowVoid,
-        const std::string &subject,
-        bool allowUserDefinedTypes
+        const std::string &subject
     ) {
         const auto type = typeFromTypeName(typeName);
-        if (type != ExpressionType::Unknown) {
-            if (!allowVoid && type == ExpressionType::Void) {
-                _engine.error(
-                    "SEM031",
-                    "Type 'void' cannot be used in " + subject + ".",
-                    typeName.range
-                );
-            }
+        if (isUnknownType(type)) {
+            _engine.error(
+                "SEM030",
+                "Unknown type '" + typeNameToString(typeName) + "'.",
+                typeName.range
+            );
 
             return;
         }
 
-        if (allowUserDefinedTypes && resolveUserDefinedType(typeName) != nullptr) {
-            return;
+        if (!allowVoid && isVoidType(type)) {
+            _engine.error(
+                "SEM031",
+                "Type 'void' cannot be used in " + subject + ".",
+                typeName.range
+            );
         }
-
-        _engine.error(
-            "SEM030",
-            "Unknown type '" + typeNameToString(typeName) + "' in " + subject + ".",
-            typeName.range
-        );
     }
 
     auto SemanticAnalyzer::typeNameToString(const AST::TypeName &typeName) -> std::string {
@@ -796,38 +856,38 @@ namespace Velo::Semantic {
         return result;
     }
 
-    auto SemanticAnalyzer::analyzeCheckedExpressionType(const AST::Expression &expression) -> ExpressionType {
+    auto SemanticAnalyzer::analyzeCheckedExpressionType(const AST::Expression &expression) -> SemanticType {
         const auto errorsBefore = _engine.size();
         analyzeExpression(expression);
 
         // If name/function/module validation already reported an error,
         // do not run type analysis to avoid duplicate/cascading diagnostics.
         if (_engine.size() != errorsBefore) {
-            return ExpressionType::Unknown;
+            return {};
         }
 
         return analyzeExpressionType(expression);
     }
 
-    auto SemanticAnalyzer::builtinParameterAcceptsType(const std::string &expected, ExpressionType actual) -> bool {
+    auto SemanticAnalyzer::builtinParameterAcceptsType(const std::string &expected, const SemanticType &actual) -> bool {
         if (expected == "any") {
             return true;
         }
 
-        if (actual == ExpressionType::Unknown) {
+        if (isUnknownType(actual)) {
             return true;
         }
 
         if (expected == "int") {
-            return actual == ExpressionType::Int;
+            return isIntType(actual);
         }
 
         if (expected == "string") {
-            return actual == ExpressionType::String;
+            return isStringType(actual);
         }
 
         if (expected == "bool") {
-            return actual == ExpressionType::Bool;
+            return isBoolType(actual);
         }
 
         return false;
@@ -874,8 +934,7 @@ namespace Velo::Semantic {
             validateDeclaredType(
                 field.type,
                 false,
-                "field '" + structDecl.name + "::" + field.name + "'",
-                true
+                "field '" + structDecl.name + "::" + field.name + "'"
             );
         }
     }
@@ -899,5 +958,56 @@ namespace Velo::Semantic {
             typeName == "string" ||
             typeName == "bool" ||
             typeName == "void";
+    }
+
+    auto SemanticAnalyzer::isUnknownType(const SemanticType &type) -> bool {
+        return type.kind == SemanticTypeKind::Unknown;
+    }
+
+    auto SemanticAnalyzer::isVoidType(const SemanticType &type) -> bool {
+        return type.kind == SemanticTypeKind::Void;
+    }
+
+    auto SemanticAnalyzer::isIntType(const SemanticType &type) -> bool {
+        return type.kind == SemanticTypeKind::Int;
+    }
+
+    auto SemanticAnalyzer::isStringType(const SemanticType &type) -> bool {
+        return type.kind == SemanticTypeKind::String;
+    }
+
+    auto SemanticAnalyzer::isBoolType(const SemanticType &type) -> bool {
+        return type.kind == SemanticTypeKind::Bool;
+    }
+
+    auto SemanticAnalyzer::typesEqual(const SemanticType &left, const SemanticType &right) -> bool {
+        if (left.kind != right.kind) {
+            return false;
+        }
+
+        if (left.kind == SemanticTypeKind::Struct) {
+            return left.name == right.name;
+        }
+
+        return true;
+    }
+
+    auto SemanticAnalyzer::semanticTypeToString(const SemanticType &type) -> std::string {
+        switch (type.kind) {
+            case SemanticTypeKind::Unknown:
+                return "unknown";
+            case SemanticTypeKind::Void:
+                return "void";
+            case SemanticTypeKind::Int:
+                return "int";
+            case SemanticTypeKind::String:
+                return "string";
+            case SemanticTypeKind::Bool:
+                return "bool";
+            case SemanticTypeKind::Struct:
+                return type.name;
+        }
+
+        return "unknown";
     }
 }

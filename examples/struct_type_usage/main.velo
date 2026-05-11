@@ -1,0 +1,22 @@
+module app;
+
+use std::console;
+
+struct User {
+    id: int;
+    name: string;
+}
+
+fn identity(u: User): User {
+    return u;
+}
+
+fn useUser(u: User): int {
+    let copy: User = identity(u);
+    return 0;
+}
+
+fn main(): int {
+    console::println("struct type usage works");
+    return 0;
+}

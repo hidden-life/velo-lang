@@ -71,9 +71,25 @@ struct int {
 ```
 This is invalid!
 
+Struct types can be used in function parameters, return types, and local declarations:
+```velo
+struct User {
+    id: int;
+}
+
+fn identity(u: User): User {
+    return u;
+}
+
+fn useUser(u: User): int {
+    let copy: User = identity(u);
+    
+    return 0;
+}
+```
+
 Current limitation:
-- structs cannot be instantiated yet
-- struct cannot be used as parameter/local/return types yet
+- struct literals are not implemented yet
 - field access is not implemented yet
 
 ## Functions

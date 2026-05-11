@@ -113,10 +113,31 @@ struct Profile {
 }
 ```
 
-Current limitation:
-- struct type declarations exist
+Current support:
+- struct declarations
 - struct field types can reference declared structs
-- using struct types in parameters, local variables and return values is planned for MVP 0.2.3
+- function parameters can use struct types
+- function return type can use struct types
+- semantic type checking understands specific struct names
+
+Example:
+```velo
+struct User {
+    id: int;
+}
+
+fn identity(u: User): User {
+    return u;
+}
+
+fn useUser(u: User): int {
+    let copy: User = identity(u);
+    
+    return 0;
+}
+```
+
+Current limitation:
 - struct literals are planned for MVP 0.2.4
 - field access is planned for MVP 0.2.5
 

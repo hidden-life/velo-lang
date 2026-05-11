@@ -10,12 +10,19 @@
 #include "velo/module/module_registry.h"
 
 namespace Velo::Semantic {
-    enum class ExpressionType {
+    enum class SemanticTypeKind {
         Unknown,
         Void,
         Int,
         String,
         Bool,
+        Struct,
+    };
+
+    struct SemanticType final {
+        SemanticTypeKind kind {SemanticTypeKind::Unknown};
+        // Used only when kind == SemanticKindType::Struct
+        std::string name {};
     };
 
     // Minimal semantic analyzer for the first executable Velo program shape.
@@ -39,20 +46,27 @@ namespace Velo::Semantic {
         [[nodiscard]] static auto visibleImportName(const AST::UseDeclaration &useDecl) -> std::string;
         [[nodiscard]] static auto isBuiltinInt(const AST::TypeName &typeName) -> bool;
 
-        [[nodiscard]] auto analyzeExpressionType(const AST::Expression &expression) -> ExpressionType;
+        [[nodiscard]] auto analyzeExpressionType(const AST::Expression &expression) -> SemanticType;
 
-        [[nodiscard]] auto analyzeCheckedExpressionType(const AST::Expression &expression) -> ExpressionType;
+        [[nodiscard]] auto analyzeCheckedExpressionType(const AST::Expression &expression) -> SemanticType;
 
-        [[nodiscard]] auto typeFromTypeName(const AST::TypeName &typeName) -> ExpressionType;
-        [[nodiscard]] auto analyzeCallExpressionType(const AST::CallExpression &callExpr) -> ExpressionType;
+        [[nodiscard]] auto typeFromTypeName(const AST::TypeName &typeName) -> SemanticType;
+        [[nodiscard]] auto analyzeCallExpressionType(const AST::CallExpression &callExpr) -> SemanticType;
 
-        [[nodiscard]] auto typeFromString(const std::string &typeName) -> ExpressionType;
+        [[nodiscard]] auto typeFromString(const std::string &typeName) -> SemanticType;
+
+        [[nodiscard]] static auto isUnknownType(const SemanticType &type) -> bool;
+        [[nodiscard]] static auto isVoidType(const SemanticType &type) -> bool;
+        [[nodiscard]] static auto isIntType(const SemanticType &type) -> bool;
+        [[nodiscard]] static auto isStringType(const SemanticType &type) -> bool;
+        [[nodiscard]] static auto isBoolType(const SemanticType &type) -> bool;
+        [[nodiscard]] static auto typesEqual(const SemanticType &left, const SemanticType &right) -> bool;
+        [[nodiscard]] static auto semanticTypeToString(const SemanticType &type) -> std::string;
 
         void validateDeclaredType(
             const AST::TypeName &typeName,
             bool allowVoid,
-            const std::string &subject,
-            bool allowUserDefinedTypes = false
+            const std::string &subject
         );
         [[nodiscard]] static auto typeNameToString(const AST::TypeName &typeName) -> std::string;
 
@@ -63,7 +77,7 @@ namespace Velo::Semantic {
         void pushScope();
         void popScope();
 
-        [[nodiscard]] static auto builtinParameterAcceptsType(const std::string &expected, ExpressionType actual) -> bool;
+        [[nodiscard]] static auto builtinParameterAcceptsType(const std::string &expected, const SemanticType &actual) -> bool;
 
         [[nodiscard]] auto resolveUserDefinedType(const AST::TypeName &typeName) const -> const AST::StructDeclaration*;
         [[nodiscard]] static auto isBuiltinTypeName(const std::string &typeName) -> bool;
@@ -76,7 +90,7 @@ namespace Velo::Semantic {
         std::unordered_map<std::string, const AST::FunctionDeclaration*> _functions {};
 
         struct LocalSymbol final {
-            ExpressionType type {ExpressionType::Unknown};
+            SemanticType type {};
             bool isMutable {false};
         };
         // Scope of stack for local variables.
@@ -85,8 +99,8 @@ namespace Velo::Semantic {
         const Module::ModuleRegistry &_modules;
         // Function parameters visible in the currently analyzed function.
         // Parameter name -> semantic type.
-        std::unordered_map<std::string, ExpressionType> _currentParameters {};
-        std::string _currentFunctionReturnType {};
+        std::unordered_map<std::string, SemanticType> _currentParameters {};
+        SemanticType _currentFunctionReturnType {};
 
         int _loopDepth {0};
 

@@ -87,9 +87,40 @@ struct Profile {
 }
 ```
 
-Not implemented in 0.2.2:
+## 0.2.3 scope
+Implemented in this step:
+- semantic type model with named struct types
 - struct types in function parameters
-- struct types in local variables
 - struct types as function return types
+- struct types in local variable declarations
+- return type checking for struct types
+- local initializer checking for struct types
+- user-defined function argument checking
+
+Example:
+```velo
+module app;
+
+struct User {
+    id: int;
+}
+
+fn identity(user: User): User {
+    return user;
+}
+
+fn useUser(user: User): int {
+    let copy: User = identity(user);
+    return 0;
+}
+
+fn main(): int {
+    return 0;
+}
+```
+
+Not implemented in 0.2.3:
 - struct literals
+- runtime struct access
 - field access
+- field assignment

@@ -167,6 +167,16 @@ Demonstrates:
 - user-defined type registry
 - public struct with user-defined field type
 
+### Struct type usage
+```text
+examples/struct_type_usage/main.velo
+```
+Demonstrates:
+- struct type in function parameter
+- struct type as function return type
+- struct type in local declaration
+- semantic checking of named struct types
+
 ### MVP showcase
 ```text
 examples/mvp_showcase/main.velo

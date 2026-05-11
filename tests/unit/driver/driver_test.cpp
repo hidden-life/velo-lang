@@ -874,3 +874,57 @@ fn main(): int {
     EXPECT_NE(result.irText.find("CallBuiltin int::toString args=1"), std::string::npos);
     EXPECT_EQ(result.irText.find("CallBuiltin ints::toString args=1"), std::string::npos);
 }
+
+TEST(DriverTest, CheckModeAcceptsStructTypeUsageInFunctionSignature) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "struct_type_usage.velo",
+        R"(module app;
+struct User {
+    id: int;
+}
+
+fn identity(user: User): User {
+    return user;
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        Velo::Driver::DriverMode::Check
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 0);
+}
+
+TEST(DriverTest, CheckModeReportsStructFunctionArgumentMismatch) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "struct_argument_mismatch.velo",
+        R"(module app;
+struct User {
+    id: int;
+}
+
+fn accept(user: User): int {
+    return 1;
+}
+
+fn main(): int {
+    return accept(123);
+}
+)",
+        Velo::Driver::DriverMode::Check
+    );
+
+    ASSERT_FALSE(result.success);
+    ASSERT_FALSE(result.diagnostics.empty());
+
+    EXPECT_EQ(result.exitCode, 1);
+    EXPECT_EQ(result.diagnostics.front().code(), "SEM037");
+}
