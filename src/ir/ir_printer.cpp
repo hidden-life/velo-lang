@@ -78,6 +78,10 @@ namespace Velo::IR {
                 stream << " -> " << instruction.targetOperand;
                 break;
 
+            case OpCode::BuildStruct:
+                stream << " " << instruction.stringOperand << " fields=" << instruction.argsCount;
+                break;
+
             case OpCode::Pop:
             case OpCode::Return:
             case OpCode::AddInt:
@@ -180,6 +184,9 @@ namespace Velo::IR {
 
             case OpCode::LogicalOr:
                 return "LogicalOr";
+
+            case OpCode::BuildStruct:
+                return "BuildStruct";
         }
 
         return "Unknown";

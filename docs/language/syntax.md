@@ -88,8 +88,32 @@ fn useUser(u: User): int {
 }
 ```
 
-Current limitation:
-- struct literals are not implemented yet
+### Struct literals
+Struct values can be created with struct literals:
+```velo
+struct User {
+    id: int;
+    name: string;
+}
+
+fn main(): int {
+    let user: User = User {
+        id: 1,
+        name: "John Doe"
+    };
+    
+    return 0;
+}
+```
+Rules:
+- struct type must exist
+- field names must exist
+- duplicate fields are rejected
+- all fields must be provided
+- field values must match declared field types
+- field order does not matter
+
+### Current limitation:
 - field access is not implemented yet
 
 ## Functions

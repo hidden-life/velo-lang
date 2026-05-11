@@ -587,6 +587,10 @@ namespace Velo::Parser {
             return nullptr;
         }
 
+        if (check(TokenKind::OpenBrace)) {
+            return parseStructLiteralExpression(*qualifiedName);
+        }
+
         if (!match(TokenKind::OpenParen)) {
             return std::make_unique<AST::NameExpression>(*qualifiedName, qualifiedName->range);
         }
@@ -970,5 +974,80 @@ namespace Velo::Parser {
             .type = std::move(*fieldType),
             .range = makeRangeFromTokens(*nameToken, *semicolon)
         };
+    }
+
+    auto Parser::parseStructLiteralExpression(AST::QualifiedName typeName) -> std::unique_ptr<AST::Expression> {
+        const Token *openBrace = consume(TokenKind::OpenBrace, "PAR110", "Expected '{' after struct literal type.");
+        if (openBrace == nullptr) {
+            return nullptr;
+        }
+
+        std::vector<AST::StructLiteralField> fields;
+        if (!check(TokenKind::CloseBrace)) {
+            while (true) {
+                const Token *fieldName = consume(
+                    TokenKind::Identifier,
+                    "PAR111",
+                    "Expected struct literal field name."
+                );
+
+                if (fieldName == nullptr) {
+                    return nullptr;
+                }
+
+                if (consume(TokenKind::Colon, "PAR112", "Expected ':' after struct literal field name.") == nullptr) {
+                    return nullptr;
+                }
+
+                auto value = parseExpression();
+                if (value == nullptr) {
+                    return nullptr;
+                }
+
+                const auto fieldRange = Source::SourceRange(
+                    fieldName->range().begin(),
+                    value->range.end()
+                );
+
+                fields.push_back(AST::StructLiteralField {
+                    .name = std::string(fieldName->text()),
+                    .value = std::move(value),
+                    .range = fieldRange
+                });
+
+                if (!match(TokenKind::Comma)) {
+                    break;
+                }
+
+                // Allow trailing comma before closing brace:
+                //
+                // User {
+                //      id: 1,
+                // }
+                if (check(TokenKind::CloseBrace)) {
+                    break;
+                }
+            }
+        }
+
+        const Token *closeBrace = consume(
+            TokenKind::CloseBrace,
+            "PAR113",
+            "Expected '}' after struct literal."
+        );
+
+        if (closeBrace == nullptr) {
+            return nullptr;
+        }
+
+        AST::TypeName literalType;
+        literalType.range = typeName.range;
+        literalType.name = std::move(typeName);
+
+        return std::make_unique<AST::StructLiteralExpression>(
+            std::move(literalType),
+            std::move(fields),
+            Source::SourceRange(literalType.range.begin(), closeBrace->range().end())
+        );
     }
 }

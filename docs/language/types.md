@@ -118,6 +118,8 @@ Current support:
 - struct field types can reference declared structs
 - function parameters can use struct types
 - function return type can use struct types
+- local variables can use struct types
+- struct literals can create struct values
 - semantic type checking understands specific struct names
 
 Example:
@@ -138,7 +140,6 @@ fn useUser(u: User): int {
 ```
 
 Current limitation:
-- struct literals are planned for MVP 0.2.4
 - field access is planned for MVP 0.2.5
 
 ## Current limitations

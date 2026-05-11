@@ -13,6 +13,9 @@ namespace Velo::IR {
         StoreLocal,
         CallBuiltin,
         CallFunction,
+
+        BuildStruct,
+
         Pop,
         Return,
 

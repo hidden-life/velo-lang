@@ -1,0 +1,27 @@
+module app;
+
+use std::console;
+
+struct User {
+    id: int;
+    name: string;
+    active: bool;
+}
+
+fn identity(u: User): User {
+    return u;
+}
+
+fn main(): int {
+    let user: User = User {
+        id: 1,
+        name: "John Doe",
+        active: true
+    };
+
+    let copy: User = identity(user);
+
+    console::println("struct literals work");
+
+    return 0;
+}

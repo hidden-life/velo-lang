@@ -227,7 +227,7 @@ namespace Velo::Semantic {
 
                 const auto valueType = analyzeCheckedExpressionType(*assignment.value);
 
-                if (isUnknownType(valueType) && !isUnknownType(local->type) && !typesEqual(valueType, local->type)) {
+                if (!isUnknownType(valueType) && !isUnknownType(local->type) && !typesEqual(valueType, local->type)) {
                     _engine.error(
                         "SEM022",
                         "Assignment type mismatch. Expected '" + semanticTypeToString(local->type) + "', actual '" +
@@ -331,6 +331,13 @@ namespace Velo::Semantic {
                 for (const auto &arg : callExpr.arguments) {
                     analyzeExpression(*arg);
                 }
+
+                return;
+            }
+
+            case AST::ExpressionKind::StructLiteral: {
+                const auto &structLiteral = static_cast<const AST::StructLiteralExpression&>(expr);
+                static_cast<void>(analyzerStructLiteralExpressionType(structLiteral));
 
                 return;
             }
@@ -501,6 +508,11 @@ namespace Velo::Semantic {
                 }
 
                 return {};
+            }
+
+            case ExpressionKind::StructLiteral: {
+                const auto &structLiteral = static_cast<const StructLiteralExpression&>(expression);
+                return analyzerStructLiteralExpressionType(structLiteral);
             }
 
             case ExpressionKind::Binary: {
@@ -950,7 +962,7 @@ namespace Velo::Semantic {
             return nullptr;
         }
 
-        return &it->second;
+        return it->second;
     }
 
     auto SemanticAnalyzer::isBuiltinTypeName(const std::string &typeName) -> bool {
@@ -1009,5 +1021,80 @@ namespace Velo::Semantic {
         }
 
         return "unknown";
+    }
+
+    auto SemanticAnalyzer::analyzerStructLiteralExpressionType(
+        const AST::StructLiteralExpression &expr
+    ) -> SemanticType {
+        const auto *structDecl = resolveUserDefinedType(expr.type);
+        if (structDecl == nullptr) {
+            _engine.error(
+                "SEM038",
+                "Unknown struct type '" + typeNameToString(expr.type) + "'.",
+                expr.type.range
+            );
+
+            return {};
+        }
+
+        std::unordered_map<std::string, const AST::StructField*> declaredFields;
+        for (const auto &field : structDecl->fields) {
+            declaredFields.emplace(field.name, &field);
+        }
+
+        std::unordered_set<std::string> providedFields;
+        for (const auto &literalField : expr.fields) {
+            const auto [it, inserted] = providedFields.emplace(literalField.name);
+            static_cast<void>(it);
+
+            if (!inserted) {
+                _engine.error(
+                    "SEM039",
+                    "Duplicate field '" + literalField.name + "' in struct literal '" + structDecl->name + "'.",
+                    literalField.range
+                );
+
+                continue;
+            }
+
+            const auto declaredIt = declaredFields.find(literalField.name);
+            if (declaredIt == declaredFields.end()) {
+                _engine.error(
+                    "SEM040",
+                    "Unknown field '" + literalField.name + "' in struct literal '" + structDecl->name + "'.",
+                    literalField.range
+                );
+
+                continue;
+            }
+
+            const auto expectedType = typeFromTypeName(declaredIt->second->type);
+            const auto actualType = analyzeCheckedExpressionType(*literalField.value);
+
+            if (!isUnknownType(expectedType) && !isUnknownType(actualType) && !typesEqual(actualType, expectedType)) {
+                _engine.error(
+                    "SEM041",
+                    "Struct field initializer type mismatch for field '" + literalField.name +
+                    "'. Expected '" + semanticTypeToString(expectedType) +
+                    "', actual '" + semanticTypeToString(actualType) + "'.",
+                    literalField.range
+                );
+            }
+        }
+
+        for (const auto &field : structDecl->fields) {
+            if (!providedFields.contains(field.name)) {
+                _engine.error(
+                    "SEM042",
+                    "Missing field '" + field.name + "' in struct literal '" + structDecl->name + "'.",
+                    expr.range
+                );
+            }
+        }
+
+        return SemanticType {
+            .kind = SemanticTypeKind::Struct,
+            .name = structDecl->name,
+        };
     }
 }

@@ -19,6 +19,7 @@ namespace Velo::Interpreter {
         [[nodiscard]] auto executeInstruction(const IR::Instruction &inst) -> Runtime::ExecutionResult;
         [[nodiscard]] auto callBuiltin(const std::string &name, std::size_t argsCount) -> Runtime::ExecutionResult;
         [[nodiscard]] auto callFunction(const std::string &name, std::size_t argsCount) -> Runtime::ExecutionResult;
+        [[nodiscard]] auto buildStruct(const std::string &encodedOperand, std::size_t fieldsCount) -> Runtime::ExecutionResult;
 
         // Operand stack for temporary expression values.
         std::vector<Runtime::Value> _stack {};

@@ -26,6 +26,7 @@ namespace Velo::AST {
         BooleanLiteral,
         Name,
         Call,
+        StructLiteral,
         Binary,
         Unary,
     };
@@ -99,6 +100,25 @@ namespace Velo::AST {
 
         QualifiedName callee;
         std::vector<std::unique_ptr<Expression>> arguments {};
+    };
+
+    struct StructLiteralField final {
+        std::string name;
+        std::unique_ptr<Expression> value;
+        Source::SourceRange range;
+    };
+
+    struct StructLiteralExpression final : Expression {
+        StructLiteralExpression(
+            TypeName expressionType,
+            std::vector<StructLiteralField> expressionFields,
+            Source::SourceRange expressionRange
+        ) : Expression(
+            ExpressionKind::StructLiteral, expressionRange
+        ), type(std::move(expressionType)), fields(std::move(expressionFields)) {}
+
+        TypeName type {};
+        std::vector<StructLiteralField> fields {};
     };
 
     struct UnaryExpression final : Expression {

@@ -164,3 +164,21 @@ lexer -> parser -> semantic -> lowerer -> IR printer
 ```
 
 The program is not executed in IR mode.
+
+## Struct construction
+Struct literals lower to:
+```text
+PushInt 1
+PushString "John Doe"
+BuildStruct User:id,name fields=2
+```
+**BuildStruct** uses:
+- `stringOperand`: encoded struct type and field names
+- `argsCount`: number of field values on stack
+
+Current encoding:
+```text
+TypeName:field1,field2,field3
+```
+
+This is an MVP representation and may be replaced by richer IR metadata later.

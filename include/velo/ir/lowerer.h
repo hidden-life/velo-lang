@@ -25,6 +25,9 @@ namespace Velo::IR {
         void collectModuleAliases(const AST::Program &program);
         [[nodiscard]] auto lowerQualifiedName(const AST::QualifiedName &name) const -> std::string;
 
+        [[nodiscard]] auto lowerTypeName(const AST::TypeName &typeName) const -> std::string;
+        void lowerStructLiteralExpression(const AST::StructLiteralExpression &expr, Function &func);
+
         void lowerLogicalAndExpression(const AST::BinaryExpression &expr, Function &func);
         void lowerLogicalOrExpression(const AST::BinaryExpression &expr, Function &func);
 

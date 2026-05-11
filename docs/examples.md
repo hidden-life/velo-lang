@@ -177,6 +177,16 @@ Demonstrates:
 - struct type in local declaration
 - semantic checking of named struct types
 
+### Struct literals
+```text
+examples/struct_literal/main.velo
+```
+Demonstrates:
+- struct literal syntax
+- struct value creation
+- passing struct values to functions
+- returning struct values from functions
+
 ### MVP showcase
 ```text
 examples/mvp_showcase/main.velo

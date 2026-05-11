@@ -14,7 +14,20 @@ namespace Velo::Runtime {
                 return std::get<bool>(value) ? "true" : "false";
             }
 
-            return std::get<std::string>(value);
+            if (std::holds_alternative<std::string>(value)) {
+                return std::get<std::string>(value);
+            }
+
+            if (std::holds_alternative<StructValuePtr>(value)) {
+                const auto &structVal = std::get<StructValuePtr>(value);
+                if (structVal == nullptr) {
+                    return "<struct:null>";
+                }
+
+                return "<struct " + structVal->typeName + ">";
+            }
+
+            return "<unknown>";
         }
     }
 

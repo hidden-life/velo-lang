@@ -176,6 +176,20 @@ namespace Velo::AST {
                     break;
                 }
 
+                case ExpressionKind::StructLiteral: {
+                    const auto &structLiteral = static_cast<const StructLiteralExpression&>(expression);
+                    writeIndent(stream, indentLevel);
+                    stream << "StructLiteral " << joinTypeName(structLiteral.type) << "\n";
+
+                    for (const auto &field : structLiteral.fields) {
+                        writeIndent(stream, indentLevel + 1U);
+                        stream << "Field " << field.name << "\n";
+                        printExpression(stream, *field.value, indentLevel + 2U);
+                    }
+
+                    break;
+                }
+
                 case ExpressionKind::Binary: {
                     const auto &binaryExpression = static_cast<const BinaryExpression&>(expression);
                     writeIndent(stream, indentLevel);

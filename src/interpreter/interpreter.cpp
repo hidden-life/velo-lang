@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <ostream>
+#include <sstream>
 
 namespace {
     template <typename Predicate>
@@ -116,6 +117,35 @@ namespace {
         stack.emplace_back(-std::get<int>(value));
 
         return {};
+    }
+
+    auto splitStructOperand(const std::string &encodedOperand) -> std::pair<std::string, std::vector<std::string>> {
+        const auto colonPos = encodedOperand.find(':');
+        if (colonPos == std::string::npos) {
+            return {encodedOperand, {}};
+        }
+
+        std::string typeName = encodedOperand.substr(0, colonPos);
+        std::vector<std::string> fields;
+
+        const std::string fieldsText = encodedOperand.substr(colonPos + 1U);
+        std::string current;
+
+        for (const char ch : fieldsText) {
+            if (ch == ',') {
+                fields.push_back(current);
+                current.clear();
+                continue;
+            }
+
+            current += ch;
+        }
+
+        if (!current.empty()) {
+            fields.push_back(current);
+        }
+
+        return {std::move(typeName), std::move(fields)};
     }
 }
 
@@ -382,6 +412,9 @@ namespace Velo::Interpreter {
                     [](bool left, bool right) { return left || right; }
                 );
             }
+            case OpCode::BuildStruct: {
+                return buildStruct(inst.stringOperand, inst.argsCount);
+            }
         }
 
         return Runtime::ExecutionResult {
@@ -518,6 +551,42 @@ namespace Velo::Interpreter {
         _stack = std::move(callerStack);
         _locals = std::move(callerLocals);
         _stack.push_back(returnValue);
+
+        return {};
+    }
+
+    auto Interpreter::buildStruct(const std::string &encodedOperand, std::size_t fieldsCount) -> Runtime::ExecutionResult {
+        const auto [typeName, fieldNames] = splitStructOperand(encodedOperand);
+
+        if (fieldNames.size() != fieldsCount) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "Struct field metadata does not match field count."
+            };
+        }
+
+        if (_stack.size() < fieldsCount) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "Operand stack underflow while building struct."
+            };
+        }
+
+        auto structVal = std::make_shared<Runtime::StructValue>();
+        structVal->typeName = typeName;
+
+        const auto first = _stack.end() - static_cast<std::ptrdiff_t>(fieldsCount);
+        for (std::size_t idx = 0U; idx < fieldsCount; idx++) {
+            structVal->fields.emplace(
+                fieldNames[idx],
+                *(first + static_cast<std::ptrdiff_t>(idx))
+            );
+        }
+
+        _stack.erase(first, _stack.end());
+        _stack.push_back(structVal);
 
         return {};
     }

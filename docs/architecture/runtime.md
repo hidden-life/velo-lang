@@ -227,3 +227,17 @@ These modes do not execute the program:
 - `ir`
 
 Therefore runtime errors such as division by zero are not triggered in those modes.
+
+## Struct values
+Runtime values now include struct values.
+
+Conceptually:
+```text
+StructValue
+    typeName
+    fields
+```
+Struct values are stored through shared pointers inside `Runtime::Value`.
+
+Current limitation:
+- field access is not implemented yet

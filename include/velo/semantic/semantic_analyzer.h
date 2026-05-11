@@ -63,6 +63,8 @@ namespace Velo::Semantic {
         [[nodiscard]] static auto typesEqual(const SemanticType &left, const SemanticType &right) -> bool;
         [[nodiscard]] static auto semanticTypeToString(const SemanticType &type) -> std::string;
 
+        [[nodiscard]] auto analyzerStructLiteralExpressionType(const AST::StructLiteralExpression &expr) -> SemanticType;
+
         void validateDeclaredType(
             const AST::TypeName &typeName,
             bool allowVoid,
@@ -86,7 +88,7 @@ namespace Velo::Semantic {
         Diagnostic::DiagnosticEngine &_engine;
 
         std::unordered_map<std::string, const AST::UseDeclaration*> _visibleImports {};
-        std::unordered_map<std::string, const AST::StructDeclaration> _structs {};
+        std::unordered_map<std::string, const AST::StructDeclaration*> _structs {};
         std::unordered_map<std::string, const AST::FunctionDeclaration*> _functions {};
 
         struct LocalSymbol final {

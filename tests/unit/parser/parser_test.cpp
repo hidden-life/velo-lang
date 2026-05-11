@@ -536,3 +536,44 @@ fn main(): int {
     EXPECT_FALSE(user.fields[1].isPublic);
     EXPECT_EQ(user.fields[1].name, "name");
 }
+
+TEST(ParserTest, ParsesStructLiteralExpression) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+struct User {
+    id: int;
+    name: string;
+}
+
+fn main(): int {
+    let user: User = User{
+        id: 1,
+        name: "Alex"
+    };
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    ASSERT_EQ(program->functions.size(), 1U);
+    const auto &mainFunction = program->functions[0];
+    ASSERT_EQ(mainFunction.statements.size(), 2U);
+    ASSERT_EQ(mainFunction.statements[0]->kind, Velo::AST::StatementKind::VariableDeclaration);
+
+    const auto &varDecl = static_cast<const Velo::AST::VariableDeclarationStatement&>(*mainFunction.statements[0]);
+    ASSERT_NE(varDecl.initializer, nullptr);
+    ASSERT_EQ(varDecl.initializer->kind, Velo::AST::ExpressionKind::StructLiteral);
+
+    const auto &literal = static_cast<const Velo::AST::StructLiteralExpression&>(*varDecl.initializer);
+    ASSERT_EQ(literal.type.name.segments.size(), 1U);
+    EXPECT_EQ(literal.type.name.segments[0], "User");
+
+    ASSERT_EQ(literal.fields.size(), 2U);
+    EXPECT_EQ(literal.fields[0].name, "id");
+    EXPECT_EQ(literal.fields[1].name, "name");
+}

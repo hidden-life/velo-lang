@@ -14,6 +14,8 @@ MVP 0.2 focuses on data model foundation.
 ## Current step
 ```text
 0.2.2   user-defined type registry
+0.2.3 struct type usage in parameters/locals/returns
+0.2.4 struct literals
 ```
 
 ## 0.2.1 scope
@@ -124,3 +126,41 @@ Not implemented in 0.2.3:
 - runtime struct access
 - field access
 - field assignment
+
+## 0.2.4 scope
+Implemented in this step:
+- struct literal syntax
+- struct literal AST node
+- semantic validation for struct literals
+- duplicate literal field diagnostics
+- unknown literal field diagnostics
+- missing field diagnostics
+- field initializer type checking
+- runtime `StructValue`
+- IR `BuildStruct`
+- interpreter struct value construction
+
+Example:
+```velo
+module app;
+
+struct User {
+    id: int;
+    name: string;
+}
+
+fn main(): int {
+    let user: User = User {
+        id: 1,
+        name: "John Doe"
+    };
+    
+    return 0;
+}
+```
+
+Not implemented in 0.2.4:
+- field access
+- field assignment
+- methods
+- struct destructuring

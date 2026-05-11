@@ -215,6 +215,12 @@ namespace Velo::IR {
                 return;
             }
 
+            case ExpressionKind::StructLiteral: {
+                const auto &structLiteral = static_cast<const StructLiteralExpression&>(expr);
+                lowerStructLiteralExpression(structLiteral, func);
+                return;
+            }
+
             case ExpressionKind::Binary: {
                 const auto &binaryExpr = static_cast<const BinaryExpression&>(expr);
                 if (binaryExpr.op == BinaryOperator::LogicalAnd) {
@@ -469,5 +475,40 @@ namespace Velo::IR {
         }
 
         return result;
+    }
+
+    auto Lowerer::lowerTypeName(const AST::TypeName &typeName) const -> std::string {
+        std::string result;
+        for (std::size_t idx = 0U; idx < typeName.name.segments.size(); ++idx) {
+            if (idx > 0U) {
+                result += "::";
+            }
+
+            result += typeName.name.segments[idx];
+        }
+
+        return result;
+    }
+
+    void Lowerer::lowerStructLiteralExpression(const AST::StructLiteralExpression &expr, Function &func) {
+        std::string encodedOperand = lowerTypeName(expr.type);
+        encodedOperand += ":";
+
+        for (std::size_t idx = 0U; idx < expr.fields.size(); ++idx) {
+            const auto &field = expr.fields[idx];
+            if (idx > 0U) {
+                encodedOperand += ",";
+            }
+
+            encodedOperand += field.name;
+
+            lowerExpression(*field.value, func);
+        }
+
+        func.instructions.push_back(Instruction {
+            .code = OpCode::BuildStruct,
+            .stringOperand = encodedOperand,
+            .argsCount = expr.fields.size()
+        });
     }
 }

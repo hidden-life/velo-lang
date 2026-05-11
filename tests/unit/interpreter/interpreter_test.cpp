@@ -771,3 +771,45 @@ TEST(InterpreterTest, ExecutesBoolToStringBuiltin) {
     EXPECT_EQ(result.exitCode, 4);
     EXPECT_TRUE(result.error.empty());
 }
+
+TEST(InterpreterTest, BuildsStructValue) {
+    Module module;
+    Function mainFunction;
+    mainFunction.name = "main";
+
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .intOperand = 1
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::PushString,
+        .stringOperand = "Alex",
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::BuildStruct,
+        .stringOperand = "User::id,name",
+        .argsCount = 2U
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::CallBuiltin,
+        .stringOperand = "console::println",
+        .argsCount = 1U
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::PushInt,
+        .intOperand = 0
+    });
+    mainFunction.instructions.push_back(Instruction {
+        .code = OpCode::Return,
+    });
+
+    module.functions.push_back(std::move(mainFunction));
+    Runtime runtime;
+    Interpreter interpreter(runtime);
+
+    const auto result = interpreter.execute(module);
+
+    EXPECT_TRUE(result.success);
+    EXPECT_TRUE(result.error.empty());
+    EXPECT_EQ(result.exitCode, 0);
+}

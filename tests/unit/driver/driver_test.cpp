@@ -928,3 +928,93 @@ fn main(): int {
     EXPECT_EQ(result.exitCode, 1);
     EXPECT_EQ(result.diagnostics.front().code(), "SEM037");
 }
+
+TEST(DriverTest, CheckModeAcceptsStructLiteral) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "struct_literal.velo",
+        R"(module app;
+struct User {
+    id: int;
+    name: string;
+}
+
+fn main(): int {
+    let user: User = User {
+        id: 1,
+        name: "Alex"
+    };
+
+    return 0;
+}
+)",
+        Velo::Driver::DriverMode::Check
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 0);
+}
+
+TEST(DriverTest, IrModePrintsStructLiteralBuildInstruction) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "struct_literal_ir.velo",
+        R"(module app;
+struct User {
+    id: int;
+    name: string;
+}
+
+fn main(): int {
+    let user: User = User {
+        id: 1,
+        name: "Alex"
+    };
+
+    return 0;
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.irText.find("BuildStruct User:id,name fields=2"), std::string::npos);
+}
+
+TEST(DriverTest, RunModeExecutesStructLiteralProgram) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "struct_literal_run.velo",
+        R"(module app;
+use std::console;
+
+struct User {
+    id: int;
+    name: string;
+}
+
+fn main(): int {
+    let user: User = User {
+        id: 1,
+        name: "Alex"
+    };
+
+    console::println("struct literal works");
+
+    return 0;
+}
+)"
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 0);
+}
