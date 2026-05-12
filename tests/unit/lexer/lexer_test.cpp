@@ -294,3 +294,22 @@ TEST(LexerTest, LexesArithmeticOperators) {
     EXPECT_EQ(kinds, expected);
     EXPECT_FALSE(engine.hasErrors());
 }
+
+TEST(LexerTest, LexesDotToken) {
+    const SourceFile file("field_access.velo", "user.id");
+    DiagnosticEngine engine;
+    Lexer lexer(file, engine);
+
+    const auto tokens = lexer.lexAll();
+    const auto kinds = collectKinds(tokens);
+
+    const std::vector<TokenKind> expected {
+        TokenKind::Identifier,
+        TokenKind::Dot,
+        TokenKind::Identifier,
+        TokenKind::EndOfFile,
+    };
+
+    EXPECT_EQ(kinds, expected);
+    EXPECT_FALSE(engine.hasErrors());
+}

@@ -1938,3 +1938,128 @@ fn main(): int {
     ASSERT_TRUE(engine.hasErrors());
     EXPECT_EQ(engine.diagnostics().front().code(), "SEM042");
 }
+
+TEST(SemanticAnalyzerTest, AcceptsStructFieldAccess) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+struct User {
+    id: int;
+    name: string;
+}
+
+fn main(): int {
+    let user: User = User {
+        id: 1,
+        name: "Alex"
+    };
+
+    return user.id;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, AcceptsNestedStructFieldAccess) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+struct User {
+    id: int;
+}
+
+struct Box {
+    user: User;
+}
+
+fn main(): int {
+    let box: Box = Box {
+        user: User {
+            id: 42
+        }
+    };
+
+    return box.user.id;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, ReportsFieldAccessOnNonStructValue) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    let value: int = 1;
+    return value.id;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM043");
+}
+
+TEST(SemanticAnalyzerTest, ReportsUnknownStructFieldAccess) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+struct User {
+    id: int;
+}
+
+fn main(): int {
+    let user: User = User {
+        id: 1
+    };
+
+    return user.name;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM044");
+}

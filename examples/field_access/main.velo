@@ -1,0 +1,22 @@
+module app;
+use std::console;
+
+struct User {
+    id: int;
+    name: string;
+    active: bool;
+}
+
+fn main(): int {
+    let user: User = User {
+        id: 42,
+        name: "Alex",
+        active: true
+    };
+
+    console::println(user.id);
+    console::println(user.name);
+    console::println(user.active);
+
+    return 0;
+}

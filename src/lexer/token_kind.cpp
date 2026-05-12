@@ -89,6 +89,8 @@ namespace Velo::Lexer {
                 return "Slash";
             case TokenKind::KwStruct:
                 return "KwStruct";
+            case TokenKind::Dot:
+                return "Dot";
         }
 
         return "Unknown";

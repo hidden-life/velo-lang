@@ -121,26 +121,35 @@ Current support:
 - local variables can use struct types
 - struct literals can create struct values
 - semantic type checking understands specific struct names
+- field access can read fields from struct values
 
 Example:
 ```velo
 struct User {
     id: int;
+    name: string;
 }
 
 fn identity(u: User): User {
     return u;
 }
 
-fn useUser(u: User): int {
-    let copy: User = identity(u);
-    
-    return 0;
+fn main(): int {
+    let user: User = User {
+        id: 42,
+        name: "Alex"
+    };
+
+    let copy: User = identity(user);
+
+    return copy.id;
 }
 ```
 
 Current limitation:
-- field access is planned for MVP 0.2.5
+- field assignment is not implemented yet
+- methods are not implemented yet
+- arrays/maps/generics are not implemented yet
 
 ## Current limitations
 Velo does not yet support:

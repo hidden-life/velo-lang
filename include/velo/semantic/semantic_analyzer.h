@@ -54,6 +54,7 @@ namespace Velo::Semantic {
         [[nodiscard]] auto analyzeCallExpressionType(const AST::CallExpression &callExpr) -> SemanticType;
 
         [[nodiscard]] auto typeFromString(const std::string &typeName) -> SemanticType;
+        [[nodiscard]] auto analyzeFieldAccessExpressionType(const AST::FieldAccessExpression &expr) -> SemanticType;
 
         [[nodiscard]] static auto isUnknownType(const SemanticType &type) -> bool;
         [[nodiscard]] static auto isVoidType(const SemanticType &type) -> bool;
@@ -63,7 +64,7 @@ namespace Velo::Semantic {
         [[nodiscard]] static auto typesEqual(const SemanticType &left, const SemanticType &right) -> bool;
         [[nodiscard]] static auto semanticTypeToString(const SemanticType &type) -> std::string;
 
-        [[nodiscard]] auto analyzerStructLiteralExpressionType(const AST::StructLiteralExpression &expr) -> SemanticType;
+        [[nodiscard]] auto analyzeStructLiteralExpressionType(const AST::StructLiteralExpression &expr) -> SemanticType;
 
         void validateDeclaredType(
             const AST::TypeName &typeName,
@@ -82,6 +83,7 @@ namespace Velo::Semantic {
         [[nodiscard]] static auto builtinParameterAcceptsType(const std::string &expected, const SemanticType &actual) -> bool;
 
         [[nodiscard]] auto resolveUserDefinedType(const AST::TypeName &typeName) const -> const AST::StructDeclaration*;
+        [[nodiscard]] auto resolveStructType(const SemanticType &type) const -> const AST::StructDeclaration*;
         [[nodiscard]] static auto isBuiltinTypeName(const std::string &typeName) -> bool;
 
         const AST::Program &_program;

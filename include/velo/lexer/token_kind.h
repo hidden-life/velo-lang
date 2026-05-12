@@ -26,6 +26,7 @@ namespace Velo::Lexer {
         Colon, // :
         Semicolon, // ;
         Comma, // ,
+        Dot, // .
         OpenParen, // (
         CloseParen, // )
         OpenBrace, // {

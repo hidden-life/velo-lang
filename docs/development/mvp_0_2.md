@@ -16,11 +16,12 @@ MVP 0.2 focuses on data model foundation.
 0.2.2   user-defined type registry
 0.2.3 struct type usage in parameters/locals/returns
 0.2.4 struct literals
+0.2.5 field access
 ```
 
 ## 0.2.1 scope
 Implemented in this step:
-- `struct` declaraions
+- `struct` declarations
 - `pub struct`
 - struct fields
 - `pub` fields
@@ -164,3 +165,62 @@ Not implemented in 0.2.4:
 - field assignment
 - methods
 - struct destructuring
+
+## 0.2.5 scope
+Implemented in this step:
+- field access expressions
+- chained field access
+- semantic validation that field access target is a struct
+- semantic validation that the selected field exists
+- IR lowering for field access
+- interpreter support for loading fields from runtime struct values
+- lexer support for `.`
+- parser tests
+- semantic tests
+- driver tests
+- example
+
+Example:
+```velo
+module app;
+
+struct User {
+    id: int;
+    name: string;
+}
+
+fn main(): int {
+    let user: User = User {
+        id: 42,
+        name: "John Doe"
+    };
+    
+    return user.id;
+}
+```
+Chained field access is supported:
+```velo
+module app;
+
+struct User {
+    id: int;
+}
+
+struct Box {
+    user: User;
+}
+
+fn main(): int {
+    let box: Box = Box {
+        user: User {
+            id: 42
+        }
+    };
+    
+    return box.user.id;
+}
+```
+Not implemented in 0.2.5:
+- field assignment
+- methods
+- visibility enforcement for `pub` / private fields

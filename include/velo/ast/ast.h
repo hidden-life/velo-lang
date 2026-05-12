@@ -27,6 +27,7 @@ namespace Velo::AST {
         Name,
         Call,
         StructLiteral,
+        FieldAccess,
         Binary,
         Unary,
     };
@@ -119,6 +120,20 @@ namespace Velo::AST {
 
         TypeName type {};
         std::vector<StructLiteralField> fields {};
+    };
+
+    struct FieldAccessExpression final : Expression {
+        FieldAccessExpression(
+            std::unique_ptr<Expression> objectExpression,
+            std::string expressionFieldName,
+            Source::SourceRange expressionFieldRange,
+            Source::SourceRange expressionRange
+        ) : Expression(ExpressionKind::FieldAccess, expressionRange),
+            object(std::move(objectExpression)), fieldName(std::move(expressionFieldName)), fieldRange(expressionFieldRange) {}
+
+        std::unique_ptr<Expression> object;
+        std::string fieldName;
+        Source::SourceRange fieldRange;
     };
 
     struct UnaryExpression final : Expression {

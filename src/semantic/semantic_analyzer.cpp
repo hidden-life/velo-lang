@@ -337,7 +337,14 @@ namespace Velo::Semantic {
 
             case AST::ExpressionKind::StructLiteral: {
                 const auto &structLiteral = static_cast<const AST::StructLiteralExpression&>(expr);
-                static_cast<void>(analyzerStructLiteralExpressionType(structLiteral));
+                static_cast<void>(analyzeStructLiteralExpressionType(structLiteral));
+
+                return;
+            }
+
+            case AST::ExpressionKind::FieldAccess: {
+                const auto &fieldAccess = static_cast<const AST::FieldAccessExpression&>(expr);
+                static_cast<void>(analyzeFieldAccessExpressionType(fieldAccess));
 
                 return;
             }
@@ -512,7 +519,12 @@ namespace Velo::Semantic {
 
             case ExpressionKind::StructLiteral: {
                 const auto &structLiteral = static_cast<const StructLiteralExpression&>(expression);
-                return analyzerStructLiteralExpressionType(structLiteral);
+                return analyzeStructLiteralExpressionType(structLiteral);
+            }
+
+            case ExpressionKind::FieldAccess: {
+                const auto &fieldAccess = static_cast<const FieldAccessExpression&>(expression);
+                return analyzeFieldAccessExpressionType(fieldAccess);
             }
 
             case ExpressionKind::Binary: {
@@ -766,6 +778,51 @@ namespace Velo::Semantic {
         }
 
         return {};
+    }
+
+    auto SemanticAnalyzer::analyzeFieldAccessExpressionType(const AST::FieldAccessExpression &expr) -> SemanticType {
+        const auto objectType = analyzeCheckedExpressionType(*expr.object);
+        if (isUnknownType(objectType)) {
+            return {};
+        }
+
+        const auto *structDecl = resolveStructType(objectType);
+        if (structDecl == nullptr) {
+            _engine.error(
+                "SEM043",
+                "Field access target must be struct, actual '" + semanticTypeToString(objectType) + "'.",
+                expr.object->range
+            );
+
+            return {};
+        }
+
+        for (const auto &field : structDecl->fields) {
+            if (field.name == expr.fieldName) {
+                return typeFromTypeName(field.type);
+            }
+        }
+
+        _engine.error(
+            "SEM044",
+            "Unknown field '" + expr.fieldName + "' in struct '" + structDecl->name + "'.",
+            expr.fieldRange
+        );
+
+        return {};
+    }
+
+    auto SemanticAnalyzer::resolveStructType(const SemanticType &type) const -> const AST::StructDeclaration* {
+        if (type.kind != SemanticTypeKind::Struct) {
+            return nullptr;
+        }
+
+        const auto it = _structs.find(type.name);
+        if (it == _structs.end()) {
+            return nullptr;
+        }
+
+        return it->second;
     }
 
     auto SemanticAnalyzer::importedModuleName(const AST::UseDeclaration &useDecl) -> std::string {
@@ -1023,7 +1080,7 @@ namespace Velo::Semantic {
         return "unknown";
     }
 
-    auto SemanticAnalyzer::analyzerStructLiteralExpressionType(
+    auto SemanticAnalyzer::analyzeStructLiteralExpressionType(
         const AST::StructLiteralExpression &expr
     ) -> SemanticType {
         const auto *structDecl = resolveUserDefinedType(expr.type);

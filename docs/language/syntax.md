@@ -113,6 +113,43 @@ Rules:
 - field values must match declared field types
 - field order does not matter
 
+### Struct field access
+Field access is supported:
+```velo
+fn main(): int {
+    let user: User = User {
+        id: 42,
+        name: "Alex",
+        active: true
+    };
+
+    return user.id;
+}
+```
+Chained field access is supported:
+```velo
+struct User {
+    id: int;
+}
+
+struct Box {
+    user: User;
+}
+
+fn main(): int {
+    let box: Box = Box {
+        user: User {
+            id: 42
+        }
+    };
+
+    return box.user.id;
+}
+```
+Current limitation:
+- field assignment is not implemented yet
+- visibility rules for private/public fields are not enforced yet
+
 ### Current limitation:
 - field access is not implemented yet
 

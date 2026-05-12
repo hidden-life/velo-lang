@@ -15,6 +15,7 @@ namespace Velo::IR {
         CallFunction,
 
         BuildStruct,
+        LoadField,
 
         Pop,
         Return,

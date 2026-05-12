@@ -35,6 +35,7 @@ namespace Velo::Parser {
         [[nodiscard]] auto parseStatement() -> std::unique_ptr<AST::Statement>;
         [[nodiscard]] auto parseExpression() -> std::unique_ptr<AST::Expression>;
         [[nodiscard]] auto parsePrimaryExpression() -> std::unique_ptr<AST::Expression>;
+        [[nodiscard]] auto parsePostfixExpression() -> std::unique_ptr<AST::Expression>;
         [[nodiscard]] auto parseCallExpressionOrName() -> std::unique_ptr<AST::Expression>;
         [[nodiscard]] auto parseStructLiteralExpression(AST::QualifiedName typeName) -> std::unique_ptr<AST::Expression>;
         [[nodiscard]] auto parseEquality() -> std::unique_ptr<AST::Expression>;

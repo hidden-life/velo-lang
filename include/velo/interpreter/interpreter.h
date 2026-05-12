@@ -20,6 +20,7 @@ namespace Velo::Interpreter {
         [[nodiscard]] auto callBuiltin(const std::string &name, std::size_t argsCount) -> Runtime::ExecutionResult;
         [[nodiscard]] auto callFunction(const std::string &name, std::size_t argsCount) -> Runtime::ExecutionResult;
         [[nodiscard]] auto buildStruct(const std::string &encodedOperand, std::size_t fieldsCount) -> Runtime::ExecutionResult;
+        [[nodiscard]] auto loadField(const std::string &fieldName) -> Runtime::ExecutionResult;
 
         // Operand stack for temporary expression values.
         std::vector<Runtime::Value> _stack {};

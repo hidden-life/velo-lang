@@ -415,6 +415,9 @@ namespace Velo::Interpreter {
             case OpCode::BuildStruct: {
                 return buildStruct(inst.stringOperand, inst.argsCount);
             }
+            case OpCode::LoadField: {
+                return loadField(inst.stringOperand);
+            }
         }
 
         return Runtime::ExecutionResult {
@@ -587,6 +590,49 @@ namespace Velo::Interpreter {
 
         _stack.erase(first, _stack.end());
         _stack.push_back(structVal);
+
+        return {};
+    }
+
+    auto Interpreter::loadField(const std::string &fieldName) -> Runtime::ExecutionResult {
+        if (_stack.empty()) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "LoadField requires a struct value on the stack."
+            };
+        }
+
+        const auto value = _stack.back();
+        _stack.pop_back();
+
+        if (!std::holds_alternative<Runtime::StructValuePtr>(value)) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "LoadField expects a struct value."
+            };
+        }
+
+        const auto structValue = std::get<Runtime::StructValuePtr>(value);
+        if (structValue == nullptr) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "LoadField received a null struct value."
+            };
+        }
+
+        const auto fieldIt = structValue->fields.find(fieldName);
+        if (fieldIt == structValue->fields.end()) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "Unknown field '" + fieldName + "' in struct value '" + structValue->typeName + "'."
+            };
+        }
+
+        _stack.push_back(fieldIt->second);
 
         return {};
     }

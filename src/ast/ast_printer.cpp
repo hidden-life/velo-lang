@@ -190,6 +190,15 @@ namespace Velo::AST {
                     break;
                 }
 
+                case ExpressionKind::FieldAccess: {
+                    const auto &fieldAccess = static_cast<const FieldAccessExpression&>(expression);
+                    writeIndent(stream, indentLevel);
+                    stream << "FieldAccess " << fieldAccess.fieldName << "\n";
+                    printExpression(stream, *fieldAccess.object, indentLevel + 1U);
+
+                    break;
+                }
+
                 case ExpressionKind::Binary: {
                     const auto &binaryExpression = static_cast<const BinaryExpression&>(expression);
                     writeIndent(stream, indentLevel);

@@ -1018,3 +1018,74 @@ fn main(): int {
 
     EXPECT_EQ(result.exitCode, 0);
 }
+
+TEST(DriverTest, ExecutesStructFieldAccess) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "struct_field_access.velo",
+        R"(module app;
+
+struct User {
+    id: int;
+    name: string;
+}
+
+fn main(): int {
+    let user: User = User {
+        id: 42,
+        name: "Alex"
+    };
+
+    return user.id;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 42);
+}
+
+TEST(DriverTest, IrModePrintsLoadFieldInstruction) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "struct_field_access_ir.velo",
+        R"(module app;
+
+struct User {
+    id: int;
+}
+
+fn main(): int {
+    let user: User = User {
+        id: 7
+    };
+
+    return user.id;
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.irText.find("LoadField id"), std::string::npos);
+}

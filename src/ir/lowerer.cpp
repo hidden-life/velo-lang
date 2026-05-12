@@ -221,6 +221,12 @@ namespace Velo::IR {
                 return;
             }
 
+            case ExpressionKind::FieldAccess: {
+                const auto &fieldAccess = static_cast<const FieldAccessExpression&>(expr);
+                lowerFieldAccessExpression(fieldAccess, func);
+                return;
+            }
+
             case ExpressionKind::Binary: {
                 const auto &binaryExpr = static_cast<const BinaryExpression&>(expr);
                 if (binaryExpr.op == BinaryOperator::LogicalAnd) {
@@ -509,6 +515,14 @@ namespace Velo::IR {
             .code = OpCode::BuildStruct,
             .stringOperand = encodedOperand,
             .argsCount = expr.fields.size()
+        });
+    }
+
+    void Lowerer::lowerFieldAccessExpression(const AST::FieldAccessExpression &expr, Function &func) {
+        lowerExpression(*expr.object, func);
+        func.instructions.push_back(Instruction {
+            .code = OpCode::LoadField,
+            .stringOperand = expr.fieldName,
         });
     }
 }

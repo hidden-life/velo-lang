@@ -27,6 +27,7 @@ namespace Velo::IR {
 
         [[nodiscard]] auto lowerTypeName(const AST::TypeName &typeName) const -> std::string;
         void lowerStructLiteralExpression(const AST::StructLiteralExpression &expr, Function &func);
+        void lowerFieldAccessExpression(const AST::FieldAccessExpression &expr, Function &func);
 
         void lowerLogicalAndExpression(const AST::BinaryExpression &expr, Function &func);
         void lowerLogicalOrExpression(const AST::BinaryExpression &expr, Function &func);

@@ -187,6 +187,16 @@ Demonstrates:
 - passing struct values to functions
 - returning struct values from functions
 
+### Field access
+```text
+examples/field_access/main.velo
+```
+Demonstrates:
+- struct literal creation
+- reading `int`, `string`, and `bool` fields
+- field access expressions
+- printing field values with `console::println`
+
 ### MVP showcase
 ```text
 examples/mvp_showcase/main.velo

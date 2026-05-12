@@ -581,6 +581,35 @@ namespace Velo::Parser {
         return nullptr;
     }
 
+    auto Parser::parsePostfixExpression() -> std::unique_ptr<AST::Expression> {
+        auto expr = parsePrimaryExpression();
+        if (expr == nullptr) {
+            return nullptr;
+        }
+
+        while (match(TokenKind::Dot)) {
+            const Token *fieldName = consume(
+                TokenKind::Identifier,
+                "PAR120",
+                "Expected field name after '.'."
+            );
+
+            if (fieldName == nullptr) {
+                return nullptr;
+            }
+
+            const auto expressionBegin = expr->range.begin();
+            expr = std::make_unique<AST::FieldAccessExpression>(
+                std::move(expr),
+                std::string(fieldName->text()),
+                fieldName->range(),
+                Source::SourceRange(expressionBegin, fieldName->range().end())
+            );
+        }
+
+        return expr;
+    }
+
     auto Parser::parseCallExpressionOrName() -> std::unique_ptr<AST::Expression> {
         const auto qualifiedName = parseQualifiedName();
         if (!qualifiedName.has_value()) {
@@ -855,7 +884,7 @@ namespace Velo::Parser {
             );
         }
 
-        return parsePrimaryExpression();
+        return parsePostfixExpression();
     }
 
     auto Parser::parseFactor() -> std::unique_ptr<AST::Expression> {
