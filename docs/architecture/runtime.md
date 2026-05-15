@@ -76,7 +76,7 @@ Semantic analysis also uses builtin metadata to catch invalid builtin calls befo
 Current runtime value type:
 
 ```cpp
-std::variant<int, std::string, bool>
+std::variant<int, std::string, bool, StructValuePtr>
 ```
 
 Supported runtime values:
@@ -84,6 +84,11 @@ Supported runtime values:
 - `int`
 - `string`
 - `bool`
+- runtime struct values
+
+Runtime struct values store:
+- struct type name
+- field values by field name
 
 ## Interpreter
 
@@ -109,6 +114,43 @@ StoreLocal
 ```
 
 read and write local slots.
+
+## Struct values
+Struct literals are lowered to `BuildStruct`.
+
+At runtime, `BuildStruct` consumes field values from the operand stack and creates a runtime struct value.
+
+Example source:
+```velo
+let user: User = User {
+    id: 42,
+    name: "John Doe"
+};
+```
+
+The resulting runtime value contains:
+```text
+typeName = User
+fields["id"] = 42
+fields["name"] = "John Doe"
+```
+
+## Field access
+Field access is lowered to `LoadField`.
+
+Example source:
+```velo
+return user.id;
+```
+
+Runtime behavior:
+1. load the struct value onto the operand stack
+2. execute `LoadField id`
+3. replace the struct value with the selected field value
+
+Invalid field access should normally be caught be semantic analysis before runtime.
+
+Runtime still checks shape and value type defensively.
 
 ## Calls
 
@@ -226,7 +268,7 @@ These modes do not execute the program:
 - `ast`
 - `ir`
 
-Therefore runtime errors such as division by zero are not triggered in those modes.
+Therefore, runtime errors such as division by zero are not triggered in those modes.
 
 ## Struct values
 Runtime values now include struct values.

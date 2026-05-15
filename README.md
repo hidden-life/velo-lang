@@ -2,8 +2,9 @@
 Velo is an experimental programming language and virtual machine focused on backend
 and API-oriented development.
 
-The current goal is **Velo MVP 0.1**: a small, strict, statically checked language
-with a simple VM, standard modules, and developer-friendly CLI tooling.
+The current goal is **Velo MVP 0.2**: a small, strict, statically checked language
+with a simple VM, standard modules, and developer-friendly CLI tooling, and basic
+data model foundation based on struct.
 
 ## Current status
 - modules
@@ -31,6 +32,10 @@ with a simple VM, standard modules, and developer-friendly CLI tooling.
 - IR lowering
 - VM execution
 - CLI modes: `run`, `check`, `ast`, `ir`
+- struct declarations
+- user-defined struct types
+- struct literals
+- field access expressions
 
 ## Standard modules
 Current standard modules:
@@ -145,22 +150,25 @@ Start here:
 - [MVP release checklist](docs/development/release_checklist.md)
 - [MVP 0.1 status](docs/development/mvp_0_1.md)
 - [MVP v0.1.0 release notes draft](docs/development/release_notes_v0_1.md)
+- [MVP 0.2 status](docs/development/mvp_0_2.md)
+- [MVP v0.2.0 release notes draft](docs/development/release_notes_v0_2.md)
 
 ## Current development focus
-The project is currently moving toward **MVP 0.1**.
+The project is currently finishing **MVP 0.2**.
 
 Main properties:
 - keep the language small and strict
 - keep the compiler pipeline understandable
 - keep modules easy to extend
 - keep tests close to every feature
+- keep documentation synchronized with each implemented feature
 - avoid adding large language features before the MVP foundation is stable
 
-## MVP 0.1 status
-The Velo MVP 0.1 core scope is complete.
+## MVP 0.2 status
+The Velo MVP 0.2 data model foundation is complete when the release checklist passes.
 
-Before tagging or announcing `v0.1.0`, run the release checklist:
+Before tagging or announcing `v0.2.0`, run the release checklist:
 - [MVP release checklist](docs/development/release_checklist.md)
 
 Release notes draft:
-- [Velo v0.1.0 release notes draft](docs/development/release_notes_v0_1.md)
+- [Velo v0.2.0 release notes draft](docs/development/release_notes_v0_2.md)

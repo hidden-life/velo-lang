@@ -13,10 +13,7 @@ MVP 0.2 focuses on data model foundation.
 
 ## Current step
 ```text
-0.2.2   user-defined type registry
-0.2.3 struct type usage in parameters/locals/returns
-0.2.4 struct literals
-0.2.5 field access
+0.2.6 docs/examples/release checklist
 ```
 
 ## 0.2.1 scope
@@ -32,13 +29,6 @@ Implemented in this step:
 - parser tests
 - semantic tests
 - example
-
-Not implemented in 0.2.1:
-- using structs as types in parameters
-- using structs as local variable types
-- struct literals
-- field access
-- runtime struct values
 
 Example:
 ```velo
@@ -122,24 +112,21 @@ fn main(): int {
 }
 ```
 
-Not implemented in 0.2.3:
-- struct literals
-- runtime struct access
-- field access
-- field assignment
-
 ## 0.2.4 scope
 Implemented in this step:
-- struct literal syntax
-- struct literal AST node
-- semantic validation for struct literals
-- duplicate literal field diagnostics
-- unknown literal field diagnostics
-- missing field diagnostics
-- field initializer type checking
-- runtime `StructValue`
-- IR `BuildStruct`
-- interpreter struct value construction
+- struct literal expressions
+- semantic validation for unknown struct literal types
+- semantic validation for duplicate literal fields
+- semantic validation for unknown literal fields
+- semantic validation for struct literal field types
+- semantic validation for missing fields
+- runtime struct values
+- IR lowering for struct literals
+- interpreter support for building struct values
+- parser tests
+- semantic tests
+- driver tests
+- example
 
 Example:
 ```velo
@@ -159,12 +146,14 @@ fn main(): int {
     return 0;
 }
 ```
-
-Not implemented in 0.2.4:
-- field access
-- field assignment
-- methods
-- struct destructuring
+Struct literal field order does not have to match declaration order:
+```velo
+let user: User = {
+    active: true,
+    name: "John Doe"
+    id: 1,
+};
+```
 
 ## 0.2.5 scope
 Implemented in this step:
@@ -220,7 +209,31 @@ fn main(): int {
     return box.user.id;
 }
 ```
-Not implemented in 0.2.5:
+
+## 0.2.6 scope
+Implemented in this step:
+- language docs synchronized with MVP 0.2
+- architecture docs synchronized with struct literals and field access
+- examples documented
+- release checklist updated for MVP 0.2
+- release notes draft added
+- README current status updated
+
+## MVP 0.2 limitations
+Not implemented in MVP 0.2:
 - field assignment
 - methods
 - visibility enforcement for `pub` / private fields
+- arrays
+- maps
+- nullable types
+- generics
+- classes
+- interfaces
+- package manager
+- bytecode serialization
+- standalone `veloc`
+- standalone `velovm`
+- HTTP runtime
+- JSON parser/serializer
+- optimizer

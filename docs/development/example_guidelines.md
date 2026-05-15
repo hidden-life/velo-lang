@@ -165,7 +165,7 @@ When adding a new example:
 8. mention it in README if it is important
 
 ## Example checklist
-Before commiting an example:
+Before committing an example:
 ```text
 [ ] example has clear purpose
 [ ] example has module declaration
@@ -173,7 +173,7 @@ Before commiting an example:
 [ ] example returns 0
 [ ] example runs with velo run
 [ ] example passes velo check
-[ ] example os documented in docs/examples.md
+[ ] example is documented in docs/examples.md
 ```
 
 ## Current recommended examples
@@ -187,6 +187,11 @@ examples/break_continue/main.velo
 examples/typed_parameters/main.velo
 examples/std_string/main.velo
 examples/std_to_string/main.velo
+examples/struct_declaration/main.velo
+examples/user_defined_type_registry/main.velo
+examples/struct_type_usage/main.velo
+examples/struct_literal/main.velo
+examples/field_access/main.velo
 ```
 
 ## Integration showcase example

@@ -69,6 +69,8 @@ IRModule
 
 - `LoadLocal`
 - `StoreLocal`
+- `BuildStruct`
+- `LoadField`
 
 ## Calls
 
@@ -85,6 +87,58 @@ Single-segment calls are user-defined function calls:
 
 ```velo
 helper();
+```
+
+## Struct literals
+Struct literals are lowered to:
+```text
+BuiltStruct <encoded-fields> args=<field-count>
+```
+The lowerer evaluates field initializer expressions first, then emits `BuildStruct`.
+
+Example source:
+```velo
+let user: User = User {
+    id: 42,
+    name: "John Doe"
+};
+```
+Representative IR shape:
+```text
+PushInt 42
+PushString "John Doe"
+BuildStruct User:id,name args=2
+StoreLocal local[0]
+```
+The exact encoded operand is an implementation detail, bu it must contain enough
+information for the interpreter to build a runtime struct value.
+
+## Field access
+Field access is lowered to `LoadField`.
+
+Example source:
+```velo
+return user.id;
+```
+
+Representative IR:
+```text
+LoadLocal local[0]
+LoadField id
+Return
+```
+
+Chained field access:
+```velo
+return box.user.id;
+```
+
+Representative IR:
+```text
+LoadLocal local[0]
+LoadField user
+LoadField id
+Return
 ```
 
 ## Import alias lowering

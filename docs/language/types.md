@@ -117,10 +117,9 @@ Current support:
 - struct declarations
 - struct field types can reference declared structs
 - function parameters can use struct types
-- function return type can use struct types
-- local variables can use struct types
-- struct literals can create struct values
+- function return types can use struct types
 - semantic type checking understands specific struct names
+- struct literals can create runtime struct values
 - field access can read fields from struct values
 
 Example:
@@ -145,7 +144,6 @@ fn main(): int {
     return copy.id;
 }
 ```
-
 Current limitation:
 - field assignment is not implemented yet
 - methods are not implemented yet
@@ -157,4 +155,5 @@ Velo does not yet support:
 - maps
 - nullable types
 - generics
-- user-defined types
+- field assignment
+- methods

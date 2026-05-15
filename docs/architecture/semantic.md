@@ -25,6 +25,10 @@ The semantic analyzer currently checks:
 - `break` / `continue` placement
 - declared type names
 - builtin argument types
+- struct declarations
+- user-defined struct types
+- struct literal validation
+- field access validation
 
 ## Entry point
 
@@ -50,6 +54,7 @@ Supported semantic types:
 - `string`
 - `bool`
 - `void`
+- `struct`
 - `unknown`
 
 `unknown` is used internally to reduce cascading diagnostics.
@@ -67,6 +72,71 @@ Rules:
 - unknown declared types produce `SEM030`
 - `void` is allowed only as a function return type
 - `void` parameters and local variables produce `SEM031`
+
+## Struct declarations
+Struct declarations are collected before function bodies are analyzed.
+
+This allows forward references between structs:
+```velo
+struct User {
+    profile: Profile;
+}
+
+struct Profile {
+    id: int;
+}
+```
+Rules:
+- duplicate struct names are rejected
+- struct names cannot conflict with built-in type names
+- duplicate field names are rejected
+- field types are validated
+
+## Struct literals
+Struct literals create values of user-defined struct types.
+
+Example:
+```velo
+struct User {
+    id: int;
+    name: string;
+}
+
+fn main(): int {
+    let user: User = User {
+        id: 42,
+        name: "John Doe"
+    };
+    
+    return 0;
+}
+```
+
+Rules:
+- literal type must resolve to a known struct
+- duplicate literal fields are rejected
+- unknown literal fields are rejected
+- each declared field must be provided
+- each field initializer type must match the declared field type
+- literal field order does not have to match declaration order
+
+## Field access
+Field access reads a field from a struct value.
+
+Example:
+```velo
+return user.id;
+```
+
+Rules:
+- the target expression must have a struct type
+- the field must exist in the target struct
+- the expression type is the declared field type
+
+Chained field access is supported:
+```velo
+return box.user.id;
+```
 
 ## Parameters
 
@@ -290,3 +360,5 @@ This is used for:
 - local initializer validation
 - assignment validation
 - function argument validation
+- struct literal validation
+- field access validation

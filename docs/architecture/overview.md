@@ -42,6 +42,7 @@ The AST represents Velo source structure:
 - program
 - imports
 - functions
+- structs
 - statements
 - expressions
 - type names
@@ -62,6 +63,10 @@ It checks:
 - return statements
 - control-flow constraints
 - builtin argument metadata
+- struct declarations
+- user-defined struct types
+- struct literals
+- field access expressions
 
 ### IR lowerer
 The lowerer converts semantically valid AST into executable IR.
@@ -73,6 +78,8 @@ It resolves:
 - import aliases
 - control-flow jumps
 - short-circuit logical expressions
+- struct literals
+- field access expressions
 
 ### Interpreter / VM
 The interpreter executes IR instructions.

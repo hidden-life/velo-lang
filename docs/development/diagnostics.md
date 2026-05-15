@@ -73,6 +73,17 @@ SEM030  Unknown declared type
 SEM031  void cannot be used as value type
 SEM032  Unary - requires int operand
 SEM033  Builtin argument type mismatch
+SEM034  Duplicate struct declaration
+SEM035  Duplicate struct field
+SEM036  Struct name conflicts with built-in type
+SEM037  User-defined function argument type mismatch
+SEM038  Unknown struct literal type
+SEM039  Duplicate field in struct literal
+SEM040  Unknown field in struct literal
+SEM041  Struct field initializer type mismatch
+SEM042  Missing field in struct literal
+SEM043  Field access target must be struct
+SEM044  Unknown field in struct field access
 ```
 
 This list should be updated when adding new diagnostics.

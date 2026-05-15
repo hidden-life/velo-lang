@@ -201,7 +201,7 @@ Demonstrates:
 ```text
 examples/mvp_showcase/main.velo
 ```
-Demonstrates the current MVP 0.1 feature set:
+Demonstrates the current core language feature set:
 - imports
 - aliases
 - user functions

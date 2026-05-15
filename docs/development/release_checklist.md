@@ -1,5 +1,5 @@
-# MVP 0.1 release checklist
-This checklist should be completed before tagging or announcing Velo MVP 0.1.
+# MVP 0.2 release checklist
+This checklist should be completed before tagging or announcing Velo MVP 0.2.
 
 The goal is to make sure the MVP is small, stable, documented, and reproducible.
 
@@ -68,6 +68,11 @@ Run the most important examples:
 ./build/debug/apps/velo/velo run ./examples/break_continue/main.velo
 ./build/debug/apps/velo/velo run ./examples/typed_parameters/main.velo
 ./build/debug/apps/velo/velo run ./examples/std_string/main.velo
+./build/debug/apps/velo/velo run ./examples/struct_declaration/main.velo
+./build/debug/apps/velo/velo run ./examples/user_defined_type_registry/main.velo
+./build/debug/apps/velo/velo run ./examples/struct_type_usage/main.velo
+./build/debug/apps/velo/velo run ./examples/struct_literal/main.velo
+./build/debug/apps/velo/velo run ./examples/field_access/main.velo
 ./build/debug/apps/velo/velo run ./examples/std_to_string/main.velo
 ./build/debug/apps/velo/velo run ./examples/mvp_showcase/main.velo
 ```
@@ -89,7 +94,7 @@ instead of demo examples.
 ## 6. Error example smoke tests
 Run known invalid examples:
 ```bash
-./build/debug/apps/velo/velo check ./examples/errors/unknown_type.velo
+./build/debug/apps/velo/velo check ./examples/errors/missing_return.velo
 ```
 
 Expected:
@@ -97,11 +102,41 @@ Expected:
 - diagnostic is readable
 - diagnostic code is stable
 
-## 7. IR smoke tests
+## 7. MVP 0.2 struct smoke tests
+Check struct examples:
+```bash
+./build/debug/apps/velo/velo run ./examples/struct_declaration/main.velo
+./build/debug/apps/velo/velo run ./examples/user_defined_type_registry/main.velo
+./build/debug/apps/velo/velo run ./examples/struct_type_usage/main.velo
+./build/debug/apps/velo/velo run ./examples/struct_literal/main.velo
+./build/debug/apps/velo/velo run ./examples/field_access/main.velo
+```
+Expected:
+```text
+all commands exit with code 0
+```
+Run field access example:
+```bash
+./build/debug/apps/velo/velo run ./examples/field_access/main.velo
+```
+Expected:
+```text
+42
+Alex
+true
+```
+And process exit code:
+```text
+0
+```
+
+## 8. IR smoke tests
 Inspect IR for a few representative examples:
 ```bash
 ./build/debug/apps/velo/velo ir ./examples/arithmetic/main.velo
 ./build/debug/apps/velo/velo ir ./examples/short_circuit/main.velo
+./build/debug/apps/velo/velo run ./examples/struct_literal/main.velo
+./build/debug/apps/velo/velo run ./examples/field_access/main.velo
 ```
 
 Check for:
@@ -109,6 +144,8 @@ Check for:
 - jump instructions
 - builtin calls
 - alias resolution
+- `BuildStruct`
+- `LoadField`
 
 For alias resolution, source like:
 ```velo
@@ -126,7 +163,7 @@ not:
 CallBuiltin str::len args=1
 ```
 
-## 8. Documentation review
+## 9. Documentation review
 Review:
 ```text
 README.md
@@ -140,11 +177,14 @@ docs/architecture/runtime.md
 docs/architecture/ir.md
 docs/examples.md
 docs/development/mvp_0_1.md
+docs/development/mvp_0_2.md
 docs/development/adding_builtin.md
-docs/development/adding_language_feature.md
+docs/development/adding_lang_features.md
 docs/development/diagnostics.md
 docs/development/example_guidelines.md
 docs/development/release_checklist.md
+docs/development/release_notes_v0_1.md
+docs/development/release_notes_v0_2.md
 ```
 
 Check:
@@ -154,30 +194,25 @@ Check:
 - standard module signatures are correct
 - diagnostic codes match tests
 - architecture docs match current code
+- MVP 0.2 feature list matches tests and examples
 
-## 9. MVP scope review
-MVP 0.1 should stay focused.
-
-Included:
-- basic language syntax
-- functions
-- locals
-- scopes
-- conditions
-- loops
-- arithmetic
-- logical operators
-- short-circuit
-- builtins
-- standard module foundation
-- semantic validation
-- IR lowering
-- VM execution
-- CLI modes
-- documentation
+## 10. MVP scope review
+MVP 0.2 includes:
+- all MVP 0.2 language foundation
+- struct declarations
+- user-defined struct type registry
+- struct types in parameters
+- struct types in local declarations
+- struct types as function return types
+- struct literals
+- runtime struct values
+- field access expressions
+- documentation and examples for MVP 0.2
 
 Not included:
-- structs
+- field assignment
+- methods
+- visibility enforcement for `pub` / private fields
 - arrays
 - maps
 - nullable types
@@ -194,7 +229,7 @@ Not included:
 - optimizer
 - full control-flow graph analysis
 
-## 10. Git status
+## 11. Git status
 Check repository status:
 ```bash
 git status
@@ -205,29 +240,27 @@ Expected:
 only intentional changes
 ```
 
-## 11. Suggested release commit flow
+## 12. Suggested release commit flow
 Before release:
 ```bash
 git add README.md docs examples tests include src apps
-git commit -m "chore(docs): prepare MVP 0.1 documentation"
+git commit -m "docs(mvp): finalize MVP 0.2 documentation"
 ```
 
-Then final release/tag commit can be separate if desired.
-
-## 12. Suggested tag
+## 13. Suggested tag
 When ready:
 ```bash
-get tag v0.1.0
+get tag -a v0.2.0 -m "Velo MVP 0.2.0"
 ```
 
 Push:
 ```bash
 git push origin main
-git push origin v0.1.0
+git push origin v0.2.0
 ```
 
 Use only when the project is actually ready to publish the tag.
 
-## 13. Release notes draft
+## 14. Release notes draft
 Release notes are tracked here:
 - [Velo v0.1.0 release notes draft](release_notes_v0_1.md)
