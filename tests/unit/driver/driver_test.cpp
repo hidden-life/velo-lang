@@ -1089,3 +1089,47 @@ fn main(): int {
 
     EXPECT_NE(result.irText.find("LoadField id"), std::string::npos);
 }
+
+TEST(DriverTest, ExecutesStructValueCopiesThroughLocalsParametersAndReturnValues) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "struct_value_Copy.velo",
+        R"(module app;
+struct User {
+    id: int;
+}
+
+fn identity(u: User): User {
+    return u;
+}
+
+fn getId(u: User): int {
+    return u.id;
+}
+
+fn main(): int {
+    let a: User = User {
+        id: 42
+    };
+
+    let b: User = a;
+    let c: User = identity(b);
+
+    return getId(c);
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 42);
+}

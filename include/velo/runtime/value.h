@@ -17,6 +17,13 @@ namespace Velo::Runtime {
         std::string typeName {};
         std::map<std::string, Value> fields {};
     };
+
+    // Creates an independent runtime value.
+    //
+    // Primitive values are copied directly.
+    // Struct values are deep-copied recursively so future field mutation does not
+    // accidentally alias another local, parameter, return value, or struct field.
+    [[nodiscard]] auto cloneValue(const Value &value) -> Value;
 }
 
 #endif //INC_VELO_RUNTIME_VALUE_H

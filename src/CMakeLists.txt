@@ -150,6 +150,7 @@ add_library(velo_runtime
         runtime/builtin_function.cpp
         runtime/builtin_registry.cpp
         runtime/runtime.cpp
+        runtime/value.cpp
 )
 
 add_library(Velo::Runtime ALIAS velo_runtime)

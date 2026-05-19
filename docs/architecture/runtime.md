@@ -90,6 +90,42 @@ Runtime struct values store:
 - struct type name
 - field values by field name
 
+## Runtime value cloning
+Velo structs use value semantics at the language level.
+
+Runtime struct values are represented with `StructValuePtr`, but the interpreter
+uses `Runtime::cloneValue(...)` at the value boundaries to avoid accidental aliasing.
+
+`cloneValue(...)` behavior:
+- primitive values are copied directly
+- struct values are deep-copied recursively
+- nested struct fields are also cloned
+
+Important interpreter boundaries:
+- `LoadLocal`
+- `StoreLocal`
+- function arguments
+- function return values
+- struct literal fields
+- field access results
+
+This prepares the runtime for future field assignment support.
+
+Example intended behavior after field assignment is implemented:
+```velo
+let a: User = User {
+    id: 1
+};
+
+let b: User = a;
+b.id = 2;
+```
+Expected language-level result:
+```text
+a.id == 1
+b.id == 2
+```
+
 ## Interpreter
 
 The interpreter executes IR instructions.

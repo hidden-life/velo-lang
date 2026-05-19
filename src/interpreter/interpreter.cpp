@@ -245,7 +245,7 @@ namespace Velo::Interpreter {
                     };
                 }
 
-                _stack.push_back(_locals[inst.indexOperand]);
+                _stack.push_back(Runtime::cloneValue(_locals[inst.indexOperand]));
                 return {};
             case OpCode::StoreLocal: {
                 if (_stack.empty()) {
@@ -256,7 +256,7 @@ namespace Velo::Interpreter {
                     };
                 }
 
-                const auto value = _stack.back();
+                const auto value = Runtime::cloneValue(_stack.back());
                 _stack.pop_back();
 
                 if (inst.indexOperand > _locals.size()) {
@@ -536,7 +536,7 @@ namespace Velo::Interpreter {
         // At this stage parameters are placed onto the callee stack.
         // Later this will be replaced with a real frame with local slots.
         for (auto &arg : arguments) {
-            _locals.push_back(std::move(arg));
+            _locals.push_back(Runtime::cloneValue(arg));
         }
 
         // execute a function
@@ -547,7 +547,7 @@ namespace Velo::Interpreter {
 
         Runtime::Value returnValue {};
         if (!_stack.empty()) {
-            returnValue = _stack.back();
+            returnValue = Runtime::cloneValue(_stack.back());
         }
 
         // recover caller stack
@@ -584,7 +584,7 @@ namespace Velo::Interpreter {
         for (std::size_t idx = 0U; idx < fieldsCount; idx++) {
             structVal->fields.emplace(
                 fieldNames[idx],
-                *(first + static_cast<std::ptrdiff_t>(idx))
+                Runtime::cloneValue(*(first + static_cast<std::ptrdiff_t>(idx)))
             );
         }
 
@@ -632,7 +632,7 @@ namespace Velo::Interpreter {
             };
         }
 
-        _stack.push_back(fieldIt->second);
+        _stack.push_back(Runtime::cloneValue(fieldIt->second));
 
         return {};
     }

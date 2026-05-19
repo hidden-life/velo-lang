@@ -154,7 +154,19 @@ Start here:
 - [MVP v0.2.0 release notes draft](docs/development/release_notes_v0_2.md)
 
 ## Current development focus
-The project is currently finishing **MVP 0.2**.
+The project is currently moving toward **Velo MVP 0.3**.
+
+MVP 0.3 focuses on making struct values safer and more useful before moving toward
+larger API-oriented features.
+
+Planned steps:
+```text
+0.3.1   define struct value copy semantics
+0.3.2   field assignment
+0.3.3   equality operators for string and bool
+0.3.4   block-scoped locals
+0.3.5   docs/examples/release checklist
+```
 
 Main properties:
 - keep the language small and strict
@@ -172,3 +184,13 @@ Before tagging or announcing `v0.2.0`, run the release checklist:
 
 Release notes draft:
 - [Velo v0.2.0 release notes draft](docs/development/release_notes_v0_2.md)
+
+MVP 0.2 is tagged as `v0.2.0`.
+
+## MVP 0.3 status
+MVP 0.3 is in progress.
+
+Current step:
+```text
+0.3.1   define struct value copy semantics
+```

@@ -14,7 +14,6 @@ runtime, and MVP planning.
 - [IR](architecture/ir.md)
 
 ## Development
-- [MVP 0.1 status](development/mvp_0_1.md)
 - [Adding builtin](development/adding_builtin.md)
 - [Adding a language feature](development/adding_lang_features.md)
 - [Diagnostics](development/diagnostics.md)
@@ -22,8 +21,10 @@ runtime, and MVP planning.
 - [MVP release checklist](development/release_checklist.md)
 - [Examples](examples.md)
 - [Velo 0.1.0 release notes draft](development/release_notes_v0_1.md)
-- [MVP 0.2 status](development/mvp_0_2.md)
 - [Velo 0.2.0 release notes draft](development/release_notes_v0_2.md)
+- [MVP 0.1 status](development/mvp_0_1.md)
+- [MVP 0.2 status](development/mvp_0_2.md)
+- [MVP 0.3 status](development/mvp_0_3.md)
 
 ## Documentation rules
 When adding a new feature:

@@ -149,11 +149,33 @@ Current limitation:
 - methods are not implemented yet
 - arrays/maps/generics are not implemented yet
 
+### Struct value semantics
+Velo structs use value semantics at the language level.
+
+Example:
+```velo
+let a: User = User {
+    id: 1
+};
+
+let b: User = a;
+```
+`a` and `b` are independent struct values.
+
+This is important for future field assignment support:
+```velo
+b.id = 2;
+```
+The intended behavior is:
+```text
+a.id == 1
+b.id == 2
+```
+The runtime may internally use pointers for struct storage, but the interpreter
+clones struct values at value boundaries to preserve language-level value semantics.
+
 ## Current limitations
 Velo does not yet support:
-- arrays
-- maps
-- nullable types
-- generics
-- field assignment
-- methods
+- field assignment is not implemented yet
+- methods are not implemented yet
+- array/maps/generics are not implemented yet
