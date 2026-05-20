@@ -36,6 +36,9 @@ data model foundation based on struct.
 - user-defined struct types
 - struct literals
 - field access expressions
+- struct field assignment
+- nested struct field assignment
+- struct value semantics preserved during field assignment
 
 ## Standard modules
 Current standard modules:
@@ -192,5 +195,5 @@ MVP 0.3 is in progress.
 
 Current step:
 ```text
-0.3.1   define struct value copy semantics
+0.3.2   field assignment
 ```

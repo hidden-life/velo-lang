@@ -169,6 +169,7 @@ namespace Velo::AST {
         Return,
         VariableDeclaration,
         Assignment,
+        FieldAssignment,
         If,
         While,
         Break,
@@ -223,6 +224,19 @@ namespace Velo::AST {
         {}
 
         std::string name;
+        std::unique_ptr<Expression> value;
+    };
+
+    struct FieldAssignmentStatement final : Statement {
+        FieldAssignmentStatement(
+            std::unique_ptr<FieldAccessExpression> assignmentTarget,
+            std::unique_ptr<Expression> assignmentValue,
+            Source::SourceRange assignmentRange
+        ) : Statement(StatementKind::FieldAssignment, assignmentRange),
+            target(std::move(assignmentTarget)),
+            value(std::move(assignmentValue)) {}
+
+        std::unique_ptr<FieldAccessExpression> target;
         std::unique_ptr<Expression> value;
     };
 

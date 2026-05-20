@@ -29,6 +29,7 @@ The semantic analyzer currently checks:
 - user-defined struct types
 - struct literal validation
 - field access validation
+- field assignment validation
 
 ## Entry point
 
@@ -136,6 +137,35 @@ Rules:
 Chained field access is supported:
 ```velo
 return box.user.id;
+```
+
+## Field assignment
+Field assignment updates a field inside a struct value.
+
+Example:
+```velo
+user.id = 42;
+```
+Rules:
+- assignment target must be a field access expression
+- root expression must be a local variable
+- root local variable must be mutable
+- target expression must resolve to an existing struct field
+- assigned value type must match the target field type
+
+Nested field assignment is supported:
+```velo
+box.user.id = 42;
+```
+
+Field assignment is rejected for immutable root locals:
+
+```velo
+let user: User = User {
+    id: 1
+};
+
+user.id = 2;
 ```
 
 ## Parameters

@@ -1,5 +1,22 @@
 #include "velo/semantic/semantic_analyzer.h"
 
+namespace {
+    [[nodiscard]] auto rootNameExpression(const Velo::AST::Expression &expr) -> const Velo::AST::NameExpression* {
+        using namespace Velo::AST;
+
+        if (expr.kind == ExpressionKind::Name) {
+            return &static_cast<const NameExpression&>(expr);
+        }
+
+        if (expr.kind == ExpressionKind::FieldAccess) {
+            const auto &fieldAccess = static_cast<const FieldAccessExpression&>(expr);
+            return rootNameExpression(*fieldAccess.object);
+        }
+
+        return nullptr;
+    }
+}
+
 namespace Velo::Semantic {
     SemanticAnalyzer::SemanticAnalyzer(
         const AST::Program &program,
@@ -310,6 +327,59 @@ namespace Velo::Semantic {
 
                 break;
             }
+
+            case AST::StatementKind::FieldAssignment: {
+                const auto &fieldAssignment = static_cast<const AST::FieldAssignmentStatement&>(stmt);
+                analyzeFieldAssignmentStatement(fieldAssignment);
+                break;
+            }
+        }
+    }
+
+    void SemanticAnalyzer::analyzeFieldAssignmentStatement(const AST::FieldAssignmentStatement &stmt) {
+        const auto *rootName = rootNameExpression(*stmt.target);
+        if (rootName == nullptr || rootName->name.segments.size() != 1U) {
+            _engine.error(
+                "SEM045",
+                "Field assignment target must start from a local variable.",
+                stmt.target->range
+            );
+
+            static_cast<void>(analyzeCheckedExpressionType(*stmt.value));
+            return;
+        }
+
+        const std::string &rootLocalName = rootName->name.segments.front();
+        const auto *local = resolveLocal(rootLocalName);
+        if (local == nullptr) {
+            _engine.error(
+                "SEM045",
+                "Field assignment target must start from a local variable.",
+                rootName->range
+            );
+
+            static_cast<void>(analyzeCheckedExpressionType(*stmt.value));
+            return;
+        }
+
+        if (!local->isMutable) {
+            _engine.error(
+                "SEM046",
+                "Cannot assign to field through immutable local variable '" + rootLocalName + "'.",
+                rootName->range
+            );
+        }
+
+        const auto targetType = analyzeFieldAccessExpressionType(*stmt.target);
+        const auto valueType = analyzeCheckedExpressionType(*stmt.value);
+
+        if (!isUnknownType(targetType) && !isUnknownType(valueType) && !typesEqual(targetType, valueType)) {
+            _engine.error(
+                "SEM047",
+                "Field assignment type mismatch. Expected '" + semanticTypeToString(targetType) + "', actual" +
+                semanticTypeToString(valueType) + "'.",
+                stmt.range
+            );
         }
     }
 

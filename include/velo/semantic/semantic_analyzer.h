@@ -55,6 +55,7 @@ namespace Velo::Semantic {
 
         [[nodiscard]] auto typeFromString(const std::string &typeName) -> SemanticType;
         [[nodiscard]] auto analyzeFieldAccessExpressionType(const AST::FieldAccessExpression &expr) -> SemanticType;
+        void analyzeFieldAssignmentStatement(const AST::FieldAssignmentStatement &stmt);
 
         [[nodiscard]] static auto isUnknownType(const SemanticType &type) -> bool;
         [[nodiscard]] static auto isVoidType(const SemanticType &type) -> bool;

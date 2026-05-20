@@ -29,6 +29,8 @@ namespace Velo::IR {
         void lowerStructLiteralExpression(const AST::StructLiteralExpression &expr, Function &func);
         void lowerFieldAccessExpression(const AST::FieldAccessExpression &expr, Function &func);
 
+        void lowerFieldAssignmentStatement(const AST::FieldAssignmentStatement &stmt, Function &func);
+
         void lowerLogicalAndExpression(const AST::BinaryExpression &expr, Function &func);
         void lowerLogicalOrExpression(const AST::BinaryExpression &expr, Function &func);
 

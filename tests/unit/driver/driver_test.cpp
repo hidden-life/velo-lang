@@ -1133,3 +1133,156 @@ fn main(): int {
 
     EXPECT_EQ(result.exitCode, 42);
 }
+
+TEST(DriverTest, ExecutesStructFieldAssignment) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "struct_field_assignment.velo",
+        R"(module app;
+
+struct User {
+    id: int;
+}
+
+fn main(): int {
+    var user: User = User {
+        id: 1
+    };
+
+    user.id = 42;
+
+    return user.id;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 42);
+}
+
+TEST(DriverTest, ExecutesNestedStructFieldAssignment) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "nested_struct_field_assignment.velo",
+        R"(module app;
+
+struct User {
+    id: int;
+}
+
+struct Box {
+    user: User;
+}
+
+fn main(): int {
+    var box: Box = Box {
+        user: User {
+            id: 1
+        }
+    };
+
+    box.user.id = 42;
+
+    return box.user.id;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 42);
+}
+
+TEST(DriverTest, StructFieldAssignmentPreservesCopiedStructValueSemantics) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "struct_field_assignment_value_semantics.velo",
+        R"(module app;
+
+struct User {
+    id: int;
+}
+
+fn main(): int {
+    let a: User = User {
+        id: 1
+    };
+
+    var b: User = a;
+
+    b.id = 2;
+
+    return a.id;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 1);
+}
+
+TEST(DriverTest, IrModePrintsStoreFieldPathInstruction) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "struct_field_assignment_ir.velo",
+        R"(module app;
+
+struct User {
+    id: int;
+}
+
+fn main(): int {
+    var user: User = User {
+        id: 1
+    };
+
+    user.id = 42;
+
+    return user.id;
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.irText.find("StoreFieldPath id"), std::string::npos);
+}

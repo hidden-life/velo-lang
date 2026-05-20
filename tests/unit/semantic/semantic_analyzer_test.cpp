@@ -2063,3 +2063,205 @@ fn main(): int {
     ASSERT_TRUE(engine.hasErrors());
     EXPECT_EQ(engine.diagnostics().front().code(), "SEM044");
 }
+
+TEST(SemanticAnalyzerTest, AcceptsStructFieldAssignment) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+struct User {
+    id: int;
+    name: string;
+}
+
+fn main(): int {
+    var user: User = User {
+        id: 1,
+        name: "Alex"
+    };
+
+    user.id = 42;
+
+    return user.id;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, AcceptsNestedStructFieldAssignment) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+struct User {
+    id: int;
+}
+
+struct Box {
+    user: User;
+}
+
+fn main(): int {
+    var box: Box = Box {
+        user: User {
+            id: 1
+        }
+    };
+
+    box.user.id = 42;
+
+    return box.user.id;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, ReportsFieldAssignmentThroughImmutableLocal) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+struct User {
+    id: int;
+}
+
+fn main(): int {
+    let user: User = User {
+        id: 1
+    };
+
+    user.id = 42;
+
+    return user.id;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM046");
+}
+
+TEST(SemanticAnalyzerTest, ReportsStructFieldAssignmentTypeMismatch) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+struct User {
+    id: int;
+}
+
+fn main(): int {
+    var user: User = User {
+        id: 1
+    };
+
+    user.id = "bad";
+
+    return user.id;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM047");
+}
+
+TEST(SemanticAnalyzerTest, ReportsUnknownStructFieldAssignment) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+struct User {
+    id: int;
+}
+
+fn main(): int {
+    var user: User = User {
+        id: 1
+    };
+
+    user.name = "Alex";
+
+    return user.id;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM044");
+}
+
+TEST(SemanticAnalyzerTest, ReportsFieldAssignmentOnNonStructValue) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    var value: int = 1;
+
+    value.id = 42;
+
+    return value;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM043");
+}

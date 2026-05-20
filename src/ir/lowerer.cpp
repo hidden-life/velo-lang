@@ -1,5 +1,46 @@
 #include "velo/ir/lowerer.h"
 
+namespace {
+    struct FieldAssignmentPath final {
+        std::string rootLocalName {};
+        std::vector<std::string> fields {};
+    };
+
+    void collectFieldAssignmentPath(const Velo::AST::Expression &expr, FieldAssignmentPath &path) {
+        using namespace Velo::AST;
+
+        if (expr.kind == ExpressionKind::Name) {
+            const auto &nameExpr = static_cast<const NameExpression&>(expr);
+            if (nameExpr.name.segments.size() == 1U) {
+                path.rootLocalName = nameExpr.name.segments.front();
+            }
+
+            return;
+        }
+
+        if (expr.kind == ExpressionKind::FieldAccess) {
+            const auto &fieldAccess = static_cast<const FieldAccessExpression&>(expr);
+            collectFieldAssignmentPath(*fieldAccess.object, path);
+            path.fields.push_back(fieldAccess.fieldName);
+            return;
+        }
+    }
+
+    [[nodiscard]] auto encodeFieldPath(const std::vector<std::string> &fields) -> std::string {
+        std::string encoded;
+
+        for (std::size_t idx = 0; idx < fields.size(); ++idx) {
+            if (idx > 0U) {
+                encoded += ".";
+            }
+
+            encoded += fields[idx];
+        }
+
+        return encoded;
+    }
+}
+
 namespace Velo::IR {
     auto Lowerer::lower(const AST::Program &program) -> Module {
         collectModuleAliases(program);
@@ -173,6 +214,48 @@ namespace Velo::IR {
 
             return;
         }
+
+        if (stmt.kind == StatementKind::FieldAssignment) {
+            const auto &fieldAssignment = static_cast<const FieldAssignmentStatement&>(stmt);
+            lowerFieldAssignmentStatement(fieldAssignment, func);
+            return;
+        }
+    }
+
+    void Lowerer::lowerFieldAssignmentStatement(const AST::FieldAssignmentStatement &stmt, Function &func) {
+        FieldAssignmentPath path;
+        collectFieldAssignmentPath(*stmt.target, path);
+
+        if (path.rootLocalName.empty() || path.fields.empty()) {
+            return;
+        }
+
+        const auto *localIdx = findLocalIndex(path.rootLocalName);
+        if (localIdx == nullptr) {
+            return;
+        }
+
+        // Evaluate RHS first. This preserves expected behavior for:
+        //
+        // user.id = user.id + 1
+        //
+        // RHS sees the old value, then root local is loaded and updated.
+        lowerExpression(*stmt.value, func);
+
+        func.instructions.push_back(Instruction {
+            .code = OpCode::LoadLocal,
+            .indexOperand = *localIdx,
+        });
+
+        func.instructions.push_back(Instruction {
+            .code = OpCode::StoreFieldPath,
+            .stringOperand = encodeFieldPath(path.fields),
+        });
+
+        func.instructions.push_back(Instruction {
+            .code = OpCode::StoreLocal,
+            .indexOperand = *localIdx,
+        });
     }
 
     void Lowerer::lowerExpression(const AST::Expression &expr, Function &func) {

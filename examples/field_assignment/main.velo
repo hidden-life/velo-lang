@@ -1,0 +1,27 @@
+module app;
+
+use std::console;
+
+struct User {
+    id: int;
+    name: string;
+}
+
+fn main(): int {
+    let orig: User = User {
+        id: 1,
+        name: "Alex"
+    };
+
+    var copy: User = orig;
+    copy.id = 2;
+    copy.name = "Bob";
+
+    console::println(orig.id);
+    console::println(orig.name);
+
+    console::println(copy.id);
+    console::println(copy.name);
+
+    return 0;
+}
