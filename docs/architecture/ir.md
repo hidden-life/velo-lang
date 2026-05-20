@@ -141,6 +141,42 @@ LoadField id
 Return
 ```
 
+## Field assignment
+Field assignment is lowered using `StoreFieldPath`.
+
+Example source:
+
+```velo
+user.id = 42;
+```
+
+Representative IR:
+
+```text
+PushInt 42
+LoadLocal local[0]
+StoreFieldPath id
+StoreLocal local[0]
+```
+
+Nested field assignment:
+
+```velo
+box.user.id = 42;
+```
+
+Representative IR:
+
+```text
+PushInt 42
+LoadLocal local[0]
+StoreFieldPath user.id
+StoreLocal local[0]
+```
+
+The operand of `StoreFieldPath` contains only the field path inside the root local value.
+The root local itself is selected by the surrounding `LoadLocal` and `StoreLocal`.
+
 ## Import alias lowering
 
 The lowerer resolves imported module aliases.

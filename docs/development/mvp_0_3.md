@@ -13,7 +13,7 @@ larger API-oriented features.
 
 ## Current step
 ```text
-0.3.1   define struct value copy semantics
+0.3.2   field assignment
 ```
 
 ## 0.3.1 scope
@@ -59,3 +59,88 @@ language-level value semantics.
 - equality operators for string and bool
 - block-scoped locals
 - release checklist for MVP 0.3
+
+## 0.3.2 scope
+Implemented in this step:
+- field assignment statements
+- nested field assignment
+- parser support for assignment targets based on expressions
+- semantic validation for field assignment root mutability
+- semantic validation for field assignment target type
+- semantic validation for field assignment value type
+- IR lowering for field assignment
+- runtime support for storing values into struct field paths
+- regression tests for value semantics after field assignment
+- example
+
+Example:
+```velo
+struct User {
+    id: int;
+}
+
+fn main(): int {
+    var user: User = User {
+        id: 1
+    };
+
+    user.id = 42;
+
+    return user.id;
+}
+```
+Nested field assignment is supported:
+```velo
+struct User {
+    id: int;
+}
+
+struct Box {
+    user: User;
+}
+
+fn main(): int {
+    var box: Box = Box {
+        user: User {
+            id: 1
+        }
+    };
+
+    box.user.id = 42;
+
+    return box.user.id;
+}
+```
+Field assignment requires the root value to be mutable local variable:
+```velo
+var user: User = User {
+    id: 1
+};
+
+user.id = 2;
+```
+This is rejected:
+```velo
+let user: User = User {
+    id: 1
+};
+
+user.id = 2;
+```
+Value semantics are preserved:
+```velo
+let a: User = User {
+    id: 1
+};
+
+var b: User = a;
+b.id = 2;
+
+// a.id is still 1
+```
+
+## Not implemented in 0.3.2
+- methods
+- equality operators for string and bool
+- block-scoped locals
+- visibility enforcement for `pub` / private fields

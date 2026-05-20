@@ -78,6 +78,21 @@ namespace Velo::AST {
                     break;
                 }
 
+                case StatementKind::FieldAssignment: {
+                    const auto &fieldAssignment = static_cast<const FieldAssignmentStatement&>(statement);
+                    writeIndent(stream, indentLevel);
+                    stream << "FieldAssignment\n";
+
+                    writeIndent(stream, indentLevel + 1U);
+                    stream << "Target\n";
+                    printExpression(stream, *fieldAssignment.target, indentLevel + 2U);
+
+                    writeIndent(stream, indentLevel + 1U);
+                    stream << "Value\n";
+                    printExpression(stream, *fieldAssignment.value, indentLevel + 2U);
+                    break;
+                }
+
                 case StatementKind::If: {
                     const auto &ifStmt = static_cast<const IfStatement&>(statement);
                     writeIndent(stream, indentLevel);

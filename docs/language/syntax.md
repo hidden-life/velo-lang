@@ -150,8 +150,69 @@ Current limitation:
 - field assignment is not implemented yet
 - visibility rules for private/public fields are not enforced yet
 
-### Current limitation:
-- field access is not implemented yet
+Field assignment is supported for mutable local struct values:
+```velo
+struct User {
+    id: int;
+    name: string;
+}
+
+fn main(): int {
+    var user: User = User {
+        id: 1,
+        name: "Alex"
+    };
+
+    user.id = 42;
+    user.name = "Bob";
+
+    return user.id;
+}
+```
+Nested field assignment is supported:
+```velo
+struct User {
+    id: int;
+}
+
+struct Box {
+    user: User;
+}
+
+fn main(): int {
+    var box: Box = Box {
+        user: User {
+            id: 1
+        }
+    };
+
+    box.user.id = 42;
+
+    return box.user.id;
+}
+```
+Field assignment requires the root variable to be mutable:
+```velo
+var user: User = User {
+    id: 1
+};
+
+user.id = 2;
+```
+
+This is rejected:
+
+```velo
+let user: User = User {
+    id: 1
+};
+
+user.id = 2;
+```
+
+Current limitation:
+- visibility rules for private/public fields are not enforced yet
+- methods are not implemented yet
 
 ## Functions
 Function declaration:

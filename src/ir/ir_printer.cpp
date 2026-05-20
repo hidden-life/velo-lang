@@ -86,6 +86,10 @@ namespace Velo::IR {
                 stream << " " << instruction.stringOperand;
                 break;
 
+            case OpCode::StoreFieldPath:
+                stream << " " << instruction.stringOperand;
+                break;
+
             case OpCode::Pop:
             case OpCode::Return:
             case OpCode::AddInt:
@@ -194,6 +198,9 @@ namespace Velo::IR {
 
             case OpCode::LoadField:
                 return "LoadField";
+
+            case OpCode::StoreFieldPath:
+                return "StoreFieldPath";
         }
 
         return "Unknown";

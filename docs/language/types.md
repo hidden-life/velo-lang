@@ -121,6 +121,7 @@ Current support:
 - semantic type checking understands specific struct names
 - struct literals can create runtime struct values
 - field access can read fields from struct values
+- field assignment can update fields through mutable local struct values
 
 Example:
 ```velo
@@ -174,8 +175,23 @@ b.id == 2
 The runtime may internally use pointers for struct storage, but the interpreter
 clones struct values at value boundaries to preserve language-level value semantics.
 
+Field assignment preserves value semantics:
+```velo
+let a: User = User {
+    id: 1
+};
+
+var b: User = a;
+
+b.id = 2;
+```
+After this code:
+```text
+a.id == 1
+b.id == 2
+```
+
 ## Current limitations
 Velo does not yet support:
-- field assignment is not implemented yet
 - methods are not implemented yet
 - array/maps/generics are not implemented yet

@@ -666,3 +666,96 @@ fn main(): int {
     const auto &userAccess = static_cast<const Velo::AST::FieldAccessExpression&>(*idAccess.object);
     EXPECT_EQ(userAccess.fieldName, "user");
 }
+
+TEST(ParserTest, ParsesFieldAssignmentStatement) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+struct User {
+    id: int;
+}
+
+fn main(): int {
+    var user: User = User {
+        id: 1
+    };
+
+    user.id = 42;
+
+    return user.id;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+    ASSERT_EQ(program->functions.size(), 1U);
+
+    const auto &mainFunction = program->functions[0];
+
+    ASSERT_EQ(mainFunction.statements.size(), 3U);
+    ASSERT_EQ(mainFunction.statements[1]->kind, Velo::AST::StatementKind::FieldAssignment);
+
+    const auto &assignment = static_cast<const Velo::AST::FieldAssignmentStatement&>(*mainFunction.statements[1]);
+    ASSERT_NE(assignment.target, nullptr);
+    EXPECT_EQ(assignment.target->fieldName, "id");
+    ASSERT_NE(assignment.target->object, nullptr);
+    ASSERT_EQ(assignment.target->object->kind, Velo::AST::ExpressionKind::Name);
+
+    const auto &obj = static_cast<Velo::AST::NameExpression&>(*assignment.target->object);
+    ASSERT_EQ(obj.name.segments.size(), 1U);
+    EXPECT_EQ(obj.name.segments[0], "user");
+}
+
+TEST(ParserTest, ParsesNestedFieldAssignmentStatement) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+struct User {
+    id: int;
+}
+
+struct Box {
+    user: User;
+}
+
+fn main(): int {
+    var box: Box = Box {
+        user: User {
+            id: 1
+        }
+    };
+
+    box.user.id = 42;
+
+    return box.user.id;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    const auto &mainFunction = program->functions[0];
+    ASSERT_EQ(mainFunction.statements.size(), 3U);
+    ASSERT_EQ(mainFunction.statements[1]->kind, Velo::AST::StatementKind::FieldAssignment);
+
+    const auto &assignment = static_cast<const Velo::AST::FieldAssignmentStatement&>(
+        *mainFunction.statements[1]
+    );
+
+    ASSERT_NE(assignment.target, nullptr);
+    EXPECT_EQ(assignment.target->fieldName, "id");
+
+    ASSERT_NE(assignment.target->object, nullptr);
+    ASSERT_EQ(assignment.target->object->kind, Velo::AST::ExpressionKind::FieldAccess);
+
+    const auto &userAccess = static_cast<const Velo::AST::FieldAccessExpression&>(
+        *assignment.target->object
+    );
+
+    EXPECT_EQ(userAccess.fieldName, "user");
+}

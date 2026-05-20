@@ -452,42 +452,6 @@ namespace Velo::Parser {
             );
         }
 
-        if (check(TokenKind::Identifier) && peekNext().kind() == TokenKind::Equal) {
-            const Token *variableName = consume(
-                TokenKind::Identifier,
-                "PAR040",
-                "Expected assignment target."
-            );
-
-            if (consume(TokenKind::Equal, "PAR041", "Expected '=' in assignment.") == nullptr) {
-                return nullptr;
-            }
-
-            auto valueExpr = parseExpression();
-            if (valueExpr == nullptr) {
-                return nullptr;
-            }
-
-            const Token *semicolon = consume(
-                TokenKind::Semicolon,
-                "PAR042",
-                "Expected ';' after assignment."
-            );
-
-            if (semicolon == nullptr) {
-                return nullptr;
-            }
-
-            return std::make_unique<AST::AssignmentStatement>(
-                std::string(variableName->text()),
-                std::move(valueExpr),
-                Source::SourceRange(
-                    variableName->range().begin(),
-                    semicolon->range().end()
-                )
-            );
-        }
-
         if (match(TokenKind::KwBreak)) {
             const Token &token = previous();
             const Token *semicolon = consume(
@@ -528,6 +492,54 @@ namespace Velo::Parser {
         }
 
         const Source::SourceRange beginRange = expression->range;
+        if (match(TokenKind::Equal)) {
+            auto valueExpr = parseExpression();
+            if (valueExpr == nullptr) {
+                return nullptr;
+            }
+
+            const Token *semicolon = consume(
+                TokenKind::Semicolon,
+                "PAR042",
+                "Expected ';' after assignment."
+            );
+
+            if (semicolon == nullptr) {
+                return nullptr;
+            }
+
+            const auto assignmentRange = Source::SourceRange(beginRange.begin(), semicolon->range().end());
+            if (expression->kind == AST::ExpressionKind::Name) {
+                const auto &nameExpr = static_cast<AST::NameExpression&>(*expression);
+                if (nameExpr.name.segments.size() == 1U) {
+                    return std::make_unique<AST::AssignmentStatement>(
+                        nameExpr.name.segments.front(),
+                        std::move(valueExpr),
+                        assignmentRange
+                    );
+                }
+            }
+
+            if (expression->kind == AST::ExpressionKind::FieldAccess) {
+                auto *rawTarget = static_cast<AST::FieldAccessExpression*>(expression.release());
+                std::unique_ptr<AST::FieldAccessExpression> target(rawTarget);
+
+                return std::make_unique<AST::FieldAssignmentStatement>(
+                    std::move(target),
+                    std::move(valueExpr),
+                    assignmentRange
+                );
+            }
+
+            _engine.error(
+                "PAR121",
+                "Invalid assignment target.",
+                beginRange
+            );
+
+            return nullptr;
+        }
+
         const Token *semicolon = consume(TokenKind::Semicolon, "PAR017", "Expected ';' after expression statement.");
         if (semicolon == nullptr) {
             return nullptr;

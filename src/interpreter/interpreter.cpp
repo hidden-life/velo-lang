@@ -3,6 +3,7 @@
 #include <iostream>
 #include <ostream>
 #include <sstream>
+#include <vector>
 
 namespace {
     template <typename Predicate>
@@ -146,6 +147,20 @@ namespace {
         }
 
         return {std::move(typeName), std::move(fields)};
+    }
+
+    [[nodiscard]] auto splitFieldPath(const std::string &encoded) -> std::vector<std::string> {
+        std::vector<std::string> result;
+        std::stringstream stream(encoded);
+        std::string segment;
+
+        while (std::getline(stream, segment, '.')) {
+            if (!segment.empty()) {
+                result.push_back(segment);
+            }
+        }
+
+        return result;
     }
 }
 
@@ -418,6 +433,9 @@ namespace Velo::Interpreter {
             case OpCode::LoadField: {
                 return loadField(inst.stringOperand);
             }
+            case OpCode::StoreFieldPath: {
+                return storeFieldPath(inst.stringOperand);
+            }
         }
 
         return Runtime::ExecutionResult {
@@ -633,6 +651,92 @@ namespace Velo::Interpreter {
         }
 
         _stack.push_back(Runtime::cloneValue(fieldIt->second));
+
+        return {};
+    }
+
+    auto Interpreter::storeFieldPath(const std::string &encodedPath) -> Runtime::ExecutionResult {
+        const auto path = splitFieldPath(encodedPath);
+        if (path.empty()) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "StoreFieldPath requires a non-empty field path."
+            };
+        }
+
+        if (_stack.size() < 2U) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "StoreFieldPath requires a value and a struct value on the stack."
+            };
+        }
+
+        const auto rootValue = _stack.back();
+        _stack.pop_back();
+
+        const auto assignedValue = _stack.back();
+        _stack.pop_back();
+
+        if (!std::holds_alternative<Runtime::StructValuePtr>(rootValue)) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "StoreFieldPath a struct value."
+            };
+        }
+
+        const auto rootStruct = std::get<Runtime::StructValuePtr>(rootValue);
+        if (rootStruct == nullptr) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "StoreFieldPath received a null struct value."
+            };
+        }
+
+        Runtime::StructValuePtr current = rootStruct;
+        for (std::size_t idx = 0; idx + 1U < path.size(); ++idx) {
+            const auto fieldIt = current->fields.find(path[idx]);
+            if (fieldIt == current->fields.end()) {
+                return Runtime::ExecutionResult {
+                    .success = false,
+                    .exitCode = 1,
+                    .error = "Unknown field '" + path[idx] + "' in struct value '" + current->typeName + "'."
+                };
+            }
+
+            if (!std::holds_alternative<Runtime::StructValuePtr>(fieldIt->second)) {
+                return Runtime::ExecutionResult {
+                    .success = false,
+                    .exitCode = 1,
+                    .error = "Field '" + path[idx] + "' is not a struct value."
+                };
+            }
+
+            current = std::get<Runtime::StructValuePtr>(fieldIt->second);
+            if (current == nullptr) {
+                return Runtime::ExecutionResult {
+                    .success = false,
+                    .exitCode = 1,
+                    .error = "Field '" + path[idx] + "' is a null struct value."
+                };
+            }
+        }
+
+        const std::string &leafFieldName = path.back();
+        const auto leafIt = current->fields.find(leafFieldName);
+        if (leafIt == current->fields.end()) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "Unknown field '" + leafFieldName + "' in struct value '" + current->typeName + "'."
+            };
+        }
+
+        current->fields[leafFieldName] = Runtime::cloneValue(assignedValue);
+        _stack.push_back(Runtime::cloneValue(rootValue));
 
         return {};
     }

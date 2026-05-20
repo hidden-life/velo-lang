@@ -197,6 +197,19 @@ Demonstrates:
 - field access expressions
 - printing field values with `console::println`
 
+### Field assignment
+```text
+examples/field_assignment/main.velo
+```
+
+Demonstrates:
+
+- assigning to struct fields
+- assigning to `int` fields
+- assigning to `string` fields
+- preserving struct value semantics when assigning through a copied struct value
+- printing original and modified values with `console::println`
+
 ### MVP showcase
 ```text
 examples/mvp_showcase/main.velo

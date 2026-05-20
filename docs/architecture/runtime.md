@@ -188,6 +188,35 @@ Invalid field access should normally be caught be semantic analysis before runti
 
 Runtime still checks shape and value type defensively.
 
+## Field assignment
+
+Field assignment is executed through `StoreFieldPath`.
+
+Runtime stack shape before `StoreFieldPath`:
+
+```text
+[..., assignedValue, rootStructValue]
+```
+
+Runtime behavior:
+
+1. pop root struct value
+2. pop assigned value
+3. walk the field path inside the root struct value
+4. replace the leaf field with a cloned assigned value
+5. push the updated root struct value back onto the stack
+
+The following IR shape stores the updated root value back into the local slot:
+
+```text
+PushInt 42
+LoadLocal local[0]
+StoreFieldPath id
+StoreLocal local[0]
+```
+
+This works with value semantics because `LoadLocal` and `StoreLocal` clone struct values at value boundaries.
+
 ## Calls
 
 User-defined function calls use:
