@@ -185,31 +185,22 @@ The parameter `value` resolves to `string`.
 
 ## Local scopes
 
-The semantic analyzer uses a scope stack for local variables.
+The semantic analyzer uses a stack of local scopes.
+
+Function body analysis starts with a root scope containing function parameters.
+
+Nested scopes are created for:
+
+- `if` body
+- `else` body
+- `while` body
 
 Rules:
 
-- each function creates a function scope
-- each `if` branch creates a nested scope
-- each `while` body creates a nested scope
-- variables resolve from inner scope to outer scope
-- duplicate locals are forbidden only in the same scope
-- shadowing from outer scopes is allowed
-
-Example:
-
-```velo
-fn main(): int {
-    let value: int = 1;
-
-    if (true) {
-        let value: int = 2;
-        return value;
-    }
-
-    return value;
-}
-```
+- duplicate local declarations are rejected in the current scope
+- shadowing locals from outer scopes is allowed
+- name resolution searches from the innermost scope to the outermost scope
+- block-local variables are not visible after the block ends
 
 ## Assignments
 

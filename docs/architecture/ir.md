@@ -299,3 +299,43 @@ CompareEqual
 
 The lowerer does not need semantic type information to choose a type-specific equality opcode.
 Semantic analysis validates operands before lowering, and the interpreter compares actual runtime values.
+
+## Lowering local scopes
+
+The lowerer uses a stack of local scopes for name-to-local-index resolution.
+
+Runtime local slots are still function-level slots, but source-level names are resolved using lexical scopes.
+
+Example source:
+
+```velo
+let value: int = 1;
+
+if (true) {
+    let value: int = 2;
+    return value;
+}
+
+return value;
+```
+
+Representative IR shape:
+
+```text
+PushInt 1
+StoreLocal local[0]
+
+PushBool true
+JumpIfFalse ...
+
+PushInt 2
+StoreLocal local[1]
+LoadLocal local[1]
+Return
+
+LoadLocal local[0]
+Return
+```
+
+The two `value` declarations use different local slots.
+After the nested block ends, name resolution returns to the outer `value`.

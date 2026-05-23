@@ -1475,3 +1475,171 @@ fn main(): int {
 
     EXPECT_NE(result.irText.find("CompareEqual"), std::string::npos);
 }
+
+TEST(DriverTest, ExecutesLocalShadowingInsideIfBlock) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "local_shadowing_if.velo",
+        R"(module app;
+
+fn main(): int {
+    let value: int = 1;
+
+    if (true) {
+        let value: int = 2;
+        return value;
+    }
+
+    return value;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 2);
+}
+
+TEST(DriverTest, ExecutesOuterLocalAfterIfBlockShadowing) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "outer_local_after_if_shadowing.velo",
+        R"(module app;
+
+fn main(): int {
+    let value: int = 1;
+
+    if (true) {
+        let value: int = 2;
+    }
+
+    return value;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 1);
+}
+
+TEST(DriverTest, ExecutesLocalShadowingInsideWhileBlock) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "local_shadowing_while.velo",
+        R"(module app;
+
+fn main(): int {
+    var counter: int = 0;
+
+    while (counter == 0) {
+        let counter: int = 7;
+        return counter;
+    }
+
+    return counter;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 7);
+}
+
+TEST(DriverTest, ExecutesAssignmentToOuterLocalAfterBlockScope) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "assign_outer_after_block_scope.velo",
+        R"(module app;
+
+fn main(): int {
+    var value: int = 1;
+
+    if (true) {
+        let value: int = 2;
+    }
+
+    value = 3;
+
+    return value;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 3);
+}
+
+TEST(DriverTest, IrModeUsesDifferentLocalSlotsForShadowedLocals) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "local_shadowing_ir.velo",
+        R"(module app;
+
+fn main(): int {
+    let value: int = 1;
+
+    if (true) {
+        let value: int = 2;
+        return value;
+    }
+
+    return value;
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.irText.find("StoreLocal local[0]"), std::string::npos);
+    EXPECT_NE(result.irText.find("StoreLocal local[1]"), std::string::npos);
+    EXPECT_NE(result.irText.find("LoadLocal local[1]"), std::string::npos);
+}

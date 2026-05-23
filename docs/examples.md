@@ -242,3 +242,15 @@ Demonstrates:
 - comparing struct fields of type `string`
 - comparing struct fields of type `bool`
 - printing bool results with `console::println`
+
+### Block scopes
+```text
+examples/block_scopes/main.velo
+```
+
+Demonstrates:
+
+- local shadowing inside `if`
+- local shadowing inside `while`
+- block-local variables not overwriting outer local variables
+- outer local visibility after nested blocks

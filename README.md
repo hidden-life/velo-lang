@@ -42,6 +42,8 @@ data model foundation based on struct.
 - string equality and inequality
 - bool equality and inequality
 - equality checks for comparable struct fields
+- block-scoped locals for `if`, `else`, and `while`
+- local shadowing in nested blocks
 
 ## Standard modules
 Current standard modules:
@@ -198,5 +200,5 @@ MVP 0.3 is in progress.
 
 Current step:
 ```text
-0.3.3   equality operators for string and bool
+0.3.4   block-scoped locals
 ```

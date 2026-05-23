@@ -59,19 +59,24 @@ namespace Velo::IR {
         Function f;
         f.name = func.name;
 
-        _locals.clear();
+        _scopeStack.clear();
+        _nextLocalIndex = 0U;
 
-        for (std::size_t idx = 0; idx < func.parameters.size(); ++idx) {
-            const auto &param = func.parameters[idx];
+        pushScope();
+
+        for (const auto &param : func.parameters) {
             f.parameters.push_back(param.name);
-            _locals.emplace(param.name, idx);
+            static_cast<void>(declareLocal(param.name));
         }
 
         for (const auto &stmt : func.statements) {
             lowerStatement(*stmt, f);
         }
 
-        _locals.clear();
+        popScope();
+
+        _scopeStack.clear();
+        _nextLocalIndex = 0U;
 
         return f;
     }
@@ -91,9 +96,7 @@ namespace Velo::IR {
                 .code = OpCode::JumpIfFalse,
             });
 
-            for (const auto &nested : whileStmt.body) {
-                lowerStatement(*nested, func);
-            }
+            lowerStatementBlock(whileStmt.body, func);
 
             func.instructions.push_back(Instruction {
                 .code = OpCode::Jump,
@@ -137,13 +140,14 @@ namespace Velo::IR {
             const auto &varDecl = static_cast<const VariableDeclarationStatement&>(stmt);
             lowerExpression(*varDecl.initializer, func);
 
-            const std::size_t localIdx = _locals.size();
-            _locals.emplace(varDecl.name, localIdx);
+            const std::size_t localIdx = declareLocal(varDecl.name);
 
             func.instructions.push_back(Instruction {
                 .code = OpCode::StoreLocal,
                 .indexOperand = localIdx,
             });
+
+            return;
         }
 
         if (stmt.kind == StatementKind::Assignment) {
@@ -169,9 +173,7 @@ namespace Velo::IR {
                 .code = OpCode::JumpIfFalse
             });
 
-            for (const auto &nested : ifStmt.thenBranch) {
-                lowerStatement(*nested, func);
-            }
+            lowerStatementBlock(ifStmt.thenBranch, func);
 
             const std::size_t jumpOverElseIdx = func.instructions.size();
             func.instructions.push_back(Instruction {
@@ -179,9 +181,7 @@ namespace Velo::IR {
             });
 
             const std::size_t elseStartIdx = func.instructions.size();
-            for (const auto &nested : ifStmt.elseBranch) {
-                lowerStatement(*nested, func);
-            }
+            lowerStatementBlock(ifStmt.elseBranch, func);
 
             const std::size_t endIdx = func.instructions.size();
             // If condition is false, jump to the else branch.
@@ -443,12 +443,47 @@ namespace Velo::IR {
     }
 
     auto Lowerer::findLocalIndex(const std::string &name) const -> const std::size_t* {
-        const auto it = _locals.find(name);
-        if (it == _locals.end()) {
-            return nullptr;
+        for (auto scopeIt = _scopeStack.rbegin(); scopeIt != _scopeStack.rend(); ++scopeIt) {
+            const auto localIt = scopeIt->find(name);
+            if (localIt != scopeIt->end()) {
+                return &localIt->second;
+            }
         }
 
-        return &it->second;
+        return nullptr;
+    }
+
+    void Lowerer::pushScope() {
+        _scopeStack.emplace_back();
+    }
+
+    void Lowerer::popScope() {
+        if (!_scopeStack.empty()) {
+            _scopeStack.pop_back();
+        }
+    }
+
+    auto Lowerer::declareLocal(const std::string &name) -> std::size_t {
+        if (_scopeStack.empty()) {
+            pushScope();
+        }
+
+        const std::size_t localIdx = _nextLocalIndex;
+        ++_nextLocalIndex;
+
+        _scopeStack.back()[name] = localIdx;
+
+        return localIdx;
+    }
+
+    void Lowerer::lowerStatementBlock(const std::vector<std::unique_ptr<AST::Statement>> &statements, Function &func) {
+        pushScope();
+
+        for (const auto &stmt : statements) {
+            lowerStatement(*stmt, func);
+        }
+
+        popScope();
     }
 
     void Lowerer::lowerLogicalAndExpression(const AST::BinaryExpression &expr, Function &func) {

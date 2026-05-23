@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "module.h"
 #include "velo/ast/ast.h"
@@ -34,7 +35,14 @@ namespace Velo::IR {
         void lowerLogicalAndExpression(const AST::BinaryExpression &expr, Function &func);
         void lowerLogicalOrExpression(const AST::BinaryExpression &expr, Function &func);
 
-        std::unordered_map<std::string, std::size_t> _locals {};
+        void pushScope();
+        void popScope();
+
+        [[nodiscard]] auto declareLocal(const std::string &name) -> std::size_t;
+        void lowerStatementBlock(const std::vector<std::unique_ptr<AST::Statement>> &statements, Function &func);
+
+        std::vector<std::unordered_map<std::string, std::size_t>> _scopeStack {};
+        std::size_t _nextLocalIndex {0U};
 
         // Visible module name -> runtime module name
         //

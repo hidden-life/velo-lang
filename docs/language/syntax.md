@@ -466,3 +466,52 @@ Current limitations:
 - struct equality is not implemented
 - string ordering comparisons are not implemented
 - mixed-type equality is rejected
+
+## Block-scoped locals
+Local variables declared inside `if`, `else`, and `while` bodies are scoped to that block.
+```velo
+fn main(): int {
+    let value: int = 1;
+
+    if (true) {
+        let value: int = 2;
+        return value;
+    }
+
+    return value;
+}
+```
+
+The inner `value` shadows the outer `value` only inside the `if` body.
+
+After the block ends, the outer local is visible again:
+
+```velo
+fn main(): int {
+    let value: int = 1;
+
+    if (true) {
+        let value: int = 2;
+    }
+
+    return value;
+}
+```
+
+Block-local variables do not leak outside the block:
+
+```velo
+fn main(): int {
+    if (true) {
+        let value: int = 1;
+    }
+
+    return value;
+}
+```
+
+This is rejected because `value` is not visible after the `if` body.
+
+Current limitation:
+
+- standalone block statements are not implemented yet

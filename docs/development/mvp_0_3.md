@@ -13,7 +13,7 @@ larger API-oriented features.
 
 ## Current step
 ```text
-0.3.3   equality operators for string and bool
+0.3.4   block-scoped locals
 ```
 
 ## 0.3.1 scope
@@ -194,3 +194,73 @@ Not implemented in 0.3.3:
 - methods
 - block-scoped locals
 - visibility enforcement for `pub` / private fields
+
+## 0.3.4 scope
+Implemented in this step:
+- block-scoped local variables for `if` bodies
+- block-scoped local variables for `else` bodies
+- block-scoped local variables for `while` bodies
+- local shadowing in nested block scopes
+- semantic tests for block-local visibility
+- driver tests for lowerer local slot resolution
+- example
+
+Example:
+```velo
+fn main(): int {
+    let value: int = 1;
+
+    if (true) {
+        let value: int = 2;
+        return value;
+    }
+
+    return value;
+}
+```
+This returns:
+```text
+2
+```
+The inner `value` shadows the outer `value` only inside the `if` body.
+
+After the block ends, the outer local is visible again:
+
+```velo
+fn main(): int {
+    let value: int = 1;
+
+    if (true) {
+        let value: int = 2;
+    }
+
+    return value;
+}
+```
+
+This returns:
+
+```text
+1
+```
+
+Block-local variables do not leak outside the block:
+
+```velo
+fn main(): int {
+    if (true) {
+        let value: int = 1;
+    }
+
+    return value;
+}
+```
+
+This is rejected with `SEM007`.
+
+## Not implemented in 0.3.4
+
+- standalone block statements
+- methods
+- visibility enforcement for `pub` / private fields
+- release checklist for MVP 0.3

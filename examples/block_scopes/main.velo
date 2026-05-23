@@ -1,0 +1,27 @@
+module app;
+
+use std::console;
+
+fn main(): int {
+    let value: int = 1;
+
+    if (true) {
+        let value: int = 2;
+        console::println(value);
+    }
+
+    console::println(value);
+
+    var counter: int = 0;
+
+    while (counter == 0) {
+        let value: int = 3;
+        console::println(value);
+
+        counter = counter + 1;
+    }
+
+    console::println(value);
+
+    return 0;
+}

@@ -77,6 +77,24 @@ Current limitations:
 - struct equality is not implemented yet
 - string ordering comparisons are not implemented yet
 
+### Local variable scopes
+
+Function parameters and top-level function locals live in the function body scope.
+
+`if`, `else`, and `while` bodies create nested local scopes.
+
+```velo
+let value: int = 1;
+
+if (true) {
+    let value: int = 2;
+}
+```
+
+The inner `value` is a different local variable and shadows the outer one only inside the block.
+
+Duplicate local declarations are rejected only inside the same scope. Shadowing from an outer scope is allowed.
+
 ## Declared type validation
 The semantic analyzer validates declared types in:
 - function return types
