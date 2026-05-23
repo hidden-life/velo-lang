@@ -2265,3 +2265,271 @@ fn main(): int {
     ASSERT_TRUE(engine.hasErrors());
     EXPECT_EQ(engine.diagnostics().front().code(), "SEM043");
 }
+
+TEST(SemanticAnalyzerTest, AcceptsStringEquality) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    if ("Alex" == "Alex") {
+        return 1;
+    }
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, AcceptsStringInequality) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    if ("Alex" != "Bob") {
+        return 1;
+    }
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, AcceptsBoolEquality) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    if (true == true) {
+        return 1;
+    }
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, AcceptsBoolInequality) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    if (true != false) {
+        return 1;
+    }
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, AcceptsStructStringFieldEquality) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+struct User {
+    name: string;
+}
+
+fn main(): int {
+    let user: User = User {
+        name: "Alex"
+    };
+
+    if (user.name == "Alex") {
+        return 1;
+    }
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, AcceptsStructBoolFieldEquality) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+struct User {
+    active: bool;
+}
+
+fn main(): int {
+    let user: User = User {
+        active: true
+    };
+
+    if (user.active == true) {
+        return 1;
+    }
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, ReportsEqualityTypeMismatch) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    if ("1" == 1) {
+        return 1;
+    }
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM048");
+}
+
+TEST(SemanticAnalyzerTest, ReportsStructEqualityUnsupported) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+struct User {
+    id: int;
+}
+
+fn main(): int {
+    let left: User = User {
+        id: 1
+    };
+
+    let right: User = User {
+        id: 1
+    };
+
+    if (left == right) {
+        return 1;
+    }
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM048");
+}
+
+TEST(SemanticAnalyzerTest, ReportsStringOrderingComparisonUnsupported) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    if ("a" < "b") {
+        return 1;
+    }
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM024");
+}

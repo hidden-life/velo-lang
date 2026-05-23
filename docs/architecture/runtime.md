@@ -348,3 +348,19 @@ Struct values are stored through shared pointers inside `Runtime::Value`.
 
 Current limitation:
 - field access is not implemented yet
+
+## Equality comparison
+Runtime equality is executed by generic equality opcodes:
+
+```text
+CompareEqual
+CompareNotEqual
+```
+
+Supported runtime value pairs:
+
+- `int` with `int`
+- `string` with `string`
+- `bool` with `bool`
+
+The interpreter rejects mismatched or unsupported runtime equality operands defensively, but such cases should normally be caught by semantic analysis before execution.

@@ -68,6 +68,15 @@ Invalid:
 let value: void = 0;
 ```
 
+### Equality support
+- `int` supports `==` and `!=`
+- `string` supports `==` and `!=`
+- `bool` supports `==` and `!=`
+
+Current limitations:
+- struct equality is not implemented yet
+- string ordering comparisons are not implemented yet
+
 ## Declared type validation
 The semantic analyzer validates declared types in:
 - function return types

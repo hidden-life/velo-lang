@@ -212,12 +212,14 @@ CallBuiltin str::len args=1
 
 ## Comparisons
 
-- `CompareEqualInt`
-- `CompareNotEqualInt`
+- `CompareEqualInt` (legacy compatibility)
+- `CompareNotEqualInt` (legacy compatibility)
 - `CompareLessInt`
 - `CompareGreaterInt`
 - `CompareLessEqualInt`
 - `CompareGreaterEqualInt`
+- `CompareEqual`
+- `CompareNotEqual`
 
 ## Logic
 
@@ -272,3 +274,28 @@ TypeName:field1,field2,field3
 ```
 
 This is an MVP representation and may be replaced by richer IR metadata later.
+
+## Generic equality
+The lowerer emits generic equality opcodes for `==` and `!=`:
+
+```text
+CompareEqual
+CompareNotEqual
+```
+
+Example:
+
+```velo
+"Alex" == "Alex"
+```
+
+Representative IR:
+
+```text
+PushString "Alex"
+PushString "Alex"
+CompareEqual
+```
+
+The lowerer does not need semantic type information to choose a type-specific equality opcode.
+Semantic analysis validates operands before lowering, and the interpreter compares actual runtime values.

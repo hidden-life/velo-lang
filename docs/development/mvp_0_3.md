@@ -13,7 +13,7 @@ larger API-oriented features.
 
 ## Current step
 ```text
-0.3.2   field assignment
+0.3.3   equality operators for string and bool
 ```
 
 ## 0.3.1 scope
@@ -142,5 +142,55 @@ b.id = 2;
 ## Not implemented in 0.3.2
 - methods
 - equality operators for string and bool
+- block-scoped locals
+- visibility enforcement for `pub` / private fields
+
+## 0.3.3 scope
+Implemented in this step:
+- equality support for `string`
+- inequality support for `string`
+- equality support for `bool`
+- inequality support for `bool`
+- equality support for struct fields of type `string`
+- equality support for struct fields of type `bool`
+- semantic rejection for mixed equality operands
+- semantic rejection for struct equality
+- generic IR equality opcodes
+- runtime equality comparison for `int`, `string`, and `bool`
+- example
+
+Supported equality operands:
+```text
+int == int
+int != int
+
+string == string
+string != string
+
+bool == bool
+bool != bool
+```
+
+Examples:
+```velo
+"Alex" == "Alex"
+"Alex" != "Bob"
+
+true == true
+true != false
+
+user.name == "Alex"
+user.active != false
+```
+Noty supported in 0.3.3:
+```velo
+user1 == user2
+"a" < "b"
+1 == "1"
+```
+Not implemented in 0.3.3:
+- struct equality
+- string ordering comparisons
+- methods
 - block-scoped locals
 - visibility enforcement for `pub` / private fields

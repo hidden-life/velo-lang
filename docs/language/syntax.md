@@ -428,3 +428,41 @@ fn main(): int {
     return 0;
 }
 ```
+
+## Equality operators
+Velo supports equality operators for `int`, `string`, and `bool`.
+```velo
+1 == 1
+1 != 2
+
+"Alex" == "Alex"
+"Alex" != "Bob"
+
+true == true
+false != true
+```
+
+Struct fields can be compared when their field type is comparable:
+```velo
+struct User {
+    name: string;
+    active: bool;
+}
+
+fn main(): int {
+    let user: User = User {
+        name: "Alex",
+        active: true
+    };
+
+    if (user.name == "Alex") {
+        return 1;
+    }
+
+    return 0;
+}
+```
+Current limitations:
+- struct equality is not implemented
+- string ordering comparisons are not implemented
+- mixed-type equality is rejected

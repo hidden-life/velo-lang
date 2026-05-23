@@ -226,3 +226,19 @@ Demonstrates the current core language feature set:
 - comparisons
 - logical operators
 - standard modules
+
+### Equality
+
+```text
+examples/equality/main.velo
+```
+
+Demonstrates:
+
+- string equality
+- string inequality
+- bool equality
+- bool inequality
+- comparing struct fields of type `string`
+- comparing struct fields of type `bool`
+- printing bool results with `console::println`

@@ -353,12 +353,12 @@ namespace Velo::IR {
                         return;
                     case BinaryOperator::Equal:
                         func.instructions.push_back(Instruction {
-                            .code = OpCode::CompareEqualInt,
+                            .code = OpCode::CompareEqual,
                         });
                         return;
                     case BinaryOperator::NotEqual:
                         func.instructions.push_back(Instruction {
-                            .code = OpCode::CompareNotEqualInt,
+                            .code = OpCode::CompareNotEqual,
                         });
                         return;
                     case BinaryOperator::Less:

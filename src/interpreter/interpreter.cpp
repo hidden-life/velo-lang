@@ -38,6 +38,44 @@ namespace {
     }
 
     template <typename Predicate>
+    auto compareEqualityValues(std::vector<Velo::Runtime::Value> &stack, Predicate predicate) -> Velo::Runtime::ExecutionResult {
+        if (stack.size() < 2U) {
+            return Velo::Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "Equality comparison requires two values on the stack."
+            };
+        }
+
+        const auto right = stack.back();
+        stack.pop_back();
+
+        const auto left = stack.back();
+        stack.pop_back();
+
+        if (std::holds_alternative<int>(left) && std::holds_alternative<int>(right)) {
+            stack.emplace_back(predicate(std::get<int>(left), std::get<int>(right)));
+            return {};
+        }
+
+        if (std::holds_alternative<std::string>(left) && std::holds_alternative<std::string>(right)) {
+            stack.emplace_back(predicate(std::get<std::string>(left), std::get<std::string>(right)));
+            return {};
+        }
+
+        if (std::holds_alternative<bool>(left) && std::holds_alternative<bool>(right)) {
+            stack.emplace_back(predicate(std::get<bool>(left), std::get<bool>(right)));
+            return {};
+        }
+
+        return Velo::Runtime::ExecutionResult {
+            .success = false,
+            .exitCode = 1,
+            .error = "Equality comparison expects operands of the same comparable type."
+        };
+    }
+
+    template <typename Predicate>
     auto evaluateBinaryBool(
         std::vector<Velo::Runtime::Value> &stack,
         Predicate predicate
@@ -315,6 +353,14 @@ namespace Velo::Interpreter {
             }
             case OpCode::Jump:
                 return {};
+            case OpCode::CompareEqual:
+                return compareEqualityValues(_stack, [](const auto &left, const auto &right) {
+                    return left == right;
+                });
+            case OpCode::CompareNotEqual:
+                return compareEqualityValues(_stack, [](const auto &left, const auto &right) {
+                    return left != right;
+                });
             case OpCode::CompareEqualInt:
                 return compareIntegerValues(_stack, [](int left, int right) { return left == right; });
 
