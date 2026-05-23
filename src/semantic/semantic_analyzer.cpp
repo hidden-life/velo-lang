@@ -15,6 +15,25 @@ namespace {
 
         return nullptr;
     }
+
+    [[nodiscard]] auto isEqualityOperator(Velo::AST::BinaryOperator op) -> bool {
+        return op == Velo::AST::BinaryOperator::Equal || op == Velo::AST::BinaryOperator::NotEqual;
+    }
+
+    [[nodiscard]] auto isOrderingComparisonOperator(Velo::AST::BinaryOperator op) -> bool {
+        return op == Velo::AST::BinaryOperator::Less ||
+            op == Velo::AST::BinaryOperator::LessEqual ||
+            op == Velo::AST::BinaryOperator::Greater ||
+            op == Velo::AST::BinaryOperator::GreaterEqual;
+    }
+
+    [[nodiscard]] auto isEqualityComparableType(const Velo::Semantic::SemanticType &type) -> bool {
+        using Velo::Semantic::SemanticTypeKind;
+
+        return type.kind == SemanticTypeKind::Int ||
+            type.kind == SemanticTypeKind::String ||
+            type.kind == SemanticTypeKind::Bool;
+    }
 }
 
 namespace Velo::Semantic {
@@ -609,53 +628,66 @@ namespace Velo::Semantic {
                     binaryExpr.op == BinaryOperator::Modulo
                 ) {
                     if (isIntType(left) && isIntType(right)) {
-                        return SemanticType {
-                            .kind = SemanticTypeKind::Int
-                        };
+                        return typeFromString("int");
                     }
 
-                    if (!isUnknownType(left) && !isUnknownType(right)) {
-                        _engine.error(
-                        "SEM013",
-                        "Arithmetic operators require integer operands.",
-                            binaryExpr.range
-                        );
-                    }
+                    _engine.error(
+                    "SEM013",
+                    "Arithmetic operators require integer operands.",
+                        binaryExpr.range
+                    );
 
                     return {};
                 }
 
                 if (binaryExpr.op == BinaryOperator::LogicalAnd || binaryExpr.op == BinaryOperator::LogicalOr) {
                     if (isBoolType(left) && isBoolType(right)) {
-                        return SemanticType {
-                            .kind = SemanticTypeKind::Bool
-                        };
+                        return typeFromString("bool");
                     }
 
-                    if (!isUnknownType(left) && !isUnknownType(right)) {
-                        _engine.error(
-                        "SEM029",
-                        "Logical operators require bool operands.",
-                            binaryExpr.range
-                        );
-                    }
+                    _engine.error(
+                    "SEM029",
+                    "Logical operators require bool operands.",
+                        binaryExpr.range
+                    );
 
                     return {};
                 }
 
-                // At this stage all comparison/equality operators support int operands only.
-                if (isIntType(left) && isIntType(right)) {
-                    return SemanticType {
-                        .kind = SemanticTypeKind::Bool
-                    };
-                }
+                if (isEqualityOperator(binaryExpr.op)) {
+                    if (isUnknownType(left) || isUnknownType(right)) {
+                        return {};
+                    }
 
-                if (!isUnknownType(left) && !isUnknownType(right)) {
+                    if (typesEqual(left, right) && isEqualityComparableType(left)) {
+                        return typeFromString("bool");
+                    }
+
                     _engine.error(
-                    "SEM024",
-                    "Comparison operators require integer operands.",
+                        "SEM048",
+                        "Equality operators require operands of the same comparable type. Left '" +
+                        semanticTypeToString(left) +
+                        "', right '" +
+                        semanticTypeToString(right) +
+                        "'.",
                         binaryExpr.range
                     );
+
+                    return {};
+                }
+
+                if (isOrderingComparisonOperator(binaryExpr.op)) {
+                    if (isIntType(left) && isIntType(right)) {
+                        return typeFromString("bool");
+                    }
+
+                    _engine.error(
+                        "SEM024",
+                        "Comparison operators require integer operands.",
+                        binaryExpr.range
+                    );
+
+                    return {};
                 }
 
                 return {};

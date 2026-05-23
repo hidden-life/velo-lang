@@ -28,6 +28,9 @@ namespace Velo::IR {
         ModInt,
         NegInt,
 
+        CompareEqual,
+        CompareNotEqual,
+
         CompareEqualInt,
         CompareNotEqualInt,
         CompareLessInt,

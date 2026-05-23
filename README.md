@@ -39,6 +39,9 @@ data model foundation based on struct.
 - struct field assignment
 - nested struct field assignment
 - struct value semantics preserved during field assignment
+- string equality and inequality
+- bool equality and inequality
+- equality checks for comparable struct fields
 
 ## Standard modules
 Current standard modules:
@@ -195,5 +198,5 @@ MVP 0.3 is in progress.
 
 Current step:
 ```text
-0.3.2   field assignment
+0.3.3   equality operators for string and bool
 ```

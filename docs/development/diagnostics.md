@@ -87,6 +87,7 @@ SEM044  Unknown field in struct field access
 SEM045  Field assignment target must start from a local variable
 SEM046  Cannot assign to field through immutable local variable
 SEM047  Field assignment type mismatch
+SEM048  Equality operators require operands of the same comparable type
 ```
 
 This list should be updated when adding new diagnostics.

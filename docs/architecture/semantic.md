@@ -30,6 +30,7 @@ The semantic analyzer currently checks:
 - struct literal validation
 - field access validation
 - field assignment validation
+- equality operand validation
 
 ## Entry point
 
@@ -392,3 +393,37 @@ This is used for:
 - function argument validation
 - struct literal validation
 - field access validation
+
+## Equality validation
+Equality operators are supported for comparable primitive types:
+```text
+int
+string
+bool
+```
+Allowed:
+```velo
+1 == 1
+"Alex" == "Alex"
+true != false
+```
+Rejected:
+```velo
+1 == "1"
+user1 == user2
+```
+Rules:
+- both operands must have the same type
+- the type must be equality-comparable
+- supported equality-comparable types are `int`, `string`, and `bool`
+- struct equality is not part of MVP 0.3.3
+
+Ordering comparison operators remain integer-only:
+```velo
+1 < 2
+```
+
+String ordering is rejected:
+```velo
+"a" < "b"
+```

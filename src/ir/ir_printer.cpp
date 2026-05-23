@@ -104,6 +104,8 @@ namespace Velo::IR {
             case OpCode::CompareGreaterInt:
             case OpCode::CompareLessEqualInt:
             case OpCode::CompareGreaterEqualInt:
+            case OpCode::CompareEqual:
+            case OpCode::CompareNotEqual:
             case OpCode::LogicalAnd:
             case OpCode::LogicalNot:
             case OpCode::LogicalOr:
@@ -201,6 +203,12 @@ namespace Velo::IR {
 
             case OpCode::StoreFieldPath:
                 return "StoreFieldPath";
+
+            case OpCode::CompareEqual:
+                return "CompareEqual";
+
+            case OpCode::CompareNotEqual:
+                return "CompareNotEqual";
         }
 
         return "Unknown";

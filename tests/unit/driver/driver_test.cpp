@@ -1286,3 +1286,192 @@ fn main(): int {
 
     EXPECT_NE(result.irText.find("StoreFieldPath id"), std::string::npos);
 }
+
+TEST(DriverTest, ExecutesStringEquality) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "string_equality.velo",
+        R"(module app;
+
+fn main(): int {
+    if ("Alex" == "Alex") {
+        return 1;
+    }
+
+    return 0;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 1);
+}
+
+TEST(DriverTest, ExecutesStringInequality) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "string_inequality.velo",
+        R"(module app;
+
+fn main(): int {
+    if ("Alex" != "Bob") {
+        return 1;
+    }
+
+    return 0;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 1);
+}
+
+TEST(DriverTest, ExecutesBoolEquality) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "bool_equality.velo",
+        R"(module app;
+
+fn main(): int {
+    if (true == true) {
+        return 1;
+    }
+
+    return 0;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 1);
+}
+
+TEST(DriverTest, ExecutesBoolInequality) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "bool_inequality.velo",
+        R"(module app;
+
+fn main(): int {
+    if (false != true) {
+        return 1;
+    }
+
+    return 0;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 1);
+}
+
+TEST(DriverTest, ExecutesStructStringFieldEquality) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "struct_string_field_equality.velo",
+        R"(module app;
+
+struct User {
+    name: string;
+}
+
+fn main(): int {
+    let user: User = User {
+        name: "Alex"
+    };
+
+    if (user.name == "Alex") {
+        return 1;
+    }
+
+    return 0;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 1);
+}
+
+TEST(DriverTest, IrModePrintsGenericEqualityInstruction) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "string_equality_ir.velo",
+        R"(module app;
+
+fn main(): int {
+    if ("Alex" == "Alex") {
+        return 1;
+    }
+
+    return 0;
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.irText.find("CompareEqual"), std::string::npos);
+}
