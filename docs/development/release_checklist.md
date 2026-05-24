@@ -1,5 +1,5 @@
-# MVP 0.2 release checklist
-This checklist should be completed before tagging or announcing Velo MVP 0.2.
+# MVP 0.3 release checklist
+This checklist should be completed before tagging or announcing Velo MVP 0.3.
 
 The goal is to make sure the MVP is small, stable, documented, and reproducible.
 
@@ -9,7 +9,6 @@ Run a clean debug build:
 cmake --preset debug
 cmake --build --preset debug
 ```
-
 Expected:
 ```text
 build succeeds
@@ -20,10 +19,13 @@ Run the full test suite:
 ```bash
 ctest --preset debug --output-on-failure
 ```
-
 Expected:
 ```text
 100% tests passed
+```
+Alternative command:
+```bash
+ctest --test-dir build/debug --output-on-failure
 ```
 
 ## 3. CLI smoke tests
@@ -32,7 +34,6 @@ Check version/help:
 ./build/debug/apps/velo/velo --version
 ./build/debug/apps/velo/velo --help
 ```
-
 Check all primary CLI modes:
 ```bash
 ./build/debug/apps/velo/velo check ./examples/arithmetic/main.velo
@@ -40,7 +41,6 @@ Check all primary CLI modes:
 ./build/debug/apps/velo/velo ir ./examples/arithmetic/main.velo
 ./build/debug/apps/velo/velo run ./examples/arithmetic/main.velo
 ```
-
 Expected:
 - `check` exits with code `0`
 - `ast` prints AST and exits with code `0`
@@ -52,14 +52,13 @@ Run:
 ```bash
 ./build/debug/apps/velo/velo ./examples/arithmetic/main.velo
 ```
-
 Expected:
 ```text
-same behavior as vero run ./examples/arithmetic/main.velo
+same behavior as velo run ./examples/arithmetic/main.velo
 ```
 
-## 5. Example smoke tests
-Run the most important examples:
+## 5. Core example smoke tests
+Run:
 ```bash
 ./build/debug/apps/velo/velo run ./examples/arithmetic/main.velo
 ./build/debug/apps/velo/velo run ./examples/logical/main.velo
@@ -68,116 +67,100 @@ Run the most important examples:
 ./build/debug/apps/velo/velo run ./examples/break_continue/main.velo
 ./build/debug/apps/velo/velo run ./examples/typed_parameters/main.velo
 ./build/debug/apps/velo/velo run ./examples/std_string/main.velo
+./build/debug/apps/velo/velo run ./examples/std_to_string/main.velo
+```
+Expected:
+- each example exits with code `0`
+- demo examples should usually end with `return 0;`
+
+## 6. MVP 0.2 struct example smoke tests
+Run:
+```bash
 ./build/debug/apps/velo/velo run ./examples/struct_declaration/main.velo
 ./build/debug/apps/velo/velo run ./examples/user_defined_type_registry/main.velo
 ./build/debug/apps/velo/velo run ./examples/struct_type_usage/main.velo
 ./build/debug/apps/velo/velo run ./examples/struct_literal/main.velo
 ./build/debug/apps/velo/velo run ./examples/field_access/main.velo
-./build/debug/apps/velo/velo run ./examples/std_to_string/main.velo
-./build/debug/apps/velo/velo run ./examples/mvp_showcase/main.velo
 ```
-
-Expected:
-- each example prints its intended output
-- each demo example returns process exit code `0`
-
-**Important**:
-
-Demo examples should usually end with:
-```velo
-return 0;
+Expected `field_assignment` output:
+```text
+1
+Alex
+2
+Bob
 ```
+Expected `equality` output:
+```text
+true
+true
+true
+true
+```
+Expected `block_scopes` output:
+```text
+2
+1
+3
+1
+```
+All MVP 0.3 demo examples should exit with code `0`.
 
-If the language feature needs a non-zero return value, test it through driver tests
-instead of demo examples.
-
-## 6. Error example smoke tests
+## 8. Error example smoke tests
 Run known invalid examples:
 ```bash
 ./build/debug/apps/velo/velo check ./examples/errors/missing_return.velo
 ```
-
 Expected:
 - command exits with non-zero status
 - diagnostic is readable
 - diagnostic code is stable
 
-## 7. MVP 0.2 struct smoke tests
-Check struct examples:
+## 9. IR smoke tests
+Inspect representative IR:
 ```bash
-./build/debug/apps/velo/velo run ./examples/struct_declaration/main.velo
-./build/debug/apps/velo/velo run ./examples/user_defined_type_registry/main.velo
-./build/debug/apps/velo/velo run ./examples/struct_type_usage/main.velo
-./build/debug/apps/velo/velo run ./examples/struct_literal/main.velo
-./build/debug/apps/velo/velo run ./examples/field_access/main.velo
-```
-Expected:
-```text
-all commands exit with code 0
-```
-Run field access example:
-```bash
-./build/debug/apps/velo/velo run ./examples/field_access/main.velo
-```
-Expected:
-```text
-42
-Alex
-true
-```
-And process exit code:
-```text
-0
-```
-
-## 8. IR smoke tests
-Inspect IR for a few representative examples:
-```bash
-./build/debug/apps/velo/velo ir ./examples/arithmetic/main.velo
-./build/debug/apps/velo/velo ir ./examples/short_circuit/main.velo
-./build/debug/apps/velo/velo run ./examples/struct_literal/main.velo
-./build/debug/apps/velo/velo run ./examples/field_access/main.velo
+./build/debug/apps/velo/velo ir ./examples/field_access/main.velo
+./build/debug/apps/velo/velo ir ./examples/field_assignment/main.velo
+./build/debug/apps/velo/velo ir ./examples/equality/main.velo
+./build/debug/apps/velo/velo ir ./examples/block_scopes/main.velo
 ```
 
 Check for:
-- arithmetic instructions
-- jump instructions
-- builtin calls
-- alias resolution
 - `BuildStruct`
 - `LoadField`
+- `StoreFieldPath`
+- `CompareEqual`
+- `CompareNotEqual`
+- different local slots for shadowed locals
 
-For alias resolution, source like:
-```velo
-use std::string as str;
-
-str::len("hello");
-```
-
-should produce IR like:
+Representative expected fragments:
 ```text
-CallBuiltin string::len args=1
-```
-not:
-```text
-CallBuiltin str::len args=1
+LoadField id
+StoreFieldPath id
+CompareEqual
+CompareNotEqual
+StoreLocal local[0]
+StoreLocal local[1]
 ```
 
-## 9. Documentation review
+## 10. Documentation review
 Review:
 ```text
 README.md
 docs/index.md
+docs/examples.md
+
 docs/language/syntax.md
 docs/language/types.md
 docs/language/modules.md
+
 docs/architecture/overview.md
 docs/architecture/semantic.md
 docs/architecture/runtime.md
 docs/architecture/ir.md
-docs/examples.md
+
 docs/development/mvp_0_1.md
 docs/development/mvp_0_2.md
+docs/development/mvp_0_3.md
 docs/development/adding_builtin.md
 docs/development/adding_lang_features.md
 docs/development/diagnostics.md
@@ -185,6 +168,7 @@ docs/development/example_guidelines.md
 docs/development/release_checklist.md
 docs/development/release_notes_v0_1.md
 docs/development/release_notes_v0_2.md
+docs/development/release_notes_v0_3.md
 ```
 
 Check:
@@ -194,23 +178,25 @@ Check:
 - standard module signatures are correct
 - diagnostic codes match tests
 - architecture docs match current code
-- MVP 0.2 feature list matches tests and examples
+- MVP 0.3 feature list matches tests and examples
 
-## 10. MVP scope review
-MVP 0.2 includes:
-- all MVP 0.2 language foundation
-- struct declarations
-- user-defined struct type registry
-- struct types in parameters
-- struct types in local declarations
-- struct types as function return types
-- struct literals
-- runtime struct values
-- field access expressions
-- documentation and examples for MVP 0.2
+## 11. MVP scope review
+MVP 0.3 includes:
+- MVP 0.1 language foundation
+- MVP 0.2 data model foundation
+- struct value semantics
+- field assignment
+- nested field assignment
+- equality operators for `string`
+- equality operators for `bool`
+- generic runtime equality for `int`, `string`, and `bool`
+- block-scoped locals
+- local shadowing in nested blocks
 
 Not included:
-- field assignment
+- standalone block statements
+- struct equality
+- string ordering comparisons
 - methods
 - visibility enforcement for `pub` / private fields
 - arrays
@@ -229,38 +215,36 @@ Not included:
 - optimizer
 - full control-flow graph analysis
 
-## 11. Git status
+## 12. Git status
 Check repository status:
 ```bash
 git status
 ```
-
 Expected:
 ```text
 only intentional changes
 ```
 
-## 12. Suggested release commit flow
+## 13. Suggested release commit flow
 Before release:
 ```bash
-git add README.md docs examples tests include src apps
-git commit -m "docs(mvp): finalize MVP 0.2 documentation"
+git add README.md docs examples
+git commit -m "docs(mvp): finalize MVP 0.3 documentation"
 ```
 
-## 13. Suggested tag
+## 14. Suggested tag
 When ready:
 ```bash
-get tag -a v0.2.0 -m "Velo MVP 0.2.0"
+git tag -a v0.3.0 -m "Velo MVP 0.3.0"
 ```
 
 Push:
 ```bash
 git push origin main
-git push origin v0.2.0
+git push origin v0.3.0
 ```
-
 Use only when the project is actually ready to publish the tag.
 
-## 14. Release notes draft
+## 15. Release notes draft
 Release notes are tracked here:
-- [Velo v0.1.0 release notes draft](release_notes_v0_1.md)
+- [Velo v0.3.0 release notes draft](release_notes_v0_3.md)

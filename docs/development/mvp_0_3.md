@@ -13,7 +13,7 @@ larger API-oriented features.
 
 ## Current step
 ```text
-0.3.4   block-scoped locals
+0.3.5   docs/examples/release checklist
 ```
 
 ## 0.3.1 scope
@@ -258,9 +258,46 @@ fn main(): int {
 
 This is rejected with `SEM007`.
 
-## Not implemented in 0.3.4
+## 0.3.5 scope
+Implemented in this step:
+- MVP 0.3 documentation review
+- examples documentation review
+- release checklist update
+- release notes draft
+- README current status update
+- architecture docs synchronization
+- diagnostics docs synchronization
 
+## MVP 0.3 completed feature set
+MVP 0.3 includes:
+- all MVP 0.1 language foundation
+- all MVP 0.2 data model foundation
+- struct value copy semantics
+- field assignment
+- nested field assignment
+- string equality and inequality
+- bool equality and inequality
+- generic runtime equality for `int`, `string`, and `bool`
+- block-scoped locals for `if`, `else`, and `while`
+- local shadowing in nested blocks
+
+## MVP 0.3 limitations
+Not implemented in MVP 0.3:
 - standalone block statements
+- struct equality
+- string ordering comparisons
 - methods
 - visibility enforcement for `pub` / private fields
-- release checklist for MVP 0.3
+- arrays
+- maps
+- nullable types
+- generics
+- classes
+- interfaces
+- package manager
+- bytecode serialization
+- standalone `veloc`
+- standalone `velovm`
+- HTTP runtime
+- JSON parser/serializer
+- optimizer

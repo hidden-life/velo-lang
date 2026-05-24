@@ -160,14 +160,16 @@ Start here:
 - [MVP v0.1.0 release notes draft](docs/development/release_notes_v0_1.md)
 - [MVP 0.2 status](docs/development/mvp_0_2.md)
 - [MVP v0.2.0 release notes draft](docs/development/release_notes_v0_2.md)
+- [MVP 0.3 status](docs/development/mvp_0_3.md)
+- [Velo v0.3.0 release notes draft](docs/development/release_notes_v0_3.md)
 
 ## Current development focus
-The project is currently moving toward **Velo MVP 0.3**.
+The project has completed **Velo MVP 0.3**.
 
 MVP 0.3 focuses on making struct values safer and more useful before moving toward
 larger API-oriented features.
 
-Planned steps:
+Completed steps:
 ```text
 0.3.1   define struct value copy semantics
 0.3.2   field assignment

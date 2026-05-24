@@ -192,6 +192,9 @@ examples/user_defined_type_registry/main.velo
 examples/struct_type_usage/main.velo
 examples/struct_literal/main.velo
 examples/field_access/main.velo
+examples/field_assignment/main.velo
+examples/equality/main.velo
+examples/block_scopes/main.velo
 ```
 
 ## Integration showcase example
