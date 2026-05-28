@@ -418,3 +418,25 @@ String ordering is rejected:
 ```velo
 "a" < "b"
 ```
+
+## Array types
+Array types are represented in the semantic type model as `Array`.
+
+Each array type stores its element type.
+
+Example:
+```text
+[]int       -> Array<Int>
+[]User      -> Arrayy<Struct User>
+[][]int     -> Array<Array<Int>>
+```
+
+Validation rules:
+- array element type must be a known value type
+- `void` cannot be used as an array element type
+- arrays can appear in function parameters
+- arrays can appear in function return types
+- arrays can appear in local declarations
+- arrays can appear in struct fields
+
+Runtime array values are not part of MVP 0.4.1.

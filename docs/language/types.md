@@ -222,3 +222,49 @@ b.id == 2
 Velo does not yet support:
 - methods are not implemented yet
 - array/maps/generics are not implemented yet
+
+## Array types
+Velo supports array type syntax in type positions.
+
+```velo
+[]int
+[]string
+[]bool
+[]User
+[][]int
+```
+
+Arrays can currently be used in:
+- function parameters
+- function return types
+- local variable declarations
+- struct fields
+
+Example:
+```velo
+struct User {
+    id: int;
+}
+
+struct Group {
+    users: []User;
+}
+
+fn count(ids: []int): int {
+    return 0;
+}
+```
+
+Nested array types are supported:
+```velo
+struct Matrix {
+    values: [][]int
+}
+```
+
+Current limitations:
+- array literals are not implemented yet
+- runtime array values are not implemented yet
+- array indexing is not implemented yet
+- array element assignment is not implemented yet
+- array builtins are not implemented yet

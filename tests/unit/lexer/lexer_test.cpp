@@ -313,3 +313,22 @@ TEST(LexerTest, LexesDotToken) {
     EXPECT_EQ(kinds, expected);
     EXPECT_FALSE(engine.hasErrors());
 }
+
+TEST(LexerTest, LexesArrayTypeBrackets) {
+    const SourceFile file("array_type.velo", "[]int");
+    DiagnosticEngine engine;
+    Lexer lexer(file, engine);
+
+    const auto tokens = lexer.lexAll();
+    const auto kinds = collectKinds(tokens);
+
+    const std::vector<TokenKind> expected {
+        TokenKind::OpenBracket,
+        TokenKind::CloseBracket,
+        TokenKind::Identifier,
+        TokenKind::EndOfFile,
+    };
+
+    EXPECT_EQ(kinds, expected);
+    EXPECT_FALSE(engine.hasErrors());
+}

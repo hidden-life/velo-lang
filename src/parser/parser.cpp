@@ -259,14 +259,26 @@ namespace Velo::Parser {
     }
 
     auto Parser::parseTypeName() -> std::optional<AST::TypeName> {
+        const auto typeBegin = current().range().begin();
+        std::size_t arrayDepth = 0U;
+
+        while (match(TokenKind::OpenBracket)) {
+            if (consume(TokenKind::CloseBracket, "PAR122", "Expected ']' in array type.") == nullptr) {
+                return std::nullopt;
+            }
+
+            ++arrayDepth;
+        }
+
         const auto name = parseQualifiedName();
         if (!name.has_value()) {
             return std::nullopt;
         }
 
         AST::TypeName typeName;
-        typeName.range = name->range;
+        typeName.range = Source::SourceRange(typeBegin, name->range.end());
         typeName.name = std::move(*name);
+        typeName.arrayDepth = arrayDepth;
 
         return typeName;
     }

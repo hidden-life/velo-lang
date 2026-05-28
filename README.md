@@ -204,3 +204,11 @@ Current step:
 ```text
 0.3.4   block-scoped locals
 ```
+
+## MVP 0.4 status
+MVP 0.4 is in progress.
+
+Current step:
+```text
+0.4.1   array type syntax and semantic type model
+```

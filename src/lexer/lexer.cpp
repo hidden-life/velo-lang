@@ -129,6 +129,14 @@ namespace Velo::Lexer {
                 reportInvalidCharacter(beginOffset);
                 return makeToken(TokenKind::Invalid, "|", beginOffset, beginOffset);
 
+            case '[':
+                advance();
+                return makeToken(TokenKind::OpenBracket, "[", beginOffset, beginOffset);
+
+            case ']':
+                advance();
+                return makeToken(TokenKind::CloseBracket, "]", beginOffset, beginOffset);
+
             default:
                 break;
         }

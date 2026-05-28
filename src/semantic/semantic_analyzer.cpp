@@ -34,6 +34,14 @@ namespace {
             type.kind == SemanticTypeKind::String ||
             type.kind == SemanticTypeKind::Bool;
     }
+
+    [[nodiscard]] auto makeArrayType(Velo::Semantic::SemanticType elementType) -> Velo::Semantic::SemanticType {
+        return Velo::Semantic::SemanticType {
+            .kind = Velo::Semantic::SemanticTypeKind::Array,
+            .name = {},
+            .elementType = std::make_shared<Velo::Semantic::SemanticType>(std::move(elementType))
+        };
+    }
 }
 
 namespace Velo::Semantic {
@@ -757,19 +765,32 @@ namespace Velo::Semantic {
         }
 
         const std::string &name = typeName.name.segments.front();
-        const auto builtinType = typeFromString(name);
-        if (!isUnknownType(builtinType)) {
-            return builtinType;
-        }
-
-        if (resolveUserDefinedType(typeName) != nullptr) {
-            return SemanticType {
+        SemanticType baseType = typeFromString(name);
+        if (isUnknownType(baseType) && resolveUserDefinedType(typeName) != nullptr) {
+            baseType = SemanticType {
                 .kind = SemanticTypeKind::Struct,
-                .name = name
+                .name = name,
             };
         }
 
-        return {};
+        if (isUnknownType(baseType)) {
+            return {};
+        }
+
+        if (typeName.arrayDepth == 0U) {
+            return baseType;
+        }
+
+        if (isVoidType(baseType)) {
+            return {};
+        }
+
+        SemanticType result = std::move(baseType);
+        for (std::size_t idx = 0; idx < typeName.arrayDepth; ++idx) {
+            result = makeArrayType(std::move(result));
+        }
+
+        return result;
     }
 
     auto SemanticAnalyzer::analyzeCallExpressionType(const AST::CallExpression &callExpr) -> SemanticType {
@@ -995,6 +1016,18 @@ namespace Velo::Semantic {
         bool allowVoid,
         const std::string &subject
     ) {
+        if (typeName.arrayDepth > 0U &&
+            typeName.name.segments.size() == 1U &&
+            typeName.name.segments.front() == "void"
+        ) {
+            _engine.error(
+                "SEM031",
+                "Type 'void' cannot be used as an array element type in " + subject + ".",
+                typeName.range
+            );
+            return;
+        }
+
         const auto type = typeFromTypeName(typeName);
         if (isUnknownType(type)) {
             _engine.error(
@@ -1002,7 +1035,6 @@ namespace Velo::Semantic {
                 "Unknown type '" + typeNameToString(typeName) + "'.",
                 typeName.range
             );
-
             return;
         }
 
@@ -1017,6 +1049,10 @@ namespace Velo::Semantic {
 
     auto SemanticAnalyzer::typeNameToString(const AST::TypeName &typeName) -> std::string {
         std::string result;
+        for (std::size_t idx = 0; idx < typeName.arrayDepth; ++idx) {
+            result += "[]";
+        }
+
         for (std::size_t idx = 0; idx < typeName.name.segments.size(); ++idx) {
             if (idx > 0U) {
                 result += "::";
@@ -1160,6 +1196,14 @@ namespace Velo::Semantic {
             return left.name == right.name;
         }
 
+        if (left.kind == SemanticTypeKind::Array) {
+            if (left.elementType == nullptr || right.elementType == nullptr) {
+                return false;
+            }
+
+            return typesEqual(*left.elementType, *right.elementType);
+        }
+
         return true;
     }
 
@@ -1177,9 +1221,13 @@ namespace Velo::Semantic {
                 return "bool";
             case SemanticTypeKind::Struct:
                 return type.name;
+            case SemanticTypeKind::Array:
+                if (type.elementType == nullptr) {
+                    return "[]unknown";
+                }
         }
 
-        return "unknown";
+        return "[]" + semanticTypeToString(*type.elementType);
     }
 
     auto SemanticAnalyzer::analyzeStructLiteralExpressionType(

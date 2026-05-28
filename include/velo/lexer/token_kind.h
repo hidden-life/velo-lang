@@ -31,6 +31,8 @@ namespace Velo::Lexer {
         CloseParen, // )
         OpenBrace, // {
         CloseBrace, // }
+        OpenBracket, // [
+        CloseBracket, // ]
 
         Plus, // +
         Minus, // -

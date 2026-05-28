@@ -26,6 +26,7 @@ runtime, and MVP planning.
 - [MVP 0.1 status](development/mvp_0_1.md)
 - [MVP 0.2 status](development/mvp_0_2.md)
 - [MVP 0.3 status](development/mvp_0_3.md)
+- [MVP 0.4 status](development/mvp_0_4.md)
 
 ## Documentation rules
 When adding a new feature:

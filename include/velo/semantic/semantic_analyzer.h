@@ -4,6 +4,8 @@
 #include <unordered_map>
 #include <string>
 #include <unordered_set>
+#include <memory>
+#include <vector>
 
 #include "velo/ast/ast.h"
 #include "velo/diagnostic/diagnostic_engine.h"
@@ -17,12 +19,15 @@ namespace Velo::Semantic {
         String,
         Bool,
         Struct,
+        Array,
     };
 
     struct SemanticType final {
         SemanticTypeKind kind {SemanticTypeKind::Unknown};
-        // Used only when kind == SemanticKindType::Struct
+        // Used only when kind == SemanticTypeKind::Struct
         std::string name {};
+        // Used when kind == SemanticTypeKind::Array
+        std::shared_ptr<SemanticType> elementType {};
     };
 
     // Minimal semantic analyzer for the first executable Velo program shape.

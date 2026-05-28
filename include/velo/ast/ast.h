@@ -6,6 +6,7 @@
 #include <string>
 #include <optional>
 #include <utility>
+#include <cstddef>
 
 #include "velo/source/source_range.h"
 
@@ -17,6 +18,7 @@ namespace Velo::AST {
 
     struct TypeName final {
         QualifiedName name {};
+        std::size_t arrayDepth {0U};
         Source::SourceRange range {};
     };
 

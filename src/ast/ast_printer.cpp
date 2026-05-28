@@ -25,7 +25,15 @@ namespace Velo::AST {
         }
 
         auto joinTypeName(const TypeName &typeName) -> std::string {
-            return joinQualifiedName(typeName.name);
+            std::ostringstream stream;
+
+            for (std::size_t idx = 0; idx < typeName.arrayDepth; ++idx) {
+                stream << "[]";
+            }
+
+            stream << joinQualifiedName(typeName.name);
+
+            return stream.str();
         }
 
         void printExpression(std::ostringstream &stream, const Expression &expression, std::size_t indentLevel);
@@ -55,15 +63,7 @@ namespace Velo::AST {
                     writeIndent(stream, indentLevel);
                     stream << (varDecl.isMutable ? "Var " : "Let ") << varDecl.name << " : ";
 
-                    for (std::size_t idx = 0; idx < varDecl.type.name.segments.size(); ++idx) {
-                        if (idx > 0U) {
-                            stream << "::";
-                        }
-
-                        stream << varDecl.type.name.segments[idx];
-                    }
-
-                    stream << "\n";
+                    stream << joinTypeName(varDecl.type) << "\n";
 
                     printExpression(stream, *varDecl.initializer, indentLevel + 1U);
                     break;
@@ -341,7 +341,7 @@ namespace Velo::AST {
                 stream << "pub ";
             }
 
-            stream << func.name << " -> " << joinQualifiedName(func.returnType.name) << "\n";
+            stream << func.name << " -> " << joinTypeName(func.returnType) << "\n";
 
             for (const auto &stmt : func.statements) {
                 printStatement(stream, *stmt, 2U);

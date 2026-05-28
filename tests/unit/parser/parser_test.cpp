@@ -759,3 +759,74 @@ fn main(): int {
 
     EXPECT_EQ(userAccess.fieldName, "user");
 }
+
+TEST(ParserTest, ParsesArrayParameterType) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn count(ids: []int): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    ASSERT_EQ(program->functions.size(), 1U);
+    const auto &function = program->functions[0];
+
+    ASSERT_EQ(function.parameters.size(), 1U);
+    EXPECT_EQ(function.parameters[0].type.arrayDepth, 1U);
+    ASSERT_EQ(function.parameters[0].type.name.segments.size(), 1U);
+    EXPECT_EQ(function.parameters[0].type.name.segments[0], "int");
+}
+
+TEST(ParserTest, ParsesNestedArrayReturnType) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn matrix(): [][]int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    ASSERT_EQ(program->functions.size(), 1U);
+    const auto &function = program->functions[0];
+
+    EXPECT_EQ(function.returnType.arrayDepth, 2U);
+    ASSERT_EQ(function.returnType.name.segments.size(), 1U);
+    EXPECT_EQ(function.returnType.name.segments[0], "int");
+}
+
+TEST(ParserTest, ParsesArrayStructFieldType) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+struct Group {
+    ids: []int;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    ASSERT_EQ(program->structs.size(), 1U);
+    const auto &structDecl = program->structs[0];
+
+    ASSERT_EQ(structDecl.fields.size(), 1U);
+    EXPECT_EQ(structDecl.fields[0].type.arrayDepth, 1U);
+    ASSERT_EQ(structDecl.fields[0].type.name.segments.size(), 1U);
+    EXPECT_EQ(structDecl.fields[0].type.name.segments[0], "int");
+}
