@@ -515,3 +515,30 @@ This is rejected because `value` is not visible after the `if` body.
 Current limitation:
 
 - standalone block statements are not implemented yet
+
+## Array types syntax
+Array types use the `[]T` syntax.
+```velo
+[]int
+[]bool
+[]string
+[]User
+```
+Nested arrays are written by repeating `[]`:
+```velo
+[][]int
+```
+
+Examples:
+```velo
+fn count(ids: []int): int {
+    return 0;
+}
+
+struct Group {
+    users: []User;
+}
+```
+Current limitations:
+- array literals are not implemented yet
+- array indexing is not implemented yet

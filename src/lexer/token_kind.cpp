@@ -91,6 +91,10 @@ namespace Velo::Lexer {
                 return "KwStruct";
             case TokenKind::Dot:
                 return "Dot";
+            case TokenKind::OpenBracket:
+                return "OpenBracket";
+            case TokenKind::CloseBracket:
+                return "CloseBracket";
         }
 
         return "Unknown";
