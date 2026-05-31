@@ -254,3 +254,16 @@ Demonstrates:
 - local shadowing inside `while`
 - block-local variables not overwriting outer local variables
 - outer local visibility after nested blocks
+
+### Array literals
+```text
+examples/array_literal/main.velo
+```
+
+Demonstrates:
+- array literals
+- arrays of `int`
+- arrays of `string`
+- arrays of `bool`
+- arrays of struct values
+- runtime array value printing

@@ -440,3 +440,23 @@ Validation rules:
 - arrays can appear in struct fields
 
 Runtime array values are not part of MVP 0.4.1.
+
+## Array literals
+Array literals are checked by inferring their element type.
+
+Rules:
+- non-empty array literals infer their element type from the first element
+- all following elements must have the same type
+- empty array literals require an expected array type
+- array literal type is `[]T`
+
+Examples:
+```velo
+let ids: []int = [1, 2, 3];
+let empty: []int = [];
+```
+
+Rejected:
+```velo
+let values: []int = [1, "bad"];
+```

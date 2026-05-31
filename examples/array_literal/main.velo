@@ -1,0 +1,26 @@
+module app;
+
+use std::console;
+
+struct User {
+    id: int;
+    name: string;
+}
+
+fn main(): int {
+    let ids: []int = [1, 2, 3];
+    let names: []string = ["Alex", "Bob"];
+    let flags: []bool = [true, false];
+
+    let users: []User = [
+        User { id: 1, name: "Alex" },
+        User { id: 2, name: "Bob" }
+    ];
+
+    console::println(ids);
+    console::println(names);
+    console::println(flags);
+    console::println(users);
+
+    return 0;
+}

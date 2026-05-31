@@ -27,6 +27,15 @@ namespace Velo::Runtime {
                 return "<struct " + structVal->typeName + ">";
             }
 
+            if (std::holds_alternative<ArrayValuePtr>(value)) {
+                const auto &arrayVal = std::get<ArrayValuePtr>(value);
+                if (arrayVal == nullptr) {
+                    return "<array:null>";
+                }
+
+                return "<array len=" + std::to_string(arrayVal->elements.size()) + ">";
+            }
+
             return "<unknown>";
         }
     }

@@ -583,6 +583,10 @@ namespace Velo::Parser {
             return std::make_unique<AST::BooleanLiteralExpression>(token.text() == "true", token.range());
         }
 
+        if (match(TokenKind::OpenBracket)) {
+            return parseArrayLiteralExpression(previous());
+        }
+
         if (check(TokenKind::Identifier)) {
             return parseCallExpressionOrName();
         }
@@ -1101,6 +1105,48 @@ namespace Velo::Parser {
             std::move(literalType),
             std::move(fields),
             Source::SourceRange(literalType.range.begin(), closeBrace->range().end())
+        );
+    }
+
+    auto Parser::parseArrayLiteralExpression(const Lexer::Token &openBracket) -> std::unique_ptr<AST::Expression> {
+        std::vector<std::unique_ptr<AST::Expression>> elements;
+
+        if (!check(TokenKind::CloseBracket)) {
+            while (true) {
+                auto element = parseExpression();
+                if (element == nullptr) {
+                    return nullptr;
+                }
+
+                elements.push_back(std::move(element));
+                if (!match(TokenKind::Comma)) {
+                    break;
+                }
+
+                // Allow trailing comma:
+                //
+                // [
+                //      1,
+                // ]
+                if (check(TokenKind::CloseBracket)) {
+                    break;
+                }
+            }
+        }
+
+        const Token *closeBracket = consume(
+            TokenKind::CloseBracket,
+            "PAR130",
+            "Expected ']' after array literal."
+        );
+
+        if (closeBracket == nullptr) {
+            return nullptr;
+        }
+
+        return std::make_unique<AST::ArrayLiteralExpression>(
+            std::move(elements),
+            Source::SourceRange(openBracket.range().begin(), closeBracket->range().end())
         );
     }
 }

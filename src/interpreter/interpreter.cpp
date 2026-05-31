@@ -476,6 +476,9 @@ namespace Velo::Interpreter {
             case OpCode::BuildStruct: {
                 return buildStruct(inst.stringOperand, inst.argsCount);
             }
+            case OpCode::BuildArray: {
+                return buildArray(inst.argsCount);
+            }
             case OpCode::LoadField: {
                 return loadField(inst.stringOperand);
             }
@@ -654,6 +657,29 @@ namespace Velo::Interpreter {
 
         _stack.erase(first, _stack.end());
         _stack.push_back(structVal);
+
+        return {};
+    }
+
+    auto Interpreter::buildArray(std::size_t elementsCount) -> Runtime::ExecutionResult {
+        if (_stack.size() < elementsCount) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "Operand stack underflow while building array."
+            };
+        }
+
+        auto arrayValue = std::make_shared<Runtime::ArrayValue>();
+        arrayValue->elements.reserve(elementsCount);
+
+        const auto first = _stack.end() - static_cast<std::ptrdiff_t>(elementsCount);
+        for (std::size_t idx = 0U; idx < elementsCount; idx++) {
+            arrayValue->elements.push_back(Runtime::cloneValue(*(first + static_cast<std::ptrdiff_t>(idx))));
+        }
+
+        _stack.erase(first, _stack.end());
+        _stack.push_back(arrayValue);
 
         return {};
     }

@@ -1643,3 +1643,96 @@ fn main(): int {
     EXPECT_NE(result.irText.find("StoreLocal local[1]"), std::string::npos);
     EXPECT_NE(result.irText.find("LoadLocal local[1]"), std::string::npos);
 }
+
+TEST(DriverTest, ExecutesArrayLiteralProgram) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "array_literal.velo",
+        R"(module app;
+
+fn main(): int {
+    let ids: []int = [1, 2, 3];
+
+    return 0;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 0);
+}
+
+TEST(DriverTest, ExecutesArrayLiteralOfStructValues) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "array_literal_structs.velo",
+        R"(module app;
+
+struct User {
+    id: int;
+    name: string;
+}
+
+fn main(): int {
+    let users: []User = [
+        User { id: 1, name: "Alex" },
+        User { id: 2, name: "Bob" }
+    ];
+
+    return 0;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 0);
+}
+
+TEST(DriverTest, IrModePrintsBuildArrayInstruction) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "array_literal_ir.velo",
+        R"(module app;
+
+fn main(): int {
+    let ids: []int = [1, 2, 3];
+
+    return 0;
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.irText.find("BuildArray elements=3"), std::string::npos);
+}

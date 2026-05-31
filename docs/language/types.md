@@ -262,9 +262,23 @@ struct Matrix {
 }
 ```
 
+Array literals create runtime array values:
+```velo
+let ids: []int = [1, 2, 3];
+let names: []string = ["Alex", "Bob"];
+```
+
+Array element types must be consistent:
+```velo
+let ids: []int = [1, 2, 3];
+```
+
+This is rejected:
+```velo
+let ids: []int = [1, "bad"];
+```
+
 Current limitations:
-- array literals are not implemented yet
-- runtime array values are not implemented yet
 - array indexing is not implemented yet
 - array element assignment is not implemented yet
 - array builtins are not implemented yet

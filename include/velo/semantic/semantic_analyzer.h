@@ -71,6 +71,10 @@ namespace Velo::Semantic {
         [[nodiscard]] static auto semanticTypeToString(const SemanticType &type) -> std::string;
 
         [[nodiscard]] auto analyzeStructLiteralExpressionType(const AST::StructLiteralExpression &expr) -> SemanticType;
+        [[nodiscard]] auto analyzeArrayLiteralExpressionType(
+            const AST::ArrayLiteralExpression &expr,
+            const SemanticType *expectedType = nullptr
+            ) -> SemanticType;
 
         void validateDeclaredType(
             const AST::TypeName &typeName,
