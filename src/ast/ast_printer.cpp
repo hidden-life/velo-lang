@@ -205,6 +205,18 @@ namespace Velo::AST {
                     break;
                 }
 
+                case ExpressionKind::ArrayLiteral: {
+                    const auto &arrayLiteral = static_cast<const ArrayLiteralExpression&>(expression);
+                    writeIndent(stream, indentLevel);
+                    stream << "ArrayLiteral\n";
+
+                    for (const auto &element : arrayLiteral.elements) {
+                        printExpression(stream, *element, indentLevel + 1U);
+                    }
+
+                    break;
+                }
+
                 case ExpressionKind::FieldAccess: {
                     const auto &fieldAccess = static_cast<const FieldAccessExpression&>(expression);
                     writeIndent(stream, indentLevel);

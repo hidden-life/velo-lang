@@ -44,6 +44,10 @@ data model foundation based on struct.
 - equality checks for comparable struct fields
 - block-scoped locals for `if`, `else`, and `while`
 - local shadowing in nested blocks
+- array literals
+- runtime array values
+- arrays of primitive values
+- arrays of struct values
 
 ## Standard modules
 Current standard modules:
@@ -210,5 +214,5 @@ MVP 0.4 is in progress.
 
 Current step:
 ```text
-0.4.1   array type syntax and semantic type model
+0.4.2   array literals and runtime array values
 ```

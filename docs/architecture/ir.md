@@ -339,3 +339,20 @@ Return
 
 The two `value` declarations use different local slots.
 After the nested block ends, name resolution returns to the outer `value`.
+
+## Array literals
+Array literals are lowered to `BuildArray`.
+
+Example source:
+```velo
+let ids: []int = [1, 2, 3];
+```
+
+Representative IR:
+```text
+PushInt 1
+PushInt 2
+PushInt 3
+BuildArray elements=3
+StoreLocal local[0]
+```

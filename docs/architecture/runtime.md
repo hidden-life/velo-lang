@@ -349,4 +349,17 @@ Supported runtime value pairs:
 - `string` with `string`
 - `bool` with `bool`
 
-The interpreter rejects mismatched or unsupported runtime equality operands defensively, but such cases should normally be caught by semantic analysis before execution.
+The interpreter rejects mismatched or unsupported runtime 
+equality operands defensively, but such cases should normally be caught 
+by semantic analysis before execution.
+
+## Runtime array values
+Runtime arrays are represented as `ArrayValuePtr`.
+
+A runtime array stores:
+- ordered element values
+- cloned elements at value boundaries
+
+`Runtime::cloneValue(...)` deep-copies arrays recursively.
+
+This preserves value semantics for arrays in the same way as structs.

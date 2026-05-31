@@ -830,3 +830,68 @@ struct Group {
     ASSERT_EQ(structDecl.fields[0].type.name.segments.size(), 1U);
     EXPECT_EQ(structDecl.fields[0].type.name.segments[0], "int");
 }
+
+TEST(ParserTest, ParsesArrayLiteralExpression) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    let ids: []int = [1, 2, 3];
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    ASSERT_EQ(program->functions.size(), 1U);
+    const auto &mainFunction = program->functions[0];
+
+    ASSERT_EQ(mainFunction.statements.size(), 2U);
+    ASSERT_EQ(mainFunction.statements[0]->kind, Velo::AST::StatementKind::VariableDeclaration);
+
+    const auto &varDecl = static_cast<const Velo::AST::VariableDeclarationStatement&>(
+        *mainFunction.statements[0]
+    );
+
+    ASSERT_NE(varDecl.initializer, nullptr);
+    ASSERT_EQ(varDecl.initializer->kind, Velo::AST::ExpressionKind::ArrayLiteral);
+
+    const auto &arrayLiteral = static_cast<const Velo::AST::ArrayLiteralExpression&>(*varDecl.initializer);
+    EXPECT_EQ(arrayLiteral.elements.size(), 3U);
+}
+
+TEST(ParserTest, ParsesArrayLiteralWithTrailingComma) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    let ids: []int = [
+        1,
+        2,
+    ];
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    const auto &mainFunction = program->functions[0];
+    const auto &varDecl = static_cast<const Velo::AST::VariableDeclarationStatement&>(
+        *mainFunction.statements[0]
+    );
+
+    ASSERT_EQ(varDecl.initializer->kind, Velo::AST::ExpressionKind::ArrayLiteral);
+
+    const auto &arrayLiteral = static_cast<const Velo::AST::ArrayLiteralExpression&>(*varDecl.initializer);
+    EXPECT_EQ(arrayLiteral.elements.size(), 2U);
+}

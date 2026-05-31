@@ -304,6 +304,12 @@ namespace Velo::IR {
                 return;
             }
 
+            case ExpressionKind::ArrayLiteral: {
+                const auto &arrayLiteral = static_cast<const ArrayLiteralExpression&>(expr);
+                lowerArrayLiteralExpression(arrayLiteral, func);
+                return;
+            }
+
             case ExpressionKind::FieldAccess: {
                 const auto &fieldAccess = static_cast<const FieldAccessExpression&>(expr);
                 lowerFieldAccessExpression(fieldAccess, func);
@@ -633,6 +639,17 @@ namespace Velo::IR {
             .code = OpCode::BuildStruct,
             .stringOperand = encodedOperand,
             .argsCount = expr.fields.size()
+        });
+    }
+
+    void Lowerer::lowerArrayLiteralExpression(const AST::ArrayLiteralExpression &expr, Function &func) {
+        for (const auto &element : expr.elements) {
+            lowerExpression(*element, func);
+        }
+
+        func.instructions.push_back(Instruction {
+            .code = OpCode::BuildArray,
+            .argsCount = expr.elements.size()
         });
     }
 

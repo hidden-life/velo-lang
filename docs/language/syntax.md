@@ -539,6 +539,33 @@ struct Group {
     users: []User;
 }
 ```
+
+## Array literals
+Array literals use square brackets:
+```velo
+[1, 2, 3]
+["Alex", "Bob"]
+[true, false]
+```
+
+Array literals are usually used with an explicit declared array type:
+```velo
+let ids: []int = [1, 2, 3];
+```
+
+Trailing commas are allowed:
+```velo
+let ids: []int = [
+    1,
+    2,
+];
+```
+
+Empty array literals require an expected array type:
+```velo
+let ids: []int = [];
+```
+
 Current limitations:
-- array literals are not implemented yet
 - array indexing is not implemented yet
+- array element assignment is not implemented yet

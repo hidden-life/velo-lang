@@ -49,3 +49,41 @@ TEST(RuntimeValueTest, CloneValueDeepCopiesStructValues) {
     EXPECT_EQ(std::get<std::string>(cloned->fields.at("name")), "John Doe");
     EXPECT_EQ(std::get<int>(clonedProfile->fields.at("id")), 7);
 }
+
+TEST(RuntimeValueTest, CloneValueDeepCopiesArrayValues) {
+    auto nested = std::make_shared<Velo::Runtime::ArrayValue>();
+    nested->elements.emplace_back(7);
+
+    auto array = std::make_shared<Velo::Runtime::ArrayValue>();
+    array->elements.emplace_back(1);
+    array->elements.emplace_back(std::string("Alex"));
+    array->elements.emplace_back(nested);
+
+    const Velo::Runtime::Value clonedValue = Velo::Runtime::cloneValue(
+        Velo::Runtime::Value {array}
+    );
+
+    ASSERT_TRUE(std::holds_alternative<Velo::Runtime::ArrayValuePtr>(clonedValue));
+    const auto clonedArray = std::get<Velo::Runtime::ArrayValuePtr>(clonedValue);
+
+    ASSERT_NE(clonedArray, nullptr);
+    EXPECT_NE(clonedArray.get(), array.get());
+    ASSERT_EQ(clonedArray->elements.size(), 3U);
+
+    EXPECT_EQ(std::get<int>(clonedArray->elements[0]), 1);
+    EXPECT_EQ(std::get<std::string>(clonedArray->elements[1]), "Alex");
+
+    ASSERT_TRUE(std::holds_alternative<Velo::Runtime::ArrayValuePtr>(clonedArray->elements[2]));
+    const auto clonedNested = std::get<Velo::Runtime::ArrayValuePtr>(clonedArray->elements[2]);
+
+    ASSERT_NE(clonedNested, nullptr);
+    EXPECT_NE(clonedNested.get(), nested.get());
+    ASSERT_EQ(clonedNested->elements.size(), 1U);
+    EXPECT_EQ(std::get<int>(clonedNested->elements[0]), 7);
+
+    nested->elements[0] = 99;
+    array->elements[0] = 42;
+
+    EXPECT_EQ(std::get<int>(clonedArray->elements[0]), 1);
+    EXPECT_EQ(std::get<int>(clonedNested->elements[0]), 7);
+}

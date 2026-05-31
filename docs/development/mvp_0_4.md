@@ -13,7 +13,7 @@ MVP 0.4 focuses on arrays as the first collection type in Velo.
 
 ## Current step
 ```text
-0.4.1   array type syntax and semantic type model
+0.4.2   array literals and runtime array values
 ```
 
 ## 0.4.1 scope
@@ -63,6 +63,51 @@ fn main(): int {
 ## Not implemented in 0.4.1
 - array literals
 - runtime array values
+- array indexing
+- array element assignment
+- array builtins
+
+## 0.4.2 scope
+Implemented in this step:
+- array literal expressions
+- empty array literals with an expected array type
+- semantic validation for array literal element types
+- runtime array values
+- deep-copy support for array literals
+- IR lowering for array literals
+- interpreter support for building runtime arrays
+- parser tests
+- semantic tests
+- runtime tests
+- driver tests
+- example
+
+Examples:
+```velo
+let ids: []int = [1, 2, 3];
+let names: []string = ["Alex", "Bob", "John"];
+let flags: []bool = [true, false];
+```
+
+Arrays of structs are supported:
+```velo
+struct User {
+    id: int;
+    name: string;
+}
+
+let users: []User = [
+    User { id: 1, name: "Alex" },
+    User { id: 2, name: "Bob" }
+];
+```
+
+Empty array literals require an expected array type:
+```velo
+let ids: []int = [];
+```
+
+Not implemented in 0.4.2:
 - array indexing
 - array element assignment
 - array builtins
