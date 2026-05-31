@@ -31,6 +31,7 @@ namespace Velo::AST {
         StructLiteral,
         ArrayLiteral,
         FieldAccess,
+        Index,
         Binary,
         Unary,
     };
@@ -146,6 +147,18 @@ namespace Velo::AST {
         std::unique_ptr<Expression> object;
         std::string fieldName;
         Source::SourceRange fieldRange;
+    };
+
+    struct IndexExpression final : Expression {
+        IndexExpression(
+            std::unique_ptr<Expression> indexedObj,
+            std::unique_ptr<Expression> indexExpression,
+            Source::SourceRange expressionRange
+        ): Expression(ExpressionKind::Index, expressionRange),
+            object(std::move(indexedObj)), index(std::move(indexExpression)) {}
+
+        std::unique_ptr<Expression> object;
+        std::unique_ptr<Expression> index;
     };
 
     struct UnaryExpression final : Expression {

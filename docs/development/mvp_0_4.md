@@ -13,7 +13,7 @@ MVP 0.4 focuses on arrays as the first collection type in Velo.
 
 ## Current step
 ```text
-0.4.2   array literals and runtime array values
+0.4.3   array indexing read
 ```
 
 ## 0.4.1 scope
@@ -109,5 +109,50 @@ let ids: []int = [];
 
 Not implemented in 0.4.2:
 - array indexing
+- array element assignment
+- array builtins
+
+## 0.4.3 scope
+Implemented in this step:
+- array index expressions
+- indexing arrays by `int`
+- semantic validation that index target is an array
+- semantic validation that index expression is `int`
+- runtime bounds checks for array indexing
+- IR lowering for array indexing
+- interpreter support for loading array elements
+- parser tests
+- semantic tests
+- driver tests
+- example
+
+Examples:
+```velo
+let ids: []int = [10, 20, 30];
+
+return ids[1];
+```
+
+Arrays of structs can be indexed:
+```velo
+let users: []User = [
+    User { id: 1, name: "Alex" },
+    User { id: 2, name: "Bob" }
+];
+
+return users[1].id;
+```
+
+Nested arrays can be indexes:
+```velo
+let matrix: [][]int = [
+    [1, 2],
+    [3, 4]
+];
+
+return matrix[1][0];
+```
+
+Not implemented in 0.4.3:
 - array element assignment
 - array builtins

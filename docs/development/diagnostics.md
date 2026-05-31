@@ -90,6 +90,8 @@ SEM047  Field assignment type mismatch
 SEM048  Equality operators require operands of the same comparable type
 SEM049  Cannot infer type of empty array literal
 SEM050  Array literal element type mismatch
+SEM051  Array index target must be array
+SEM052  Array index must be int
 ```
 
 This list should be updated when adding new diagnostics.

@@ -278,7 +278,21 @@ This is rejected:
 let ids: []int = [1, "bad"];
 ```
 
+Array indexing returns the element type:
+```velo
+let ids: []int = [10, 20, 30];
+let value: int = ids[1];
+```
+
+For arrays of structs, indexing returns the struct value:
+```velo
+let users: []User = [
+    User {id: 1, name: "Alex"}
+];
+
+let user: User = users[0];
+```
+
 Current limitations:
-- array indexing is not implemented yet
 - array element assignment is not implemented yet
 - array builtins are not implemented yet

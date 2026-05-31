@@ -22,6 +22,7 @@ namespace Velo::Interpreter {
         [[nodiscard]] auto buildStruct(const std::string &encodedOperand, std::size_t fieldsCount) -> Runtime::ExecutionResult;
         [[nodiscard]] auto buildArray(std::size_t elementsCount) -> Runtime::ExecutionResult;
         [[nodiscard]] auto loadField(const std::string &fieldName) -> Runtime::ExecutionResult;
+        [[nodiscard]] auto loadIndex() -> Runtime::ExecutionResult;
         [[nodiscard]] auto storeFieldPath(const std::string &encodedPath) -> Runtime::ExecutionResult;
 
         // Operand stack for temporary expression values.

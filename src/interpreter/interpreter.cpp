@@ -482,6 +482,9 @@ namespace Velo::Interpreter {
             case OpCode::LoadField: {
                 return loadField(inst.stringOperand);
             }
+            case OpCode::LoadIndex: {
+                return loadIndex();
+            }
             case OpCode::StoreFieldPath: {
                 return storeFieldPath(inst.stringOperand);
             }
@@ -809,6 +812,69 @@ namespace Velo::Interpreter {
 
         current->fields[leafFieldName] = Runtime::cloneValue(assignedValue);
         _stack.push_back(Runtime::cloneValue(rootValue));
+
+        return {};
+    }
+
+    auto Interpreter::loadIndex() -> Runtime::ExecutionResult {
+        if (_stack.size() < 2U) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "LoadIndex requires an array value and an index value on the stack."
+            };
+        }
+
+        const auto indexValue = _stack.back();
+        _stack.pop_back();
+
+        const auto arrayValue = _stack.back();
+        _stack.pop_back();
+
+        if (!std::holds_alternative<int>(indexValue)) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "LoadIndex expects integer index."
+            };
+        }
+
+        const int index = std::get<int>(indexValue);
+        if (index < 0) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "Array index out of range."
+            };
+        }
+
+        if (!std::holds_alternative<Runtime::ArrayValuePtr>(arrayValue)) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "LoadIndex expects an array value."
+            };
+        }
+
+        const auto array = std::get<Runtime::ArrayValuePtr>(arrayValue);
+        if (array == nullptr) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "LoadIndex received a null array value."
+            };
+        }
+
+        const auto indexAsSize = static_cast<std::size_t>(index);
+        if (indexAsSize >= array->elements.size()) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "Array index out of range."
+            };
+        }
+
+        _stack.push_back(Runtime::cloneValue(array->elements[indexAsSize]));
 
         return {};
     }

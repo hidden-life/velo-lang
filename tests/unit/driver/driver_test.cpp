@@ -1736,3 +1736,145 @@ fn main(): int {
 
     EXPECT_NE(result.irText.find("BuildArray elements=3"), std::string::npos);
 }
+
+TEST(DriverTest, ExecutesArrayIndexRead) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "array_index_read.velo",
+        R"(module app;
+
+fn main(): int {
+    let ids: []int = [10, 20, 30];
+
+    return ids[1];
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 20);
+}
+
+TEST(DriverTest, ExecutesArrayIndexReadOnStructArray) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "array_index_struct_read.velo",
+        R"(module app;
+
+struct User {
+    id: int;
+}
+
+fn main(): int {
+    let users: []User = [
+        User { id: 1 },
+        User { id: 2 }
+    ];
+
+    return users[1].id;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 2);
+}
+
+TEST(DriverTest, ExecutesNestedArrayIndexRead) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "nested_array_index_read.velo",
+        R"(module app;
+
+fn main(): int {
+    let matrix: [][]int = [
+        [1, 2],
+        [3, 4]
+    ];
+
+    return matrix[1][0];
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 3);
+}
+
+TEST(DriverTest, ReportsRuntimeErrorForArrayIndexOutOfRange) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "array_index_out_of_range.velo",
+        R"(module app;
+
+fn main(): int {
+    let ids: []int = [10, 20, 30];
+
+    return ids[3];
+}
+)"
+    );
+
+    EXPECT_FALSE(result.success);
+    EXPECT_EQ(result.exitCode, 1);
+    EXPECT_NE(result.error.find("Array index out of range"), std::string::npos);
+}
+
+TEST(DriverTest, IrModePrintsLoadIndexInstruction) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "array_index_ir.velo",
+        R"(module app;
+
+fn main(): int {
+    let ids: []int = [10, 20, 30];
+
+    return ids[1];
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.irText.find("LoadIndex"), std::string::npos);
+}

@@ -512,10 +512,6 @@ fn main(): int {
 
 This is rejected because `value` is not visible after the `if` body.
 
-Current limitation:
-
-- standalone block statements are not implemented yet
-
 ## Array types syntax
 Array types use the `[]T` syntax.
 ```velo
@@ -566,6 +562,38 @@ Empty array literals require an expected array type:
 let ids: []int = [];
 ```
 
+## Array indexing
+Array elements can be read with index expressions:
+```velo
+let ids: []int = [10, 20, 30];
+
+return ids[1];
+```
+
+The index expression must be `int`.
+
+Arrays of structs can be indexed and then accessed with field access:
+
+```velo
+let users: []User = [
+    User { id: 1, name: "Alex" },
+    User { id: 2, name: "Bob" }
+];
+
+return users[1].id;
+```
+
+Nested arrays can be indexed repeatedly:
+
+```velo
+let matrix: [][]int = [
+    [1, 2],
+    [3, 4]
+];
+
+return matrix[1][0];
+```
+
 Current limitations:
-- array indexing is not implemented yet
 - array element assignment is not implemented yet
+- array builtins are not implemented yet

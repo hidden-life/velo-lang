@@ -363,3 +363,22 @@ A runtime array stores:
 `Runtime::cloneValue(...)` deep-copies arrays recursively.
 
 This preserves value semantics for arrays in the same way as structs.
+
+## Array indexing
+Array indexing is executed by `LoadIndex`.
+
+Runtime stack shape before `LoadIndex`.
+
+```text
+[..., arrayValue, indexValue]
+```
+
+Runtime behavior:
+1. pop index value
+2. pop array value
+3. validate that index is `int`
+4. validate that array value is a runtime array
+5. check bounds
+6. push a cloned element value
+
+Out-of-range access is runtime error.

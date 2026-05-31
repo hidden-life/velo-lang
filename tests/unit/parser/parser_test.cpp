@@ -895,3 +895,104 @@ fn main(): int {
     const auto &arrayLiteral = static_cast<const Velo::AST::ArrayLiteralExpression&>(*varDecl.initializer);
     EXPECT_EQ(arrayLiteral.elements.size(), 2U);
 }
+
+TEST(ParserTest, ParsesArrayIndexExpression) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    let ids: []int = [10, 20, 30];
+
+    return ids[1];
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    const auto &mainFunction = program->functions[0];
+    ASSERT_EQ(mainFunction.statements.size(), 2U);
+    ASSERT_EQ(mainFunction.statements[1]->kind, Velo::AST::StatementKind::Return);
+
+    const auto &returnStmt = static_cast<const Velo::AST::ReturnStatement&>(*mainFunction.statements[1]);
+    ASSERT_NE(returnStmt.expression, nullptr);
+    ASSERT_EQ(returnStmt.expression->kind, Velo::AST::ExpressionKind::Index);
+
+    const auto &indexExpr = static_cast<const Velo::AST::IndexExpression&>(*returnStmt.expression);
+    ASSERT_NE(indexExpr.object, nullptr);
+    ASSERT_NE(indexExpr.index, nullptr);
+
+    EXPECT_EQ(indexExpr.object->kind, Velo::AST::ExpressionKind::Name);
+    EXPECT_EQ(indexExpr.index->kind, Velo::AST::ExpressionKind::IntegerLiteral);
+}
+
+TEST(ParserTest, ParsesArrayIndexFollowedByFieldAccess) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+struct User {
+    id: int;
+}
+
+fn main(): int {
+    let users: []User = [
+        User { id: 1 },
+        User { id: 2 }
+    ];
+
+    return users[1].id;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    const auto &mainFunction = program->functions[0];
+    const auto &returnStmt = static_cast<const Velo::AST::ReturnStatement&>(*mainFunction.statements[1]);
+
+    ASSERT_NE(returnStmt.expression, nullptr);
+    ASSERT_EQ(returnStmt.expression->kind, Velo::AST::ExpressionKind::FieldAccess);
+
+    const auto &fieldAccess = static_cast<const Velo::AST::FieldAccessExpression&>(*returnStmt.expression);
+    EXPECT_EQ(fieldAccess.fieldName, "id");
+
+    ASSERT_NE(fieldAccess.object, nullptr);
+    EXPECT_EQ(fieldAccess.object->kind, Velo::AST::ExpressionKind::Index);
+}
+
+TEST(ParserTest, ParsesNestedArrayIndexExpression) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    let matrix: [][]int = [
+        [1, 2],
+        [3, 4]
+    ];
+
+    return matrix[1][0];
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    const auto &mainFunction = program->functions[0];
+    const auto &returnStmt = static_cast<const Velo::AST::ReturnStatement&>(*mainFunction.statements[1]);
+
+    ASSERT_NE(returnStmt.expression, nullptr);
+    ASSERT_EQ(returnStmt.expression->kind, Velo::AST::ExpressionKind::Index);
+
+    const auto &outerIndex = static_cast<const Velo::AST::IndexExpression&>(*returnStmt.expression);
+    ASSERT_NE(outerIndex.object, nullptr);
+    EXPECT_EQ(outerIndex.object->kind, Velo::AST::ExpressionKind::Index);
+}

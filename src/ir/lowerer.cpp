@@ -316,6 +316,12 @@ namespace Velo::IR {
                 return;
             }
 
+            case ExpressionKind::Index: {
+                const auto &index = static_cast<const IndexExpression&>(expr);
+                lowerIndexExpression(index, func);
+                return;
+            }
+
             case ExpressionKind::Binary: {
                 const auto &binaryExpr = static_cast<const BinaryExpression&>(expr);
                 if (binaryExpr.op == BinaryOperator::LogicalAnd) {
@@ -658,6 +664,15 @@ namespace Velo::IR {
         func.instructions.push_back(Instruction {
             .code = OpCode::LoadField,
             .stringOperand = expr.fieldName,
+        });
+    }
+
+    void Lowerer::lowerIndexExpression(const AST::IndexExpression &expr, Function &func) {
+        lowerExpression(*expr.object, func);
+        lowerExpression(*expr.index, func);
+
+        func.instructions.push_back(Instruction {
+            .code = OpCode::LoadIndex,
         });
     }
 }

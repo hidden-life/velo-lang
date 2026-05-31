@@ -48,6 +48,9 @@ data model foundation based on struct.
 - runtime array values
 - arrays of primitive values
 - arrays of struct values
+- array indexing read
+- nested array indexing
+- field access after array indexing
 
 ## Standard modules
 Current standard modules:
@@ -214,5 +217,5 @@ MVP 0.4 is in progress.
 
 Current step:
 ```text
-0.4.2   array literals and runtime array values
+0.4.3   array indexing read
 ```

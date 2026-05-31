@@ -615,24 +615,56 @@ namespace Velo::Parser {
             return nullptr;
         }
 
-        while (match(TokenKind::Dot)) {
-            const Token *fieldName = consume(
-                TokenKind::Identifier,
-                "PAR120",
-                "Expected field name after '.'."
-            );
+        while (true) {
+            if (match(TokenKind::Dot)) {
+                const Token *fieldName = consume(
+                    TokenKind::Identifier,
+                    "PAR120",
+                    "Expected field name after '.'."
+                );
 
-            if (fieldName == nullptr) {
-                return nullptr;
+                if (fieldName == nullptr) {
+                    return nullptr;
+                }
+
+                const auto expressionBegin = expr->range.begin();
+                expr = std::make_unique<AST::FieldAccessExpression>(
+                    std::move(expr),
+                    std::string(fieldName->text()),
+                    fieldName->range(),
+                    Source::SourceRange(expressionBegin, fieldName->range().end())
+                );
+
+                continue;
             }
 
-            const auto expressionBegin = expr->range.begin();
-            expr = std::make_unique<AST::FieldAccessExpression>(
-                std::move(expr),
-                std::string(fieldName->text()),
-                fieldName->range(),
-                Source::SourceRange(expressionBegin, fieldName->range().end())
-            );
+            if (match(TokenKind::OpenBracket)) {
+                auto index = parseExpression();
+                if (index == nullptr) {
+                    return nullptr;
+                }
+
+                const Token *closeBracket = consume(
+                    TokenKind::CloseBracket,
+                    "PAR131",
+                    "Expected ']' after array index."
+                );
+
+                if (closeBracket == nullptr) {
+                    return nullptr;
+                }
+
+                const auto expressionBegin = expr->range.begin();
+                expr = std::make_unique<AST::IndexExpression>(
+                    std::move(expr),
+                    std::move(index),
+                    Source::SourceRange(expressionBegin, closeBracket->range().end())
+                );
+
+                continue;
+            }
+
+            break;
         }
 
         return expr;
@@ -1108,7 +1140,7 @@ namespace Velo::Parser {
         );
     }
 
-    auto Parser::parseArrayLiteralExpression(const Lexer::Token &openBracket) -> std::unique_ptr<AST::Expression> {
+    auto Parser::parseArrayLiteralExpression(const Token &openBracket) -> std::unique_ptr<AST::Expression> {
         std::vector<std::unique_ptr<AST::Expression>> elements;
 
         if (!check(TokenKind::CloseBracket)) {

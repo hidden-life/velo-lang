@@ -1,0 +1,28 @@
+module app;
+
+use std::console;
+
+struct User {
+    id: int;
+    name: string;
+}
+
+fn main(): int {
+    let ids: []int = [10, 20, 30];
+
+    let users: []User = [
+        User { id: 1, name: "Alex" },
+        User { id: 2, name: "Bob" }
+    ];
+
+    let matrix: [][]int = [
+        [1, 2],
+        [3, 4]
+    ];
+
+    console::println(ids[1]);
+    console::println(users[1].name);
+    console::println(matrix[1][0]);
+
+    return 0;
+}

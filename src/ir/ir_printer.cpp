@@ -113,6 +113,7 @@ namespace Velo::IR {
             case OpCode::LogicalAnd:
             case OpCode::LogicalNot:
             case OpCode::LogicalOr:
+            case OpCode::LoadIndex:
                 break;
         }
 
@@ -216,6 +217,9 @@ namespace Velo::IR {
 
             case OpCode::CompareNotEqual:
                 return "CompareNotEqual";
+
+            case OpCode::LoadIndex:
+                return "LoadIndex";
         }
 
         return "Unknown";

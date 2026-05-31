@@ -267,3 +267,15 @@ Demonstrates:
 - arrays of `bool`
 - arrays of struct values
 - runtime array value printing
+
+### Array indexing
+```text
+examples/array_indexing/main.velo
+```
+
+Demonstrates:
+- reading array elements by index
+- indexing arrays of `int`
+- indexing arrays of struct values
+- field access after array indexing
+- nested array indexing

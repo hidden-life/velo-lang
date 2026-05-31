@@ -226,6 +226,22 @@ namespace Velo::AST {
                     break;
                 }
 
+                case ExpressionKind::Index: {
+                    const auto &indexExpr = static_cast<const IndexExpression&>(expression);
+                    writeIndent(stream, indentLevel);
+                    stream << "Index\n";
+
+                    writeIndent(stream, indentLevel + 1U);
+                    stream << "Object\n";
+                    printExpression(stream, *indexExpr.object, indentLevel + 2U);
+
+                    writeIndent(stream, indentLevel + 1U);
+                    stream << "IndexValue\n";
+                    printExpression(stream, *indexExpr.index, indentLevel + 2U);
+
+                    break;
+                }
+
                 case ExpressionKind::Binary: {
                     const auto &binaryExpression = static_cast<const BinaryExpression&>(expression);
                     writeIndent(stream, indentLevel);

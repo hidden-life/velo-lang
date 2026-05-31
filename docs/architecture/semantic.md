@@ -460,3 +460,23 @@ Rejected:
 ```velo
 let values: []int = [1, "bad"];
 ```
+
+## Array indexing
+Array indexing is type-checked as an expression.
+
+Rules:
+- target expression must have array type
+- index expression must have type `int`
+- result type is the array element type
+
+Example:
+```velo
+let ids: []int = [10, 20, 30];
+
+return ids[1];
+```
+
+For nested arrays, each indexing operation unwraps one array layer:
+```text
+[][]int -> []int -> int
+```

@@ -466,6 +466,12 @@ namespace Velo::Semantic {
                 return;
             }
 
+            case AST::ExpressionKind::Index: {
+                const auto &indexExpr = static_cast<const AST::IndexExpression&>(expr);
+                static_cast<void>(analyzeIndexExpressionType(indexExpr));
+                return;
+            }
+
             case AST::ExpressionKind::Binary: {
                 const auto &binaryExpr = static_cast<const AST::BinaryExpression&>(expr);
 
@@ -647,6 +653,11 @@ namespace Velo::Semantic {
             case ExpressionKind::FieldAccess: {
                 const auto &fieldAccess = static_cast<const FieldAccessExpression&>(expression);
                 return analyzeFieldAccessExpressionType(fieldAccess);
+            }
+
+            case ExpressionKind::Index: {
+                const auto &indexExpression = static_cast<const IndexExpression&>(expression);
+                return analyzeIndexExpressionType(indexExpression);
             }
 
             case ExpressionKind::Binary: {
@@ -1401,5 +1412,34 @@ namespace Velo::Semantic {
         }
 
         return result;
+    }
+
+    auto SemanticAnalyzer::analyzeIndexExpressionType(const AST::IndexExpression &expr) -> SemanticType {
+        const auto objectType = analyzeCheckedExpressionType(*expr.object);
+        const auto indexType = analyzeCheckedExpressionType(*expr.index);
+
+        if (!isUnknownType(indexType) && !isIntType(indexType)) {
+            _engine.error(
+                "SEM052",
+                "Array index must be int, actual '" + semanticTypeToString(indexType) + "'.",
+                expr.index->range
+            );
+        }
+
+        if (isUnknownType(objectType)) {
+            return {};
+        }
+
+        if (objectType.kind != SemanticTypeKind::Array || objectType.elementType == nullptr) {
+            _engine.error(
+                "SEM051",
+                "Array index target must be array, actual '" + semanticTypeToString(objectType) + "'.",
+                expr.object->range
+            );
+
+            return {};
+        }
+
+        return *objectType.elementType;
     }
 }

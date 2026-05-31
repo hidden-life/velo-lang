@@ -30,6 +30,7 @@ namespace Velo::IR {
         void lowerStructLiteralExpression(const AST::StructLiteralExpression &expr, Function &func);
         void lowerArrayLiteralExpression(const AST::ArrayLiteralExpression &expr, Function &func);
         void lowerFieldAccessExpression(const AST::FieldAccessExpression &expr, Function &func);
+        void lowerIndexExpression(const AST::IndexExpression &expr, Function &func);
 
         void lowerFieldAssignmentStatement(const AST::FieldAssignmentStatement &stmt, Function &func);
 

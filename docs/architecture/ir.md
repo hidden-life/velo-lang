@@ -356,3 +356,38 @@ PushInt 3
 BuildArray elements=3
 StoreLocal local[0]
 ```
+
+## Array indexing
+Array indexing is lowered to `LoadIndex`.
+
+Example source:
+
+```velo
+return ids[1];
+```
+
+Representative IR:
+
+```text
+LoadLocal local[0]
+PushInt 1
+LoadIndex
+Return
+```
+
+Nested indexing:
+
+```velo
+return matrix[1][0];
+```
+
+Representative IR:
+
+```text
+LoadLocal local[0]
+PushInt 1
+LoadIndex
+PushInt 0
+LoadIndex
+Return
+```
