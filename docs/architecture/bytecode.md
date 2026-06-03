@@ -55,3 +55,25 @@ available by the end of MVP 0.4:
 MVP 0.5.1 does not execute bytecode yet.
 
 Execution will be added later by the bytecode VM.
+
+## IR to bytecode compiler
+The bytecode compiler converts:
+```text
+IR::Module -> Bytecode::Module
+```
+
+The compiler is intentionally mechanical in MVP 0.5.2.
+
+It maps IR opcodes to bytecode opcodes and copies instruction operands.
+
+Preserved operands:
+- `stringOperand`
+- `intOperand`
+- `boolOperand`
+- `argsCount`
+- `indexOperand`
+- `targetOperand`
+
+The compiler does not execute bytecode.
+
+Execution will be implemented by the bytecode VM in a later MVP 0.5 step.

@@ -56,6 +56,9 @@ data model foundation based on struct.
 - array value semantics preserved during element assignment
 - `std::array` module
 - `array::len`
+- bytecode compiler
+- IR module to bytecode module conversion
+- IR instruction to bytecode instruction mapping
 
 ## Standard modules
 Current standard modules:
@@ -220,5 +223,5 @@ MVP 0.5 is in progress.
 
 Current step:
 ```text
-0.5.1   bytecode instruction model
+0.5.2   IR to bytecode compiler
 ```
