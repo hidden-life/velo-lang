@@ -195,6 +195,10 @@ examples/field_access/main.velo
 examples/field_assignment/main.velo
 examples/equality/main.velo
 examples/block_scopes/main.velo
+examples/array_literal/main.velo
+examples/array_indexing/main.velo
+examples/array_assignment/main.velo
+examples/array_builtin/main.velo
 ```
 
 ## Integration showcase example

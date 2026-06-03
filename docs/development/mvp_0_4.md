@@ -13,7 +13,7 @@ MVP 0.4 focuses on arrays as the first collection type in Velo.
 
 ## Current step
 ```text
-0.4.5   array builtins and examples
+0.4.6   docs/examples/release checklist
 ```
 
 ## 0.4.1 scope
@@ -60,13 +60,6 @@ fn main(): int {
 }
 ```
 
-## Not implemented in 0.4.1
-- array literals
-- runtime array values
-- array indexing
-- array element assignment
-- array builtins
-
 ## 0.4.2 scope
 Implemented in this step:
 - array literal expressions
@@ -106,11 +99,6 @@ Empty array literals require an expected array type:
 ```velo
 let ids: []int = [];
 ```
-
-Not implemented in 0.4.2:
-- array indexing
-- array element assignment
-- array builtins
 
 ## 0.4.3 scope
 Implemented in this step:
@@ -153,10 +141,6 @@ let matrix: [][]int = [
 return matrix[1][0];
 ```
 
-Not implemented in 0.4.3:
-- array element assignment
-- array builtins
-
 ## 0.4.4 scope
 Implemented in this step:
 - array element assignment statements
@@ -198,10 +182,6 @@ var users: []User = [
 users[0] = User {id: 2, name: "Bob"};
 ```
 
-Not implemented in 0.4.4:
-- mixed field/index assignment paths like `users[0].id = 2`
-- array builtins
-
 ## 0.4.5 scope
 Implemented in this step:
 - `std::array` module
@@ -233,9 +213,62 @@ array::len(["Alex", "Bob"])
 array::len(users)
 ```
 
-Not implemented in 0.4.5:
+## 0.4.6 scope
+Implemented in this step:
+- MVP 0.4 documentation review
+- examples documentation review
+- release checklist update
+- release notes draft
+- README current status update
+- architecture docs synchronization
+- diagnostics docs synchronization
+- smoke-test command list
+
+## MVP 0.4 completed feature set
+MVP 0.4 includes:
+- all MVP 0.1 language foundation
+- all MVP 0.2 data model foundation
+- all MVP 0.3 value semantics and block scope foundation
+- array type syntax
+- nested array type syntax
+- array semantic type model
+- array literals
+- empty array literals with expected type
+- runtime array values
+- deep-copy support for arrays
+- array indexing read
+- nested array indexing
+- array element assignment
+- nested array element assignment
+- arrays of struct values
+- `std::array` module
+- `array::len`
+
+## MVP 0.4 limitations
+Not implemented in MVP 0.4:
+- mixed field/index assignment paths such as `users[0].id = 2`
 - `array::push`
 - `array::pop`
 - `array::is_empty`
 - iterators
-- `for` loops
+- `for` loop
+- maps
+- nullable types
+- generics
+- methods
+- visibility enforcement for `pub` / private fields
+- struct equality
+- string ordering comparisons
+- package manager
+- bytecode serialization
+- standalone `veloc`
+- standalone `velovm`
+- HTTP runtime
+- JSON parser/serializer
+- optimizer
+
+## Next milestone
+The next planned milestone is:
+```text
+MVP 0.5     VM + bytecode foundation
+```
