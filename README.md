@@ -54,6 +54,8 @@ data model foundation based on struct.
 - array element assignment
 - nested array element assignment
 - array value semantics preserved during element assignment
+- `std::array` module
+- `array::len`
 
 ## Standard modules
 Current standard modules:
@@ -220,5 +222,5 @@ MVP 0.4 is in progress.
 
 Current step:
 ```text
-0.4.4   array element assignment
+0.4.5   array builtins and examples
 ```

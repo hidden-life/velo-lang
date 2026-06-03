@@ -101,3 +101,39 @@ Not implemented yet:
 - package resolution
 - module visibility rules beyond current imports
 - module initialization
+
+## std::array
+The `std::array` module contains helpers for array values.
+
+Import:
+```velo
+use std::array;
+```
+
+### `array::len`
+```velo
+array::len(values)
+```
+
+Returns the number of elements in an array.
+
+Example:
+
+```velo
+module app;
+
+use std::array;
+
+fn main(): int {
+    let ids: []int = [1, 2, 3];
+
+    return array::len(ids);
+}
+```
+
+Current limitations:
+
+- no `array::push`
+- no `array::pop`
+- no `array::is_empty`
+- no iterators

@@ -292,3 +292,16 @@ Demonstrates:
 - nested array element assignment
 - assigning struct values into arrays
 - preserving array value semantics after copying arrays
+
+### Array builtins
+```text
+examples/array_builtin/main.velo
+```
+
+Demonstrates:
+
+- importing `std::array`
+- `array::len`
+- length of `int` arrays
+- length of `string` arrays
+- length of struct arrays

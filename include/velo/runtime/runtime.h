@@ -22,6 +22,8 @@ namespace Velo::Runtime {
         void registerStdInt();
         void registerStdBool();
 
+        void registerStdArray();
+
         BuiltinRegistry _registry {};
         Module::ModuleRegistry _modules {};
     };

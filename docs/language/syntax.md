@@ -631,3 +631,15 @@ Current limitations:
 
 - mixed field/index assignment paths like `users[0].id = 2` are not implemented yet
 - array builtins are not implemented yet
+
+## Array builtins
+Array helpers are available through `std::array`.
+```velo
+use std::array;
+
+let ids: []int = [1, 2, 3];
+
+array::len(ids);
+```
+
+`array::len` returns `int`.

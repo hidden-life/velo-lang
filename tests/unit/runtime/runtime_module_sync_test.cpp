@@ -55,3 +55,20 @@ TEST(RuntimeTest, BuildsModulesFromBuiltins) {
     ASSERT_EQ(boolToStr->parameterTypes.size(), 1U);
     EXPECT_EQ(boolToStr->parameterTypes[0], "bool");
 }
+
+TEST(RuntimeModuleSyncTest, RegistersArrayLenBuiltinInArrayModule) {
+    Velo::Runtime::Runtime runtime;
+
+    const auto *module = runtime.modules().find("array");
+    ASSERT_NE(module, nullptr);
+
+    const auto *function = module->findFunction("len");
+    ASSERT_NE(function, nullptr);
+
+    EXPECT_EQ(function->name, "len");
+    EXPECT_EQ(function->arity, 1U);
+    EXPECT_EQ(function->returnType, "int");
+
+    ASSERT_EQ(function->parameterTypes.size(), 1U);
+    EXPECT_EQ(function->parameterTypes[0], "array");
+}

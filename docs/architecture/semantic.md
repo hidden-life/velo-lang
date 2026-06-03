@@ -510,3 +510,28 @@ matrix[1][0] = 99;
 
 Mixed field/index assignment paths 
 such as `users[0].id = 2` are not part of MVP 0.4.4.
+
+## Array builtins
+The semantic analyzer validates builtin metadata from the runtime module registry.
+
+`array::len` uses a special builtin parameter marker:
+
+```text
+array
+```
+
+This marker accepts any semantic type with kind `Array`.
+
+Examples accepted:
+
+```velo
+array::len([1, 2, 3])
+array::len(["Alex", "Bob"])
+array::len(users)
+```
+
+Rejected:
+
+```velo
+array::len(1)
+```

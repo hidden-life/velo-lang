@@ -1176,6 +1176,10 @@ namespace Velo::Semantic {
             return isBoolType(actual);
         }
 
+        if (expected == "array") {
+            return actual.kind == SemanticTypeKind::Array;
+        }
+
         return false;
     }
 

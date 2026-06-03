@@ -2061,3 +2061,131 @@ fn main(): int {
 
     EXPECT_NE(result.irText.find("StoreIndexPath indexes=1"), std::string::npos);
 }
+
+TEST(DriverTest, ExecutesArrayLenBuiltinForIntArray) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "array_len_int.velo",
+        R"(module app;
+
+use std::array;
+
+fn main(): int {
+    let ids: []int = [1, 2, 3];
+
+    return array::len(ids);
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 3);
+}
+
+TEST(DriverTest, ExecutesArrayLenBuiltinForEmptyArray) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "array_len_empty.velo",
+        R"(module app;
+
+use std::array;
+
+fn main(): int {
+    let ids: []int = [];
+
+    return array::len(ids);
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 0);
+}
+
+TEST(DriverTest, ExecutesArrayLenBuiltinForStructArray) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "array_len_struct.velo",
+        R"(module app;
+
+use std::array;
+
+struct User {
+    id: int;
+}
+
+fn main(): int {
+    let users: []User = [
+        User { id: 1 },
+        User { id: 2 }
+    ];
+
+    return array::len(users);
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 2);
+}
+
+TEST(DriverTest, IrModePrintsArrayLenBuiltinCall) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "array_len_ir.velo",
+        R"(module app;
+
+use std::array;
+
+fn main(): int {
+    let ids: []int = [1, 2, 3];
+
+    return array::len(ids);
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.irText.find("CallBuiltin array::len args=1"), std::string::npos);
+}

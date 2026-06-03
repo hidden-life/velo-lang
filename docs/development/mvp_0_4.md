@@ -13,7 +13,7 @@ MVP 0.4 focuses on arrays as the first collection type in Velo.
 
 ## Current step
 ```text
-0.4.4   array element assignment
+0.4.5   array builtins and examples
 ```
 
 ## 0.4.1 scope
@@ -201,3 +201,41 @@ users[0] = User {id: 2, name: "Bob"};
 Not implemented in 0.4.4:
 - mixed field/index assignment paths like `users[0].id = 2`
 - array builtins
+
+## 0.4.5 scope
+Implemented in this step:
+- `std::array` module
+- `array::len` builtin
+- semantic validation for array builtin argument type
+- runtime implementation for array length
+- semantic tests
+- driver tests
+- runtime module sync tests
+- example
+
+Example:
+```velo
+module app;
+
+use std::array;
+
+fn main(): int {
+    let ids: []int = [1, 2, 3];
+
+    return array::len(ids);
+}
+```
+
+`array::len` works with arrays of any element type:
+```velo
+array::len([1, 2, 3])
+array::len(["Alex", "Bob"])
+array::len(users)
+```
+
+Not implemented in 0.4.5:
+- `array::push`
+- `array::pop`
+- `array::is_empty`
+- iterators
+- `for` loops

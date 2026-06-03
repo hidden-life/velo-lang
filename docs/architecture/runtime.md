@@ -413,3 +413,24 @@ StoreLocal local[0]
 ```
 
 Out-of-range assignment is a runtime error.
+
+## Array builtins
+Runtime provides the `array::len` builtin.
+
+Runtime behavior:
+
+1. validate one argument
+2. validate that argument is `ArrayValuePtr`
+3. return array element count as `int`
+
+Example:
+
+```velo
+array::len([1, 2, 3])
+```
+
+returns:
+
+```text
+3
+```

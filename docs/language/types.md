@@ -325,6 +325,19 @@ original[0] == 1
 copy[0] == 42
 ```
 
+Array length can be read with `array::len` from `std::array`:
+```velo
+use std::array;
+
+let ids: []int = [1, 2, 3];
+
+let count: int = array::len(ids);
+```
+
+`array::len` accepts arrays of any element type and returns `int`.
+
 Current limitations:
 - mixed field/index assignment paths are not implemented yet
-- array builtins are not implemented yet
+- array mutation builtins are not implemented yet
+- iterators are not implemented yet
+- `for` loops are not implemented yet

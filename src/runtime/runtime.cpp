@@ -46,6 +46,9 @@ namespace Velo::Runtime {
         registerStdInt();
         registerStdBool();
 
+        // array
+        registerStdArray();
+
         buildModulesFromBuiltins();
     }
 
@@ -215,6 +218,49 @@ namespace Velo::Runtime {
                         .exitCode = 0,
                         .error = {},
                         .returnValue = std::get<bool>(value) ? std::string("true") : std::string("false")
+                    };
+                }
+            }
+        );
+    }
+
+    void Runtime::registerStdArray() {
+        _registry.registerFunc(
+            BuiltinFunction {
+                "array::len",
+                {"array"},
+                "int",
+                [](const std::vector<Value> &args) -> ExecutionResult {
+                    if (args.size() != 1U) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "array::len expects exactly one argument."
+                        };
+                    }
+
+                    if (!std::holds_alternative<ArrayValuePtr>(args[0])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "array::len expects an array argument."
+                        };
+                    }
+
+                    const auto arrayValue = std::get<ArrayValuePtr>(args[0]);
+                    if (arrayValue == nullptr) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "array::len received a null array value."
+                        };
+                    }
+
+                    return ExecutionResult {
+                        .success = true,
+                        .exitCode = 0,
+                        .error = {},
+                        .returnValue = static_cast<int>(arrayValue->elements.size())
                     };
                 }
             }
