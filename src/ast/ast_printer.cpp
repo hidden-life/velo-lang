@@ -93,6 +93,21 @@ namespace Velo::AST {
                     break;
                 }
 
+                case StatementKind::IndexAssignment: {
+                    const auto &indexAssignment = static_cast<const IndexAssignmentStatement&>(statement);
+                    writeIndent(stream, indentLevel);
+                    stream << "IndexAssignment\n";
+
+                    writeIndent(stream, indentLevel + 1U);
+                    stream << "Target\n";
+                    printExpression(stream, *indexAssignment.target, indentLevel + 2U);
+
+                    writeIndent(stream, indentLevel + 1U);
+                    stream << "Value\n";
+                    printExpression(stream, *indexAssignment.value, indentLevel + 2U);
+                    break;
+                }
+
                 case StatementKind::If: {
                     const auto &ifStmt = static_cast<const IfStatement&>(statement);
                     writeIndent(stream, indentLevel);

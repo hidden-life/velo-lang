@@ -1878,3 +1878,186 @@ fn main(): int {
 
     EXPECT_NE(result.irText.find("LoadIndex"), std::string::npos);
 }
+
+TEST(DriverTest, ExecutesArrayElementAssignment) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "array_element_assignment.velo",
+        R"(module app;
+
+fn main(): int {
+    var ids: []int = [1, 2, 3];
+
+    ids[0] = 42;
+
+    return ids[0];
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 42);
+}
+
+TEST(DriverTest, ExecutesNestedArrayElementAssignment) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "nested_array_element_assignment.velo",
+        R"(module app;
+
+fn main(): int {
+    var matrix: [][]int = [
+        [1, 2],
+        [3, 4]
+    ];
+
+    matrix[1][0] = 99;
+
+    return matrix[1][0];
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 99);
+}
+
+TEST(DriverTest, ArrayElementAssignmentPreservesCopiedArrayValueSemantics) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "array_assignment_value_semantics.velo",
+        R"(module app;
+
+fn main(): int {
+    let original: []int = [1, 2, 3];
+    var copy: []int = original;
+
+    copy[0] = 42;
+
+    return original[0];
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 1);
+}
+
+TEST(DriverTest, ExecutesArrayElementAssignmentWithStructValue) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "array_element_assignment_struct.velo",
+        R"(module app;
+
+struct User {
+    id: int;
+    name: string;
+}
+
+fn main(): int {
+    var users: []User = [
+        User { id: 1, name: "Alex" }
+    ];
+
+    users[0] = User { id: 2, name: "Bob" };
+
+    return users[0].id;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 2);
+}
+
+TEST(DriverTest, ReportsRuntimeErrorForArrayAssignmentIndexOutOfRange) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "array_assignment_out_of_range.velo",
+        R"(module app;
+
+fn main(): int {
+    var ids: []int = [1, 2, 3];
+
+    ids[3] = 42;
+
+    return 0;
+}
+)"
+    );
+
+    EXPECT_FALSE(result.success);
+    EXPECT_EQ(result.exitCode, 1);
+    EXPECT_NE(result.error.find("Array index out of range"), std::string::npos);
+}
+
+TEST(DriverTest, IrModePrintsStoreIndexPathInstruction) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "array_assignment_ir.velo",
+        R"(module app;
+
+fn main(): int {
+    var ids: []int = [1, 2, 3];
+
+    ids[0] = 42;
+
+    return ids[0];
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.irText.find("StoreIndexPath indexes=1"), std::string::npos);
+}

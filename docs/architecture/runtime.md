@@ -382,3 +382,34 @@ Runtime behavior:
 6. push a cloned element value
 
 Out-of-range access is runtime error.
+
+## Array element assignment
+
+Array element assignment is executed by `StoreIndexPath`.
+
+Runtime stack shape before `StoreIndexPath`:
+
+```text
+[..., assignedValue, rootArrayValue, index1, index2, ...]
+```
+
+Runtime behavior:
+
+1. pop index values
+2. pop root array value
+3. pop assigned value
+4. walk nested arrays by index path
+5. replace the leaf element with a cloned assigned value
+6. push the updated root array value back onto the stack
+
+The following IR shape stores the updated root array back into the local slot:
+
+```text
+PushInt 42
+LoadLocal local[0]
+PushInt 0
+StoreIndexPath indexes=1
+StoreLocal local[0]
+```
+
+Out-of-range assignment is a runtime error.

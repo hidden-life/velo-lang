@@ -92,6 +92,9 @@ SEM049  Cannot infer type of empty array literal
 SEM050  Array literal element type mismatch
 SEM051  Array index target must be array
 SEM052  Array index must be int
+SEM053  Array element assignment target must start from a local variable
+SEM054  Cannot assign array element through immutable local variable
+SEM055  Array element assignment type mismatch
 ```
 
 This list should be updated when adding new diagnostics.

@@ -24,6 +24,7 @@ namespace Velo::Interpreter {
         [[nodiscard]] auto loadField(const std::string &fieldName) -> Runtime::ExecutionResult;
         [[nodiscard]] auto loadIndex() -> Runtime::ExecutionResult;
         [[nodiscard]] auto storeFieldPath(const std::string &encodedPath) -> Runtime::ExecutionResult;
+        [[nodiscard]] auto storeIndexPath(std::size_t indexCount) -> Runtime::ExecutionResult;
 
         // Operand stack for temporary expression values.
         std::vector<Runtime::Value> _stack {};

@@ -543,6 +543,17 @@ namespace Velo::Parser {
                 );
             }
 
+            if (expression->kind == AST::ExpressionKind::Index) {
+                auto *rawTarget = static_cast<AST::IndexExpression*>(expression.release());
+                std::unique_ptr<AST::IndexExpression> target(rawTarget);
+
+                return std::make_unique<AST::IndexAssignmentStatement>(
+                    std::move(target),
+                    std::move(valueExpr),
+                    assignmentRange
+                );
+            }
+
             _engine.error(
                 "PAR121",
                 "Invalid assignment target.",

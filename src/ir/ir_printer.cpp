@@ -94,6 +94,10 @@ namespace Velo::IR {
                 stream << " " << instruction.stringOperand;
                 break;
 
+            case OpCode::StoreIndexPath:
+                stream << " indexes=" << instruction.argsCount;
+                break;
+
             case OpCode::Pop:
             case OpCode::Return:
             case OpCode::AddInt:
@@ -220,6 +224,9 @@ namespace Velo::IR {
 
             case OpCode::LoadIndex:
                 return "LoadIndex";
+
+            case OpCode::StoreIndexPath:
+                return "StoreIndexPath";
         }
 
         return "Unknown";

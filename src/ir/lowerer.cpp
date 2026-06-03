@@ -6,6 +6,11 @@ namespace {
         std::vector<std::string> fields {};
     };
 
+    struct IndexAssignmentPath final {
+        std::string rootLocalName {};
+        std::vector<const Velo::AST::Expression*> indexes {};
+    };
+
     void collectFieldAssignmentPath(const Velo::AST::Expression &expr, FieldAssignmentPath &path) {
         using namespace Velo::AST;
 
@@ -22,6 +27,26 @@ namespace {
             const auto &fieldAccess = static_cast<const FieldAccessExpression&>(expr);
             collectFieldAssignmentPath(*fieldAccess.object, path);
             path.fields.push_back(fieldAccess.fieldName);
+            return;
+        }
+    }
+
+    void collectIndexAssignmentPath(const Velo::AST::Expression &expr, IndexAssignmentPath &path) {
+        using namespace Velo::AST;
+
+        if (expr.kind == ExpressionKind::Name) {
+            const auto &nameExpr = static_cast<const NameExpression&>(expr);
+            if (nameExpr.name.segments.size() == 1U) {
+                path.rootLocalName = nameExpr.name.segments.front();
+            }
+
+            return;
+        }
+
+        if (expr.kind == ExpressionKind::Index) {
+            const auto &indexExpr = static_cast<const IndexExpression&>(expr);
+            collectIndexAssignmentPath(*indexExpr.object, path);
+            path.indexes.push_back(indexExpr.index.get());
             return;
         }
     }
@@ -218,6 +243,12 @@ namespace Velo::IR {
         if (stmt.kind == StatementKind::FieldAssignment) {
             const auto &fieldAssignment = static_cast<const FieldAssignmentStatement&>(stmt);
             lowerFieldAssignmentStatement(fieldAssignment, func);
+            return;
+        }
+
+        if (stmt.kind == StatementKind::IndexAssignment) {
+            const auto &indexAssignment = static_cast<const IndexAssignmentStatement&>(stmt);
+            lowerIndexAssignmentStatement(indexAssignment, func);
             return;
         }
     }
@@ -673,6 +704,50 @@ namespace Velo::IR {
 
         func.instructions.push_back(Instruction {
             .code = OpCode::LoadIndex,
+        });
+    }
+
+    void Lowerer::lowerIndexAssignmentStatement(const AST::IndexAssignmentStatement &stmt, Function &func) {
+        IndexAssignmentPath path;
+        collectIndexAssignmentPath(*stmt.target, path);
+
+        if (path.rootLocalName.empty() || path.indexes.empty()) {
+            return;
+        }
+
+        const auto *localIdx = findLocalIndex(path.rootLocalName);
+        if (localIdx == nullptr) {
+            return;
+        }
+
+        // Evaluate RHS first. This preserves expected behavior for:
+        //
+        // ids[0] = ids[0] + 1;
+        //
+        // RHS sees the old array value.
+        lowerExpression(*stmt.value, func);
+
+        // Load root array value.
+        func.instructions.push_back(Instruction {
+            .code = OpCode::LoadLocal,
+            .indexOperand = *localIdx,
+        });
+
+        // Evaluate indexes from left to right:
+        //
+        // matrix[1][0] -> indexes 1, 0
+        for (const auto *indexExpr : path.indexes) {
+            lowerExpression(*indexExpr, func);
+        }
+
+        func.instructions.push_back(Instruction {
+            .code = OpCode::StoreIndexPath,
+            .argsCount = path.indexes.size()
+        });
+        
+        func.instructions.push_back(Instruction {
+            .code = OpCode::StoreLocal,
+            .indexOperand = *localIdx,
         });
     }
 }

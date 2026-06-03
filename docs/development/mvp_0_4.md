@@ -13,7 +13,7 @@ MVP 0.4 focuses on arrays as the first collection type in Velo.
 
 ## Current step
 ```text
-0.4.3   array indexing read
+0.4.4   array element assignment
 ```
 
 ## 0.4.1 scope
@@ -155,4 +155,49 @@ return matrix[1][0];
 
 Not implemented in 0.4.3:
 - array element assignment
+- array builtins
+
+## 0.4.4 scope
+Implemented in this step:
+- array element assignment statements
+- nested array element assignment
+- assignment into arrays of primitive values
+- assignment into arrays of struct values
+- semantic validation that the root local is mutable
+- semantic validation that the target is an array element
+- semantic validation that assigned value type matches element type
+- runtime bounds checks for array element assignment
+- IR lowering for array element assignment
+- interpreter support for storing values into array index paths
+- value semantics regression tests
+- example
+
+Example:
+```velo
+var ids: []int = [1, 2, 3];
+
+ids[0] = 42;
+```
+
+Nested arrays are supported:
+```velo
+var matrix: [][]int = [
+    [1, 2],
+    [3, 4]
+];
+
+matrix[1][0] = 99;
+```
+
+Arrays of structs can replace whole elements:
+```velo
+var users: []User = [
+    User {id: 1, name: "Alex"}
+];
+
+users[0] = User {id: 2, name: "Bob"};
+```
+
+Not implemented in 0.4.4:
+- mixed field/index assignment paths like `users[0].id = 2`
 - array builtins

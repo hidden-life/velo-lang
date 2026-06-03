@@ -391,3 +391,40 @@ PushInt 0
 LoadIndex
 Return
 ```
+
+## Array element assignment
+
+Array element assignment is lowered to `StoreIndexPath`.
+
+Example source:
+
+```velo
+ids[0] = 42;
+```
+
+Representative IR:
+
+```text
+PushInt 42
+LoadLocal local[0]
+PushInt 0
+StoreIndexPath indexes=1
+StoreLocal local[0]
+```
+
+Nested array assignment:
+
+```velo
+matrix[1][0] = 99;
+```
+
+Representative IR:
+
+```text
+PushInt 99
+LoadLocal local[0]
+PushInt 1
+PushInt 0
+StoreIndexPath indexes=2
+StoreLocal local[0]
+```

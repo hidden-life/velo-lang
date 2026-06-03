@@ -597,3 +597,37 @@ return matrix[1][0];
 Current limitations:
 - array element assignment is not implemented yet
 - array builtins are not implemented yet
+
+## Array element assignment
+Array elements can be assigned through mutable local array values:
+```velo
+var ids: []int = [1, 2, 3];
+ids[0] = 42;
+```
+
+Nested arrays can be assigned by repeated indexing:
+```velo
+var matrix [][]int = [
+    [1, 2],
+    [3, 4]
+];
+matrix[1][0] = 99;
+```
+The root local must be mutable:
+
+```velo
+var ids: []int = [1, 2, 3];
+ids[0] = 42;
+```
+
+This is rejected:
+
+```velo
+let ids: []int = [1, 2, 3];
+ids[0] = 42;
+```
+
+Current limitations:
+
+- mixed field/index assignment paths like `users[0].id = 2` are not implemented yet
+- array builtins are not implemented yet

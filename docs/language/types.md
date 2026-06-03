@@ -293,6 +293,38 @@ let users: []User = [
 let user: User = users[0];
 ```
 
+Array element assignment must preserve the element type:
+
+```velo
+var ids: []int = [1, 2, 3];
+
+ids[0] = 42;
+```
+
+This is rejected:
+
+```velo
+var ids: []int = [1, 2, 3];
+
+ids[0] = "bad";
+```
+
+Array values preserve value semantics:
+
+```velo
+let original: []int = [1, 2, 3];
+var copy: []int = original;
+
+copy[0] = 42;
+```
+
+After this code:
+
+```text
+original[0] == 1
+copy[0] == 42
+```
+
 Current limitations:
-- array element assignment is not implemented yet
+- mixed field/index assignment paths are not implemented yet
 - array builtins are not implemented yet

@@ -18,6 +18,7 @@ namespace Velo::IR {
         BuildArray,
         LoadField,
         LoadIndex,
+        StoreIndexPath,
         StoreFieldPath,
 
         Pop,

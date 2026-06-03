@@ -33,6 +33,7 @@ namespace Velo::IR {
         void lowerIndexExpression(const AST::IndexExpression &expr, Function &func);
 
         void lowerFieldAssignmentStatement(const AST::FieldAssignmentStatement &stmt, Function &func);
+        void lowerIndexAssignmentStatement(const AST::IndexAssignmentStatement &stmt, Function &func);
 
         void lowerLogicalAndExpression(const AST::BinaryExpression &expr, Function &func);
         void lowerLogicalOrExpression(const AST::BinaryExpression &expr, Function &func);

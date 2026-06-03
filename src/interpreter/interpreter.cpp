@@ -488,6 +488,9 @@ namespace Velo::Interpreter {
             case OpCode::StoreFieldPath: {
                 return storeFieldPath(inst.stringOperand);
             }
+            case OpCode::StoreIndexPath: {
+                return storeIndexPath(inst.argsCount);
+            }
         }
 
         return Runtime::ExecutionResult {
@@ -875,6 +878,111 @@ namespace Velo::Interpreter {
         }
 
         _stack.push_back(Runtime::cloneValue(array->elements[indexAsSize]));
+
+        return {};
+    }
+
+    auto Interpreter::storeIndexPath(std::size_t indexCount) -> Runtime::ExecutionResult {
+        if (indexCount == 0U) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "StoreIndexPath requires at least one index."
+            };
+        }
+
+        if (_stack.size() < indexCount + 2U) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "StoreIndexPath requires a value, an array value, and index values on the stack."
+            };
+        }
+
+        std::vector<int> indexes(indexCount);
+        for (std::size_t reverseIdx = 0U; reverseIdx < indexCount; ++reverseIdx) {
+            const auto indexValue = _stack.back();
+            _stack.pop_back();
+
+            if (!std::holds_alternative<int>(indexValue)) {
+                return Runtime::ExecutionResult {
+                    .success = false,
+                    .exitCode = 1,
+                    .error = "StoreIndexPath expects integer indexes."
+                };
+            }
+
+            const int index = std::get<int>(indexValue);
+            if (index < 0) {
+                return Runtime::ExecutionResult {
+                    .success = false,
+                    .exitCode = 1,
+                    .error = "Array index out of range."
+                };
+            }
+
+            indexes[indexCount - 1U - reverseIdx] = index;
+        }
+
+        const auto rootValue = _stack.back();
+        _stack.pop_back();
+        const auto assignedValue = _stack.back();
+        _stack.pop_back();
+
+        if (!std::holds_alternative<Runtime::ArrayValuePtr>(rootValue)) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "StoreIndexPath expects an array value."
+            };
+        }
+
+        const auto rootArray = std::get<Runtime::ArrayValuePtr>(rootValue);
+        if (rootArray == nullptr) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "StoreIndexPath received a null array value."
+            };
+        }
+
+        Runtime::ArrayValuePtr current = rootArray;
+        for (std::size_t pathIdx = 0U; pathIdx < indexes.size(); ++pathIdx) {
+            const auto indexAsSize = static_cast<std::size_t>(indexes[pathIdx]);
+            if (indexAsSize >= current->elements.size()) {
+                return Runtime::ExecutionResult {
+                    .success = false,
+                    .exitCode = 1,
+                    .error = "Array index out of range."
+                };
+            }
+
+            const bool isLeaf = pathIdx + 1U == indexes.size();
+            if (isLeaf) {
+                current->elements[indexAsSize] = Runtime::cloneValue(assignedValue);
+                break;
+            }
+
+            auto &nextValue = current->elements[indexAsSize];
+            if (!std::holds_alternative<Runtime::ArrayValuePtr>(nextValue)) {
+                return Runtime::ExecutionResult {
+                    .success = false,
+                    .exitCode = 1,
+                    .error = "StoreIndexPath expected nested array value."
+                };
+            }
+
+            current = std::get<Runtime::ArrayValuePtr>(nextValue);
+            if (current == nullptr) {
+                return Runtime::ExecutionResult {
+                    .success = false,
+                    .exitCode = 1,
+                    .error = "StoreIndexPath received a null nested array value."
+                };
+            }
+        }
+
+        _stack.push_back(Runtime::cloneValue(rootValue));
 
         return {};
     }

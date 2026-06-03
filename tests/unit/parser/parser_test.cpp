@@ -996,3 +996,71 @@ fn main(): int {
     ASSERT_NE(outerIndex.object, nullptr);
     EXPECT_EQ(outerIndex.object->kind, Velo::AST::ExpressionKind::Index);
 }
+
+TEST(ParserTest, ParsesArrayElementAssignmentStatement) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    var ids: []int = [1, 2, 3];
+
+    ids[0] = 42;
+
+    return ids[0];
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    const auto &mainFunction = program->functions[0];
+    ASSERT_EQ(mainFunction.statements.size(), 3U);
+    ASSERT_EQ(mainFunction.statements[1]->kind, Velo::AST::StatementKind::IndexAssignment);
+
+    const auto &assignment = static_cast<const Velo::AST::IndexAssignmentStatement&>(
+        *mainFunction.statements[1]
+    );
+
+    ASSERT_NE(assignment.target, nullptr);
+    ASSERT_NE(assignment.value, nullptr);
+
+    EXPECT_EQ(assignment.target->kind, Velo::AST::ExpressionKind::Index);
+    EXPECT_EQ(assignment.value->kind, Velo::AST::ExpressionKind::IntegerLiteral);
+}
+
+TEST(ParserTest, ParsesNestedArrayElementAssignmentStatement) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    var matrix: [][]int = [
+        [1, 2],
+        [3, 4]
+    ];
+
+    matrix[1][0] = 99;
+
+    return matrix[1][0];
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    const auto &mainFunction = program->functions[0];
+    ASSERT_EQ(mainFunction.statements.size(), 3U);
+    ASSERT_EQ(mainFunction.statements[1]->kind, Velo::AST::StatementKind::IndexAssignment);
+
+    const auto &assignment = static_cast<const Velo::AST::IndexAssignmentStatement&>(
+        *mainFunction.statements[1]
+    );
+
+    ASSERT_NE(assignment.target, nullptr);
+    ASSERT_EQ(assignment.target->object->kind, Velo::AST::ExpressionKind::Index);
+}

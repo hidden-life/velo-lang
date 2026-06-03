@@ -195,6 +195,7 @@ namespace Velo::AST {
         VariableDeclaration,
         Assignment,
         FieldAssignment,
+        IndexAssignment,
         If,
         While,
         Break,
@@ -262,6 +263,19 @@ namespace Velo::AST {
             value(std::move(assignmentValue)) {}
 
         std::unique_ptr<FieldAccessExpression> target;
+        std::unique_ptr<Expression> value;
+    };
+
+    struct IndexAssignmentStatement final : Statement {
+        IndexAssignmentStatement(
+            std::unique_ptr<IndexExpression> assignmentTarget,
+            std::unique_ptr<Expression> assignmentValue,
+            Source::SourceRange assignmentRange
+        ) : Statement(StatementKind::IndexAssignment, assignmentRange),
+            target(std::move(assignmentTarget)),
+            value(std::move(assignmentValue)) {}
+
+        std::unique_ptr<IndexExpression> target;
         std::unique_ptr<Expression> value;
     };
 

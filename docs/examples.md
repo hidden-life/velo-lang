@@ -279,3 +279,16 @@ Demonstrates:
 - indexing arrays of struct values
 - field access after array indexing
 - nested array indexing
+
+### Array assignment
+
+```text
+examples/array_assignment/main.velo
+```
+
+Demonstrates:
+
+- array element assignment
+- nested array element assignment
+- assigning struct values into arrays
+- preserving array value semantics after copying arrays

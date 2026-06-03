@@ -13,6 +13,11 @@ namespace {
             return rootNameExpression(*fieldAccess.object);
         }
 
+        if (expr.kind == ExpressionKind::Index) {
+            const auto &indexExpression = static_cast<const IndexExpression&>(expr);
+            return rootNameExpression(*indexExpression.object);
+        }
+
         return nullptr;
     }
 
@@ -41,6 +46,21 @@ namespace {
             .name = {},
             .elementType = std::make_shared<Velo::Semantic::SemanticType>(std::move(elementType))
         };
+    }
+
+    [[nodiscard]] auto containsIndexExpression(const Velo::AST::Expression &expr) -> bool {
+        using namespace Velo::AST;
+
+        if (expr.kind == ExpressionKind::Index) {
+            return true;
+        }
+
+        if (expr.kind == ExpressionKind::FieldAccess) {
+            const auto &fieldAccess = static_cast<const FieldAccessExpression&>(expr);
+            return containsIndexExpression(*fieldAccess.object);
+        }
+
+        return false;
     }
 }
 
@@ -374,10 +394,27 @@ namespace Velo::Semantic {
                 analyzeFieldAssignmentStatement(fieldAssignment);
                 break;
             }
+
+            case AST::StatementKind::IndexAssignment: {
+                const auto &indexAssignment = static_cast<const AST::IndexAssignmentStatement&>(stmt);
+                analyzeIndexAssignmentStatement(indexAssignment);
+                break;
+            }
         }
     }
 
     void SemanticAnalyzer::analyzeFieldAssignmentStatement(const AST::FieldAssignmentStatement &stmt) {
+        if (containsIndexExpression(*stmt.target)) {
+            _engine.error(
+                "SEM045",
+                "Field assignment through array index is not supported yet.",
+                stmt.target->range
+            );
+
+            static_cast<void>(analyzeCheckedExpressionType(*stmt.value));
+            return;
+        }
+
         const auto *rootName = rootNameExpression(*stmt.target);
         if (rootName == nullptr || rootName->name.segments.size() != 1U) {
             _engine.error(
@@ -1441,5 +1478,62 @@ namespace Velo::Semantic {
         }
 
         return *objectType.elementType;
+    }
+
+    void SemanticAnalyzer::analyzeIndexAssignmentStatement(const AST::IndexAssignmentStatement &stmt) {
+        const auto *rootName = rootNameExpression(*stmt.target);
+        if (rootName == nullptr || rootName->name.segments.size() != 1U) {
+            _engine.error(
+                "SEM053",
+                "Array element assignment target must start from a local variable.",
+                stmt.target->range
+            );
+
+            static_cast<void>(analyzeCheckedExpressionType(*stmt.value));
+            return;
+        }
+
+        const std::string &rootLocalName = rootName->name.segments.front();
+        const auto *local = resolveLocal(rootLocalName);
+        if (local == nullptr) {
+            _engine.error(
+                "SEM053",
+                "Array element assignment target must start from a local variable.",
+                rootName->range
+            );
+
+            static_cast<void>(analyzeCheckedExpressionType(*stmt.value));
+            return;
+        }
+
+        if (!local->isMutable) {
+            _engine.error(
+                "SEM054",
+                "Cannot assign array element through immutable local variable '" + rootLocalName + "'.",
+                rootName->range
+            );
+        }
+
+        const auto targetType = analyzeIndexExpressionType(*stmt.target);
+
+        SemanticType valueType {};
+        if (stmt.value->kind == AST::ExpressionKind::ArrayLiteral) {
+            const auto &arrayLiteral = static_cast<const AST::ArrayLiteralExpression&>(*stmt.value);
+            valueType = analyzeArrayLiteralExpressionType(arrayLiteral, &targetType);
+        } else {
+            valueType = analyzeCheckedExpressionType(*stmt.value);
+        }
+
+        if (!isUnknownType(targetType) && !isUnknownType(valueType) && !typesEqual(targetType, valueType)) {
+            _engine.error(
+                "SEM055",
+                "Array element assignment type mismatch. Expected '" +
+                semanticTypeToString(targetType) +
+                "', actual '" +
+                semanticTypeToString(valueType) +
+                "'.",
+                stmt.range
+            );
+        }
     }
 }

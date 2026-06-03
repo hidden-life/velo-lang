@@ -480,3 +480,33 @@ For nested arrays, each indexing operation unwraps one array layer:
 ```text
 [][]int -> []int -> int
 ```
+
+## Array element assignment
+
+Array element assignment is type-checked as a statement.
+
+Rules:
+
+- assignment target must be an index expression
+- root expression must resolve to a local variable
+- root local must be mutable
+- target expression must resolve to an array element
+- assigned value type must match the element type
+- index expressions must be `int`
+
+Example:
+
+```velo
+var ids: []int = [1, 2, 3];
+
+ids[0] = 42;
+```
+
+Nested array assignment unwraps one array layer per index:
+
+```velo
+matrix[1][0] = 99;
+```
+
+Mixed field/index assignment paths 
+such as `users[0].id = 2` are not part of MVP 0.4.4.

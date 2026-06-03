@@ -51,6 +51,9 @@ data model foundation based on struct.
 - array indexing read
 - nested array indexing
 - field access after array indexing
+- array element assignment
+- nested array element assignment
+- array value semantics preserved during element assignment
 
 ## Standard modules
 Current standard modules:
@@ -217,5 +220,5 @@ MVP 0.4 is in progress.
 
 Current step:
 ```text
-0.4.3   array indexing read
+0.4.4   array element assignment
 ```
