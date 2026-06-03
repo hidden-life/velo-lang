@@ -20,6 +20,7 @@ runtime, and MVP planning.
 - [Example guidelines](development/example_guidelines.md)
 - [MVP release checklist](development/release_checklist.md)
 - [Examples](examples.md)
+- [Bytecode architecture](architecture/bytecode.md)
 - [Velo 0.1.0 release notes draft](development/release_notes_v0_1.md)
 - [Velo 0.2.0 release notes draft](development/release_notes_v0_2.md)
 - [Velo 0.3.0 release notes draft](development/release_notes_v0_3.md)
@@ -28,6 +29,7 @@ runtime, and MVP planning.
 - [MVP 0.2 status](development/mvp_0_2.md)
 - [MVP 0.3 status](development/mvp_0_3.md)
 - [MVP 0.4 status](development/mvp_0_4.md)
+- [MVP 0.5 status](development/mvp_0_5.md)
 
 ## Documentation rules
 When adding a new feature:

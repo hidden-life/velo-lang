@@ -21,6 +21,7 @@ add_executable(velo_smoke_tests
         unit/interpreter/interpreter_test.cpp
         unit/driver/driver_test.cpp
         unit/ast/ast_printer_test.cpp
+        unit/bytecode/bytecode_test.cpp
 )
 
 target_link_libraries(velo_smoke_tests PRIVATE

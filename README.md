@@ -176,21 +176,19 @@ Start here:
 - [Velo v0.3.0 release notes draft](docs/development/release_notes_v0_3.md)
 
 ## Current development focus
-The project has completed **Velo MVP 0.4**.
+The project is currently moving toward **Velo MVP 0.5**.
 
-MVP 0.4 focuses on arrays as the first collection type in Velo.
+MVP 0.5 focuses on VM and bytecode foundation.
 
-Completed steps:
+Planned steps:
 ```text
-0.4.1   array type syntax and semantic type model
-0.4.2   array literals and runtime array values
-0.4.3   array indexing read
-0.4.4   array element assignment
-0.4.5   array builtins and examples
-0.4.6   docs/examples/release checklist
+0.5.1   bytecode instruction model
+0.5.2   IR to bytecode compiler
+0.5.3   bytecode VM execution
+0.5.4   bytecode disassembler and CLI mode
+0.5.5   bytecode file format draft
+0.5.6   docs/examples/release checklist
 ```
-
-The next planned milestone is **Velo MVP 0.5**, focused on VM and bytecode foundation.
 
 Main properties:
 - keep the language small and strict
@@ -212,17 +210,15 @@ Release notes draft:
 MVP 0.2 is tagged as `v0.2.0`.
 
 ## MVP 0.3 status
-MVP 0.3 is in progress.
-
-Current step:
-```text
-0.3.4   block-scoped locals
-```
+MVP 0.3 is tagged as `v0.3.0`.
 
 ## MVP 0.4 status
-MVP 0.4 is in progress.
+MVP 0.4 is tagged as `v0.4.0`.
+
+## MVP 0.5 status
+MVP 0.5 is in progress.
 
 Current step:
 ```text
-0.4.5   array builtins and examples
+0.5.1   bytecode instruction model
 ```
