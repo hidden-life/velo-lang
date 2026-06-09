@@ -16,7 +16,7 @@ IR interpreter pipeline.
 
 ## Current step
 ```text
-0.5.3   bytecode VM execution
+0.5.4   bytecode disassembler and CLI mode
 ```
 
 ## 0.5.1 scope
@@ -143,3 +143,46 @@ Not implemented in 0.5.3:
 - standalone `veloc`
 - standalone `velovm`
 - switching the default driver execution path to bytecode VM
+
+## 0.5.4 scope
+Implemented in this step:
+- bytecode disassembler
+- bytecode text output
+- driver bytecode mode
+- CLI command `bytecode`
+- CLI alias `bc`
+- disassembler unit tests
+- driver bytecode mode tests
+- documentation
+
+### Bytecode disassembler
+The bytecode disassembler converts `Bytecode::Module` into readable text.
+
+Example output:
+```text
+fn main
+0000 PushInt 42
+0001 Return
+```
+
+### CLI mode
+MVP 0.5.4 adds:
+```bash
+velo bytecode file.velo
+```
+Alias:
+```bash
+velo bc file.velo
+```
+This mode uses the path:
+```text
+Source -> AST -> IR -> Bytecode -> Disassembler
+```
+It does not execute bytecode.
+
+Not implemented in 0.5.4:
+- bytecode file writer
+- bytecode file reader
+- standalone `veloc`
+- standalone `velovm`
+- switching default `run` to bytecode VM

@@ -1,6 +1,8 @@
 #include "velo/driver/driver.h"
 
 #include "velo/ast/ast_printer.h"
+#include "velo/bytecode/compiler.h"
+#include "velo/bytecode/disassembler.h"
 #include "velo/lexer/lexer.h"
 #include "velo/parser/parser.h"
 #include "velo/semantic/semantic_analyzer.h"
@@ -79,6 +81,18 @@ namespace Velo::Driver {
             result.irText = printer.print(module);
             result.success = true;
             result.exitCode = 0;
+
+            return result;
+        }
+
+        if (mode == DriverMode::Bytecode) {
+            const Bytecode::Compiler compiler;
+            const auto bytecodeModule = compiler.compile(module);
+
+            const Bytecode::Disassembler disassembler;
+            result.success = true;
+            result.exitCode = 0;
+            result.bytecodeText = disassembler.disassemble(bytecodeModule);
 
             return result;
         }

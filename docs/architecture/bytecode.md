@@ -124,3 +124,33 @@ CallBuiltin array::len args=1
 The VM exists as a separate execution path in MVP 0.5.3.
 
 The main CLI still uses the existing IR interpreter path.
+
+## Bytecode disassembler
+The disassembler converts a `Bytecode::Module` into readable text.
+
+Example:
+```text
+fn main
+0000 PushInt 42
+0001 Return
+```
+
+The disassembler is intended for:
+- debugging compiler output
+- comparing IR and bytecode shape
+- CLI inspection
+- future bytecode file debugging
+
+## CLI bytecode mode
+The CLI supports:
+```bash
+velo bytecode file.velo
+```
+and alias:
+```bash
+velo bc file.velo
+```
+
+This command compiles source to bytecode and prints bytecode disassembly.
+
+It does not execute bytecode.

@@ -13,6 +13,7 @@ namespace Velo::Driver {
         Check,
         Ast,
         Ir,
+        Bytecode,
     };
 
     struct DriverResult final {
@@ -26,6 +27,8 @@ namespace Velo::Driver {
 
         // Process exit code produced by the interpreter
         int exitCode {0};
+
+        std::string bytecodeText {};
     };
 
     // Orchestrates the source -> lexer -> parser -> semantic -> IR -> VM pipeline.

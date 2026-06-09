@@ -24,6 +24,7 @@ add_executable(velo_smoke_tests
         unit/bytecode/bytecode_test.cpp
         unit/bytecode/bytecode_compiler_test.cpp
         unit/bytecode/bytecode_vm_test.cpp
+        unit/bytecode/bytecode_disassembler_test.cpp
 )
 
 target_link_libraries(velo_smoke_tests PRIVATE

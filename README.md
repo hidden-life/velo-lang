@@ -64,6 +64,9 @@ data model foundation based on struct.
 - bytecode stack and local slots
 - bytecode builtin calls
 - bytecode user-defined function calls
+- bytecode disassembler
+- `velo bytecode`
+- `velo bc`
 
 ## Standard modules
 Current standard modules:
@@ -111,6 +114,12 @@ Print AST:
 Print IR:
 ```bash
 ./build/debug/apps/velo/velo ir ./examples/arithmetic/main.velo
+```
+
+Print bytecode:
+```bash
+./build/debug/apps/velo/velo bytecode ./examples/arithmetic/main.velo
+./build/debug/apps/velo/velo bc ./examples/arithmetic/main.velo
 ```
 
 Backward-compatible shorthand:
@@ -228,5 +237,5 @@ MVP 0.5 is in progress.
 
 Current step:
 ```text
-0.5.3   bytecode VM execution
+0.5.4   bytecode disassembler and CLI mode
 ```

@@ -2189,3 +2189,64 @@ fn main(): int {
 
     EXPECT_NE(result.irText.find("CallBuiltin array::len args=1"), std::string::npos);
 }
+
+TEST(DriverTest, BytecodeModePrintsBytecodeDisassembly) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "bytecode_mode.velo",
+        R"(module app;
+
+fn main(): int {
+    return 42;
+}
+)",
+        Velo::Driver::DriverMode::Bytecode
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.bytecodeText.find("fn main"), std::string::npos);
+    EXPECT_NE(result.bytecodeText.find("PushInt 42"), std::string::npos);
+    EXPECT_NE(result.bytecodeText.find("Return"), std::string::npos);
+}
+
+TEST(DriverTest, BytecodeModePrintsArrayInstructions) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "bytecode_array_mode.velo",
+        R"(module app;
+
+use std::array;
+
+fn main(): int {
+    let ids: []int = [1, 2, 3];
+
+    return array::len(ids);
+}
+)",
+        Velo::Driver::DriverMode::Bytecode
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.bytecodeText.find("BuildArray elements=3"), std::string::npos);
+    EXPECT_NE(result.bytecodeText.find("CallBuiltin array::len args=1"), std::string::npos);
+}
