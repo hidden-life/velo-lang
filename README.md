@@ -59,6 +59,11 @@ data model foundation based on struct.
 - bytecode compiler
 - IR module to bytecode module conversion
 - IR instruction to bytecode instruction mapping
+- bytecode VM
+- bytecode module execution
+- bytecode stack and local slots
+- bytecode builtin calls
+- bytecode user-defined function calls
 
 ## Standard modules
 Current standard modules:
@@ -223,5 +228,5 @@ MVP 0.5 is in progress.
 
 Current step:
 ```text
-0.5.2   IR to bytecode compiler
+0.5.3   bytecode VM execution
 ```

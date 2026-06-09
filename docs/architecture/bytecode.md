@@ -77,3 +77,50 @@ Preserved operands:
 The compiler does not execute bytecode.
 
 Execution will be implemented by the bytecode VM in a later MVP 0.5 step.
+
+## Bytecode VM
+The bytecode VM executes `Bytecode::Module`.
+
+Main responsibilities:
+- find `main`
+- maintain operand stack
+- maintain local slots
+- execute bytecode instruction
+- handle jumps
+- call user-defined bytecode functions
+- call runtime builtins
+- return `Runtime::ExecutionResult`
+
+## Execution model
+The VM uses an instruction pointer per function.
+
+Representative function execution loop:
+```text
+while ip < instructions.size:
+    execute instruction
+    handle Return
+    handle Jump
+    handle JumpIfFalse
+    ip += 1
+```
+
+## Stack and locals
+The VM uses:
+- operand stack for temporary values
+- local slots for function parameters and local variables
+
+Value boundaries use `Runtime::cloneValue(...)` to preserve value semantics
+for structs and arrays.
+
+## Builtins
+Bytecode builtin calls reuse the existing runtime builtin registry.
+
+Example:
+```text
+CallBuiltin array::len args=1
+```
+
+## Current limitation
+The VM exists as a separate execution path in MVP 0.5.3.
+
+The main CLI still uses the existing IR interpreter path.

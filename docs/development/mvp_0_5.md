@@ -16,7 +16,7 @@ IR interpreter pipeline.
 
 ## Current step
 ```text
-0.5.2   IR to bytecode compiler
+0.5.3   bytecode VM execution
 ```
 
 ## 0.5.1 scope
@@ -97,3 +97,49 @@ Not implemented in 0.5.2:
 - bytecode file reader
 - standalone `veloc`
 - standalone `velovm`
+
+## 0.5.3 scope
+Implemented in this step:
+- bytecode VM class
+- bytecode module execution
+- bytecode `main` lookup
+- bytecode instruction execution lookup
+- bytecode operand stack
+- bytecode local slots
+- bytecode jumps
+- bytecode user-defined function calls
+- bytecode arithmetic execution
+- bytecode logical execution
+- bytecode comparison execution
+- bytecode struct execution support
+- bytecode array execution support
+- VM unit tests
+- IR-to-bytecode-to-VM smoke test
+
+## Bytecode VM
+The bytecode VM executes `Bytecode::Module`.
+
+```text
+Bytecode::Module -> Bytecode::VM -> Runtime::ExecutionResult
+```
+
+The VM is intentionally separate from the current IR interpreter.
+
+The existing runtime path remains available:
+```text
+IR::Module -> IR::Interpreter
+```
+
+The new bytecode path is:
+```text
+IR::Module -> Bytecode::Compiler -> Bytecode::Module -> Bytecode::VM
+```
+
+Not implemented in 0.5.3:
+- bytecode disassembler
+- bytecode CLI mode
+- bytecode file writer
+- bytecode file reader
+- standalone `veloc`
+- standalone `velovm`
+- switching the default driver execution path to bytecode VM
