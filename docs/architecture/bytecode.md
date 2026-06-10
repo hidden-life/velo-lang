@@ -7,7 +7,7 @@ The existing IR is useful as compiler/interpreter representation.
 Bytecode is intended to become a stable execution format for the future VM.
 
 ## Layers
-Current pipeline:
+Default execution pipeline:
 ```text
 Source
 Lexer
@@ -17,7 +17,7 @@ IR lowerer
 IR interpreter
 ```
 
-Target pipeline:
+Bytecode inspection pipeline:
 ```text
 Source
 Lexer
@@ -25,7 +25,14 @@ Parser
 SemanticAnalyzer
 IR lowerer
 Bytecode Compiler
-Bytecode VM
+Bytecode Disassembler
+```
+
+Bytecode VM test pipeline:
+```text
+Bytecode::Module
+Bytecode::VM
+Runtime::ExecutionResult
 ```
 
 ## Model
@@ -35,7 +42,7 @@ The bytecode model contains:
 - `Bytecode::Function`
 - `Bytecode::Module`
 
-## MVP 0.5.1 opcodes
+## Opcodes
 The initial bytecode opcode set covers the language/runtime features
 available by the end of MVP 0.4:
 - primitive values
@@ -51,10 +58,40 @@ available by the end of MVP 0.4:
 - return
 - pop
 
-## Not implemented yet
-MVP 0.5.1 does not execute bytecode yet.
-
-Execution will be added later by the bytecode VM.
+Representative opcodes:
+```text
+PushInt
+PushString
+PushBool
+LoadLocal
+StoreLocal
+AddInt
+SubInt
+MulInt
+DivInt
+NegInt
+LogicalNot
+LogicalOr
+LogicalAnd
+CompareEqual
+CompareNotEqual
+CompareLessInt
+CompareGreaterInt
+CompareLessEqualInt
+CompareGreaterEqualInt
+Jump
+JumpIfFalse
+CallFunction
+CallBuiltin
+BuildStruct
+BuildArray
+LoadField
+StoreFieldPath
+LoadIndex
+StoreIndexPath
+Return
+Pop
+```
 
 ## IR to bytecode compiler
 The bytecode compiler converts:
@@ -73,10 +110,6 @@ Preserved operands:
 - `argsCount`
 - `indexOperand`
 - `targetOperand`
-
-The compiler does not execute bytecode.
-
-Execution will be implemented by the bytecode VM in a later MVP 0.5 step.
 
 ## Bytecode VM
 The bytecode VM executes `Bytecode::Module`.
@@ -119,11 +152,6 @@ Example:
 ```text
 CallBuiltin array::len args=1
 ```
-
-## Current limitation
-The VM exists as a separate execution path in MVP 0.5.3.
-
-The main CLI still uses the existing IR interpreter path.
 
 ## Bytecode disassembler
 The disassembler converts a `Bytecode::Module` into readable text.
@@ -201,3 +229,8 @@ Current non-goals:
 - compact binary encoding
 - stable public bytecode ABI
 - cross-version compatibility guarantees
+
+## Current limitation
+The VM exists as a separate execution path in MVP 0.5.
+
+The main CLI `run` mode still uses the existing IR interpreter path.

@@ -25,6 +25,7 @@ runtime, and MVP planning.
 - [Velo 0.2.0 release notes draft](development/release_notes_v0_2.md)
 - [Velo 0.3.0 release notes draft](development/release_notes_v0_3.md)
 - [Velo 0.4.0 release notes draft](development/release_notes_v0_4.md)
+- [Velo 0.5.0 release notes draft](development/release_notes_v0_5.md)
 - [MVP 0.1 status](development/mvp_0_1.md)
 - [MVP 0.2 status](development/mvp_0_2.md)
 - [MVP 0.3 status](development/mvp_0_3.md)

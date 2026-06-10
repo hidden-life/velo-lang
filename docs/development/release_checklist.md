@@ -1,5 +1,5 @@
-# MVP 0.4 release checklist
-This checklist should be completed before tagging or announcing Velo MVP 0.4.
+# MVP 0.5 release checklist
+This checklist should be completed before tagging or announcing Velo MVP 0.5.
 
 The goal is to make sure the MVP is small, stable, documented, and reproducible.
 
@@ -49,6 +49,8 @@ Check all primary CLI modes:
 ./build/debug/apps/velo/velo check ./examples/arithmetic/main.velo
 ./build/debug/apps/velo/velo ast ./examples/arithmetic/main.velo
 ./build/debug/apps/velo/velo ir ./examples/arithmetic/main.velo
+./build/debug/apps/velo/velo bytecode ./examples/arithmetic/main.velo
+./build/debug/apps/velo/velo bc ./examples/arithmetic/main.velo
 ./build/debug/apps/velo/velo run ./examples/arithmetic/main.velo
 ```
 
@@ -56,7 +58,9 @@ Expected:
 - `check` exits with code `0`
 - `ast` prints AST and exits with code `0`
 - `ir` prints IR and exits with code `0`
-- `run` executes the program and exits with code `0` for demo example
+- `bytecode` prints bytecode disassembly and exist with code `0`.
+- `bc` prints bytecode disassembly and exist with code `0`.
+- `run` executes the program and exits with code `0`
 
 ## 4. Backward-compatible CLI shorthand
 Run:
@@ -167,7 +171,65 @@ Expected `array_builtin` output:
 ```
 All MVP 0.4 demo examples should exit with code `0`.
 
-## 9. Error example smoke tests
+## 9. MVP 0.5 bytecode CLI smoke tests
+Run:
+```bash
+./build/debug/apps/velo/velo bytecode ./examples/arithmetic/main.velo
+./build/debug/apps/velo/velo bc ./examples/arithmetic/main.velo
+./build/debug/apps/velo/velo bytecode ./examples/array_builtin/main.velo
+```
+
+Expected arithmetic bytecode fragments:
+```text
+fn main
+PushInt
+Return
+```
+
+Expected array bytecode fragments:
+```text
+BuildArray elements=3
+CallBuiltin array::len args=1
+```
+
+## 10. Bytecode unit tests
+Run:
+```bash
+ctest --test-dir build/debug -R "BytecodeTest" --output-on-failure
+ctest --test-dir build/debug -R "BytecodeCompilerTest" --output-on-failure
+ctest --test-dir build/debug -R "BytecodeVmTest" --output-on-failure
+ctest --test-dir build/debug -R "BytecodeDisassemblerTest" --output-on-failure
+ctest --test-dir build/debug -R "BytecodeFileFormatTest" --output-on-failure
+```
+Expected:
+```text
+all selected tests pass
+```
+
+## 11. Bytecode disassembler smoke checks
+Run:
+```bash
+./build/debug/apps/velo/velo bytecode ./examples/arithmetic/main.velo
+```
+Expected fragments:
+```text
+fn main
+PushInt
+Return
+```
+
+Run:
+```bash
+./build/debug/apps/velo/velo bytecode ./examples/array_builtin/main.velo
+```
+
+Expected fragments:
+```text
+BuildArray elements=3
+CallBuiltin array::len args=1
+```
+
+## 12. Error example smoke tests
 Run known invalid example:
 ```bash
 ./build/debug/apps/velo/velo check ./examples/errors/missing_return.velo
@@ -178,7 +240,7 @@ Expected:
 - diagnostic is readable
 - diagnostic code is stable
 
-## 10. IR smoke tests
+## 13. IR smoke tests
 Inspect representative IR:
 ```bash
 ./build/debug/apps/velo/velo ir ./examples/array_literal/main.velo
@@ -202,7 +264,7 @@ StoreIndexPath indexes=2
 CallBuiltin array::len args=1
 ```
 
-## 11. Documentation review
+## 14. Documentation review
 Review:
 ```text
 README.md
@@ -217,11 +279,13 @@ docs/architecture/overview.md
 docs/architecture/semantic.md
 docs/architecture/runtime.md
 docs/architecture/ir.md
+docs/architecture/bytecode.md
 
 docs/development/mvp_0_1.md
 docs/development/mvp_0_2.md
 docs/development/mvp_0_3.md
 docs/development/mvp_0_4.md
+docs/development/mvp_0_5.md
 docs/development/adding_builtin.md
 docs/development/adding_lang_features.md
 docs/development/diagnostics.md
@@ -231,53 +295,52 @@ docs/development/release_notes_v0_1.md
 docs/development/release_notes_v0_2.md
 docs/development/release_notes_v0_3.md
 docs/development/release_notes_v0_4.md
+docs/development/release_notes_v0_5.md
 ```
 
 Check:
 - no outdated limitations remain
-- examples compile
 - CLI commands match actual behavior
-- standard module signatures are correct
-- diagnostic codes match tests
-- architecture docs match current code
-- MVP 0.4 feature list matches tests and examples
+- bytecode commands are documented
+- bytecode architecture docs match current code
+- release notes match completed features
+- release checklist is reproducible
 
-## 12. MVP scope review
-MVP 0.4 includes:
-- MVP 0.1 language foundation
-- MVP 0.2 data model foundation
-- MVP 0.3 value semantics and block scope foundation
-- array type syntax
-- nested array type syntax
-- array literals
-- runtime array values
-- deep-copy support for arrays
-- array indexing read
-- nested array indexing
-- array element assignment
-- nested array element assignment
-- `std::array`
-- `array::len`
+## 15. MVP scope review
+MVP 0.5 includes:
+- bytecode instruction model
+- bytecode function model
+- bytecode module model
+- IR to bytecode compiler
+- bytecode VM
+- bytecode disassembler
+- CLI bytecode mode
+- CLI `bc` alias
+- bytecode text file format draft
+- bytecode writer
+- bytecode reader
+- bytecode roundtrip tests
 
 Not included:
-- mixed field/index assignment paths such as `users[0].id = 2`
-- `array::push`
-- `array::pop`
-- `array::is_empty`
-- iterators
-- `for` loops
+- default `run` through bytecode VM
+- stable binary bytecode format
+- stable bytecode ABI
+- bytecode optimizer
+- bytecode verifier
+- bytecode file writer CLI
+- bytecode file reader CLI
+- standalone `veloc`
+- standalone `velovm`
 - maps
 - nullable types
 - generics
 - methods
-- bytecode serialization
-- standalone `veloc`
-- standalone `velovm`
+- iterators
+- `for` loops
 - HTTP runtime
 - JSON parser/serializer
-- optimizer
 
-## 13. Git status
+## 16. Git status
 Check repository status:
 ```bash
 git status
@@ -288,27 +351,27 @@ Expected:
 only intentional changes
 ```
 
-## 14. Suggested release commit flow
+## 17. Suggested release commit flow
 Before release:
 ```bash
 git add README.md docs
-git commit -m "docs(mvp): finalize MVP 0.4 documentation"
+git commit -m "docs(mvp): finalize MVP 0.5 documentation"
 ```
 
-## 15. Suggested tag
+## 18. Suggested tag
 When ready:
 ```bash
-git tag -a v0.4.0 -m "Velo MVP 0.4.0"
+git tag -a v0.5.0 -m "Velo MVP 0.5.0"
 ```
 
 Push:
 ```bash
 git push origin main
-git push origin v0.4.0
+git push origin v0.5.0
 ```
 
 Use only when the project is actually ready to publish the tag.
 
-## 16. Release notes draft
+## 19. Release notes draft
 Release notes are tracked here:
-- [Velo v0.4.0 release notes draft](release_notes_v0_4.md)
+- [Velo v0.5.0 release notes draft](release_notes_v0_5.md)
