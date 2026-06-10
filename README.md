@@ -67,6 +67,10 @@ data model foundation based on struct.
 - bytecode disassembler
 - `velo bytecode`
 - `velo bc`
+- bytecode text file format draft
+- bytecode module writer
+- bytecode module reader
+- bytecode module roundtrip tests
 
 ## Standard modules
 Current standard modules:
@@ -237,5 +241,5 @@ MVP 0.5 is in progress.
 
 Current step:
 ```text
-0.5.4   bytecode disassembler and CLI mode
+0.5.5   bytecode file format draft
 ```

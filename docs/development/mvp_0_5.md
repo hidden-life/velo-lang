@@ -16,7 +16,7 @@ IR interpreter pipeline.
 
 ## Current step
 ```text
-0.5.4   bytecode disassembler and CLI mode
+0.5.5   bytecode file format draft
 ```
 
 ## 0.5.1 scope
@@ -183,6 +183,47 @@ It does not execute bytecode.
 Not implemented in 0.5.4:
 - bytecode file writer
 - bytecode file reader
+- standalone `veloc`
+- standalone `velovm`
+- switching default `run` to bytecode VM
+
+## 0.5.5 scope
+Implemented in this step:
+- bytecode text file format draft
+- bytecode file magic
+- bytecode file version
+- bytecode module writer
+- bytecode module reader
+- bytecode instruction roundtrip tests
+- bytecode VM execution from round-tripped module
+- invalid file format tests
+- documentation
+
+## Bytecode file format draft
+MVP 0.5.5 introduces a text-based bytecode file format draft.
+
+Example:
+```text
+VELO_BYTECODE_TEXT 1
+function "main" 0
+instruction PushInt "" 42 0 0 0 0
+instruction Return "" 42 0 0 0 0
+endfunction
+```
+
+Instruction line format:
+```text
+instruction <opcode> <stringOperand> <intOperand> <boolOperand> <argsCount> <indexOperand> <targetOperand>
+```
+The format is intentionally simple and text-based.
+
+It is not a stable binary format yet.
+
+Not implemented in 0.5.5:
+- stable binary bytecode format
+- `.vbc` file extension policy
+- bytecode file writer CLI
+- bytecode file reader CLI
 - standalone `veloc`
 - standalone `velovm`
 - switching default `run` to bytecode VM

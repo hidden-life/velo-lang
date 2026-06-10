@@ -154,3 +154,50 @@ velo bc file.velo
 This command compiles source to bytecode and prints bytecode disassembly.
 
 It does not execute bytecode.
+
+## Bytecode file format draft
+MVP 0.5.5 introduces a text-based bytecode file format draft.
+
+The format starts with a magic header and version:
+```text
+VELO_BYTECODE_TEXT 1
+```
+
+Functions are written as:
+```text
+function "main" 0
+...
+endfunction
+```
+
+Function parameters are written as:
+```text
+param "name"
+```
+
+Instructions are written as:
+```text
+instruction <opcode> <stringOperand> <intOperand> <boolOperand> <argsCount> <indexOperand> <targetOperand>
+```
+
+Example:
+```text
+VELO_BYTECODE_TEXT 1
+function "main"
+instruction PushInt 42 0 0 0 0
+instruction Return 42 0 0 0 0
+endfunction
+```
+
+This is a draft format.
+
+Current goals:
+- roundtrip bytecode modules in tests
+- make bytecode inspectable
+- prepare for future `veloc`
+- prepare for future `velovm`
+
+Current non-goals:
+- compact binary encoding
+- stable public bytecode ABI
+- cross-version compatibility guarantees
