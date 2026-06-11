@@ -20,6 +20,7 @@ namespace Velo::Semantic {
         Bool,
         Struct,
         Array,
+        Map,
     };
 
     struct SemanticType final {
@@ -28,6 +29,10 @@ namespace Velo::Semantic {
         std::string name {};
         // Used when kind == SemanticTypeKind::Array
         std::shared_ptr<SemanticType> elementType {};
+
+        // Used when kind == SemanticTypeKind::Map
+        std::shared_ptr<SemanticType> keyType {};
+        std::shared_ptr<SemanticType> valueType {};
     };
 
     // Minimal semantic analyzer for the first executable Velo program shape.

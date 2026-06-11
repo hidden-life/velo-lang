@@ -1064,3 +1064,110 @@ fn main(): int {
     ASSERT_NE(assignment.target, nullptr);
     ASSERT_EQ(assignment.target->object->kind, Velo::AST::ExpressionKind::Index);
 }
+
+TEST(ParserTest, ParsesMapParameterType) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn count(values: map<string, int>): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    ASSERT_EQ(program->functions.size(), 1U);
+    const auto &function = program->functions[0];
+
+    ASSERT_EQ(function.parameters.size(), 1U);
+    const auto &type = function.parameters[0].type;
+
+    EXPECT_EQ(type.kind, Velo::AST::TypeNameKind::Map);
+    ASSERT_NE(type.mapKeyType, nullptr);
+    ASSERT_NE(type.mapValueType, nullptr);
+
+    ASSERT_EQ(type.mapKeyType->name.segments.size(), 1U);
+    EXPECT_EQ(type.mapKeyType->name.segments[0], "string");
+
+    ASSERT_EQ(type.mapValueType->name.segments.size(), 1U);
+    EXPECT_EQ(type.mapValueType->name.segments[0], "int");
+}
+
+TEST(ParserTest, ParsesMapStructFieldType) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+struct Scores {
+    values: map<string, int>;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    ASSERT_EQ(program->structs.size(), 1U);
+    const auto &structDecl = program->structs[0];
+
+    ASSERT_EQ(structDecl.fields.size(), 1U);
+    const auto &type = structDecl.fields[0].type;
+
+    EXPECT_EQ(type.kind, Velo::AST::TypeNameKind::Map);
+    ASSERT_NE(type.mapKeyType, nullptr);
+    ASSERT_NE(type.mapValueType, nullptr);
+}
+
+TEST(ParserTest, ParsesArrayOfMapType) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+struct Store {
+    items: []map<string, int>;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    ASSERT_EQ(program->structs.size(), 1U);
+    const auto &type = program->structs[0].fields[0].type;
+
+    EXPECT_EQ(type.arrayDepth, 1U);
+    EXPECT_EQ(type.kind, Velo::AST::TypeNameKind::Map);
+    ASSERT_NE(type.mapKeyType, nullptr);
+    ASSERT_NE(type.mapValueType, nullptr);
+}
+
+TEST(ParserTest, ParsesMapValueArrayType) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+struct Store {
+    values: map<string, []int>;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    ASSERT_EQ(program->structs.size(), 1U);
+    const auto &type = program->structs[0].fields[0].type;
+
+    EXPECT_EQ(type.kind, Velo::AST::TypeNameKind::Map);
+    ASSERT_NE(type.mapValueType, nullptr);
+    EXPECT_EQ(type.mapValueType->arrayDepth, 1U);
+    ASSERT_EQ(type.mapValueType->name.segments.size(), 1U);
+    EXPECT_EQ(type.mapValueType->name.segments[0], "int");
+}

@@ -643,3 +643,27 @@ array::len(ids);
 ```
 
 `array::len` returns `int`.
+
+## Map type syntax
+Map types use the  `map<K, V>` syntax.
+
+For MVP 0.6, map keys must be `string`.
+```velo
+map<string, int>
+map<string, User>
+```
+
+Map values may be primitive types, user-defined struct types, arrays, or other
+supported value types:
+```velo
+map<string, []int>
+```
+
+Arrays of maps are supported:
+```velo
+[]map<string, int>
+```
+
+Current limitations:
+- map/object literals are not implemented yet
+- map indexing is not implemented yet

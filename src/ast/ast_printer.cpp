@@ -31,6 +31,27 @@ namespace Velo::AST {
                 stream << "[]";
             }
 
+            if (typeName.kind == TypeNameKind::Map) {
+                stream << "map<";
+                if (typeName.mapKeyType != nullptr) {
+                    stream << joinTypeName(*typeName.mapKeyType);
+                } else {
+                    stream << "unknown";
+                }
+
+                stream << ", ";
+
+                if (typeName.mapValueType != nullptr) {
+                    stream << joinTypeName(*typeName.mapValueType);
+                } else {
+                    stream << "unknown";
+                }
+
+                stream << ">";
+
+                return stream.str();
+            }
+
             stream << joinQualifiedName(typeName.name);
 
             return stream.str();

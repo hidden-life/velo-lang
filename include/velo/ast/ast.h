@@ -16,9 +16,21 @@ namespace Velo::AST {
         Source::SourceRange range {};
     };
 
+    enum class TypeNameKind {
+        Named,
+        Map,
+    };
+
     struct TypeName final {
+        TypeNameKind kind {TypeNameKind::Named};
+
         QualifiedName name {};
         std::size_t arrayDepth {0U};
+
+        // Used when kind == TypeNameKind::Map
+        std::shared_ptr<TypeName> mapKeyType {};
+        std::shared_ptr<TypeName> mapValueType {};
+
         Source::SourceRange range {};
     };
 

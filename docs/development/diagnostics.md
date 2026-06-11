@@ -95,6 +95,8 @@ SEM052  Array index must be int
 SEM053  Array element assignment target must start from a local variable
 SEM054  Cannot assign array element through immutable local variable
 SEM055  Array element assignment type mismatch
+SEM056  Map key type must be string
+SEM057  Map type must have key and value types
 ```
 
 This list should be updated when adding new diagnostics.

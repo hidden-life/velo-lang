@@ -197,21 +197,19 @@ Start here:
 - [Velo v0.3.0 release notes draft](docs/development/release_notes_v0_3.md)
 
 ## Current development focus
-The project has completed **Velo MVP 0.5**.
+The project is currently moving toward **Velo MVP 0.6**.
 
-MVP 0.5 focuses on VM and bytecode foundation.
+MVP 0.6 focuses on maps and object literals.
 
-Completed steps:
+Planned steps:
 ```text
-0.5.1   bytecode instruction model
-0.5.2   IR to bytecode compiler
-0.5.3   bytecode VM execution
-0.5.4   bytecode disassembler and CLI mode
-0.5.5   bytecode file format draft
-0.5.6   docs/examples/release checklist
+0.6.1   map type syntax and semantic type model
+0.6.2   map/object literals and runtime map values
+0.6.3   map indexing read
+0.6.4   map element assignment
+0.6.5   map builtins and examples
+0.6.6   docs/examples/release checklist
 ```
-
-The next planned milestone is **Velo MVP 0.6**, focused on maps and object literals.
 
 Main properties:
 - keep the language small and strict
@@ -239,9 +237,7 @@ MVP 0.3 is tagged as `v0.3.0`.
 MVP 0.4 is tagged as `v0.4.0`.
 
 ## MVP 0.5 status
-MVP 0.5 is in progress.
+MVP 0.5 is tagged as `v0.5.0`.
 
-Current step:
-```text
-0.5.5   bytecode file format draft
-```
+## MVP 0.6 status
+MVP 0.6 is in progress.

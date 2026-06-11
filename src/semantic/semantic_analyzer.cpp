@@ -48,6 +48,19 @@ namespace {
         };
     }
 
+    [[nodiscard]] auto makeMapType(
+        Velo::Semantic::SemanticType keyType,
+        Velo::Semantic::SemanticType valueType
+    ) -> Velo::Semantic::SemanticType {
+        return Velo::Semantic::SemanticType {
+            .kind = Velo::Semantic::SemanticTypeKind::Map,
+            .name = {},
+            .elementType = {},
+            .keyType = std::make_shared<Velo::Semantic::SemanticType>(std::move(keyType)),
+            .valueType = std::make_shared<Velo::Semantic::SemanticType>(std::move(valueType)),
+        };
+    }
+
     [[nodiscard]] auto containsIndexExpression(const Velo::AST::Expression &expr) -> bool {
         using namespace Velo::AST;
 
@@ -833,21 +846,46 @@ namespace Velo::Semantic {
     }
 
     auto SemanticAnalyzer::typeFromTypeName(const AST::TypeName &typeName) -> SemanticType {
-        if (typeName.name.segments.size() != 1U) {
-            return {};
-        }
+        SemanticType baseType {};
+        if (typeName.kind == AST::TypeNameKind::Map) {
+            if (typeName.mapKeyType == nullptr || typeName.mapValueType == nullptr) {
+                return {};
+            }
 
-        const std::string &name = typeName.name.segments.front();
-        SemanticType baseType = typeFromString(name);
-        if (isUnknownType(baseType) && resolveUserDefinedType(typeName) != nullptr) {
-            baseType = SemanticType {
-                .kind = SemanticTypeKind::Struct,
-                .name = name,
-            };
-        }
+            auto keyType = typeFromTypeName(*typeName.mapKeyType);
+            auto valueType = typeFromTypeName(*typeName.mapValueType);
 
-        if (isUnknownType(baseType)) {
-            return {};
+            if (isUnknownType(keyType) || isUnknownType(valueType)) {
+                return {};
+            }
+
+            if (!isStringType(keyType)) {
+                return {};
+            }
+
+            if (isVoidType(valueType)) {
+                return {};
+            }
+
+            baseType = makeMapType(std::move(keyType), std::move(valueType));
+        } else {
+            if (typeName.name.segments.size() != 1U) {
+                return {};
+            }
+
+            const std::string &name = typeName.name.segments.front();
+            baseType = typeFromString(name);
+
+            if (isUnknownType(baseType) && resolveUserDefinedType(typeName) != nullptr) {
+                baseType = SemanticType {
+                    .kind = SemanticTypeKind::Struct,
+                    .name = name,
+                };
+            }
+
+            if (isUnknownType(baseType)) {
+                return {};
+            }
         }
 
         if (typeName.arrayDepth == 0U) {
@@ -1096,6 +1134,7 @@ namespace Velo::Semantic {
         const std::string &subject
     ) {
         if (typeName.arrayDepth > 0U &&
+            typeName.kind == AST::TypeNameKind::Named &&
             typeName.name.segments.size() == 1U &&
             typeName.name.segments.front() == "void"
         ) {
@@ -1105,6 +1144,61 @@ namespace Velo::Semantic {
                 typeName.range
             );
             return;
+        }
+
+
+        if (typeName.kind == AST::TypeNameKind::Map) {
+            if (typeName.mapKeyType == nullptr || typeName.mapValueType == nullptr) {
+                _engine.error(
+                    "SEM057",
+                    "Map type must have key and value types in " + subject + ".",
+                    typeName.range
+                );
+
+                return;
+            }
+
+            const auto keyType = typeFromTypeName(*typeName.mapKeyType);
+            if (isUnknownType(keyType)) {
+                _engine.error(
+                    "SEM030",
+                    "Unknown type '" + typeNameToString(*typeName.mapKeyType) + "'.",
+                    typeName.mapKeyType->range
+                );
+
+                return;
+            }
+
+            if (!isStringType(keyType)) {
+                _engine.error(
+                    "SEM056",
+                    "Map key type must be string, actual '" + semanticTypeToString(keyType) + "'.",
+                    typeName.mapKeyType->range
+                );
+
+                return;
+            }
+
+            const auto valueType = typeFromTypeName(*typeName.mapValueType);
+            if (isUnknownType(valueType)) {
+                _engine.error(
+                    "SEM030",
+                    "Unknown type '" + typeNameToString(*typeName.mapValueType) + "'.",
+                    typeName.mapValueType->range
+                );
+
+                return;
+            }
+
+            if (isVoidType(valueType)) {
+                _engine.error(
+                    "SEM031",
+                    "Type 'void' cannot be used as map value type in " + subject + ".",
+                    typeName.mapValueType->range
+                );
+
+                return;
+            }
         }
 
         const auto type = typeFromTypeName(typeName);
@@ -1130,6 +1224,28 @@ namespace Velo::Semantic {
         std::string result;
         for (std::size_t idx = 0; idx < typeName.arrayDepth; ++idx) {
             result += "[]";
+        }
+
+        if (typeName.kind == AST::TypeNameKind::Map) {
+            result += "map<";
+
+            if (typeName.mapKeyType != nullptr) {
+                result += typeNameToString(*typeName.mapKeyType);
+            } else {
+                result += "unknown";
+            }
+
+            result += ", ";
+
+            if (typeName.mapValueType != nullptr) {
+                result += typeNameToString(*typeName.mapValueType);
+            } else {
+                result += "unknown";
+            }
+
+            result += ">";
+
+            return result;
         }
 
         for (std::size_t idx = 0; idx < typeName.name.segments.size(); ++idx) {
@@ -1230,6 +1346,10 @@ namespace Velo::Semantic {
     }
 
     auto SemanticAnalyzer::resolveUserDefinedType(const AST::TypeName &typeName) const -> const AST::StructDeclaration* {
+        if (typeName.kind != AST::TypeNameKind::Named) {
+            return nullptr;
+        }
+
         if (typeName.name.segments.size() != 1U) {
             return nullptr;
         }
@@ -1287,6 +1407,14 @@ namespace Velo::Semantic {
             return typesEqual(*left.elementType, *right.elementType);
         }
 
+        if (left.kind == SemanticTypeKind::Map) {
+            if (left.keyType == nullptr || right.keyType == nullptr || left.valueType == nullptr || right.valueType == nullptr) {
+                return false;
+            }
+
+            return typesEqual(*left.keyType, *right.keyType) && typesEqual(*left.valueType, *right.valueType);
+        }
+
         return true;
     }
 
@@ -1308,9 +1436,17 @@ namespace Velo::Semantic {
                 if (type.elementType == nullptr) {
                     return "[]unknown";
                 }
+
+                return "[]" + semanticTypeToString(*type.elementType);
+            case SemanticTypeKind::Map:
+                if (type.keyType == nullptr || type.valueType == nullptr) {
+                    return "map<unknown, unknown>";
+                }
+
+                return "map<" + semanticTypeToString(*type.keyType) + ", " + semanticTypeToString(*type.valueType) + ">";
         }
 
-        return "[]" + semanticTypeToString(*type.elementType);
+        return "unknown";
     }
 
     auto SemanticAnalyzer::analyzeStructLiteralExpressionType(

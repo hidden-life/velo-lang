@@ -270,12 +270,52 @@ namespace Velo::Parser {
             ++arrayDepth;
         }
 
+        if (check(TokenKind::Identifier) && current().text() == "map" && peekNext().is(TokenKind::Less)) {
+            const Token &mapToken = advance();
+
+            if (consume(TokenKind::Less, "PAR140", "Expected '<' after 'map' in map type.") == nullptr) {
+                return std::nullopt;
+            }
+
+            auto keyType = parseTypeName();
+            if (!keyType.has_value()) {
+                return std::nullopt;
+            }
+
+            if (consume(TokenKind::Comma, "PAR141", "Expected ',' between map key and value types.") == nullptr) {
+                return std::nullopt;
+            }
+
+            auto valueType = parseTypeName();
+            if (!valueType.has_value()) {
+                return std::nullopt;
+            }
+
+            const Token *closeAngle = consume(TokenKind::Greater, "PAR142", "Expected '>' after map value type.");
+            if (closeAngle == nullptr) {
+                return std::nullopt;
+            }
+
+            AST::TypeName typeName;
+            typeName.kind = AST::TypeNameKind::Map;
+            typeName.arrayDepth = arrayDepth;
+            typeName.range = Source::SourceRange(typeBegin, closeAngle->range().end());
+            typeName.name.segments.push_back(std::string(mapToken.text()));
+            typeName.name.range = mapToken.range();
+
+            typeName.mapKeyType = std::make_shared<AST::TypeName>(std::move(*keyType));
+            typeName.mapValueType = std::make_shared<AST::TypeName>(std::move(*valueType));
+
+            return typeName;
+        }
+
         const auto name = parseQualifiedName();
         if (!name.has_value()) {
             return std::nullopt;
         }
 
         AST::TypeName typeName;
+        typeName.kind = AST::TypeNameKind::Named;
         typeName.range = Source::SourceRange(typeBegin, name->range.end());
         typeName.name = std::move(*name);
         typeName.arrayDepth = arrayDepth;

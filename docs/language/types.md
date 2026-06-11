@@ -341,3 +341,36 @@ Current limitations:
 - array mutation builtins are not implemented yet
 - iterators are not implemented yet
 - `for` loops are not implemented yet
+
+## Map types
+Velo supports map type syntax in type positions.
+```velo
+map<string, string>
+map<string, int>
+map<string, bool>
+map<string, User>
+map<string, []int>
+[]map<string, int>
+```
+
+Map keys must currently be `string`.
+
+Examples:
+```velo
+struct User {
+    id: int;
+}
+
+struct Store {
+    scores: map<string, int>;
+    users: map<string, User>;
+    snapshots: []map<string, int>;
+}
+```
+
+Current limitations:
+- map/object literals are not implemented yet
+- runtime map values are not implemented yet
+- map indexing is not implemented yet
+- map element assignment is not implemented yet
+- map builtins are not implemented yet

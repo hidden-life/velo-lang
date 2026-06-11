@@ -535,3 +535,29 @@ Rejected:
 ```velo
 array::len(1)
 ```
+
+## Map types
+Map types are represented in the semantic type model as `Map`.
+
+Each map type stores:
+- key type
+- value type
+
+Examples:
+```text
+map<string, int>    -> Map<String, Int>
+map<string, User>   -> Map<String, Struct User>
+map<string, []int>  -> Map<String, Array<Int>>
+[]map<string, int>  -> Array<Map<String, Int>>
+```
+
+Validation rules:
+- map key type must be `string`
+- map value type must be a known value type
+- `void` cannot be used as map value type
+- maps can appear in function parameters
+- maps can appear in function return types
+- maps can appear in local declarations
+- maps can appear in struct fields
+
+Runtime map values are not part of MVP 0.6.1.
