@@ -211,13 +211,15 @@ Start here:
 - [Velo v0.4.0 release notes draft](docs/development/release_notes_v0_4.md)
 - [MVP 0.5 status](docs/development/mvp_0_5.md)
 - [Velo v0.5.0 release notes draft](docs/development/release_notes_v0_5.md)
+- [MVP 0.6 status](docs/development/mvp_0_6.md)
+- [Velo v0.6.0 release notes draft](docs/development/release_notes_v0_6.md)
 
 ## Current development focus
-The project is currently moving toward **Velo MVP 0.6**.
+The project has completed **Velo MVP 0.6**.
 
 MVP 0.6 focuses on maps and object literals.
 
-Planned steps:
+Completed steps:
 ```text
 0.6.1   map type syntax and semantic type model
 0.6.2   map/object literals and runtime map values
@@ -225,6 +227,13 @@ Planned steps:
 0.6.4   map element assignment
 0.6.5   map builtins and examples
 0.6.6   docs/examples/release checklist
+```
+
+The next milestone should be planned after tagging `v0.6.0`.
+
+Suggested candidate:
+```text
+MVP 0.7     JSON foundation / serialization
 ```
 
 Main properties:

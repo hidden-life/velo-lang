@@ -199,6 +199,10 @@ examples/array_literal/main.velo
 examples/array_indexing/main.velo
 examples/array_assignment/main.velo
 examples/array_builtin/main.velo
+examples/map_literal/main.velo
+examples/map_indexing/main.velo
+examples/map_assignment/main.velo
+examples/map_builtin/main.velo
 ```
 
 ## Integration showcase example

@@ -305,3 +305,83 @@ Demonstrates:
 - length of `int` arrays
 - length of `string` arrays
 - length of struct arrays
+
+### Map literals
+```text
+examples/map_literal/main.velo
+```
+
+Demonstrates:
+- map literal expressions
+- empty map literals with expected type
+- maps of primitive values
+- maps of struct values
+- runtime map value printing
+
+Expected output:
+```text
+<map len=2>
+<map len=2>
+<map len=0>
+```
+
+### Map indexing
+```text
+examples/map_indexing/main.velo
+```
+
+Demonstrates:
+- map index read expressions
+- string map keys
+- field access after map indexing
+- array indexing after map indexing
+
+Expected output:
+```text
+20
+Bob
+4
+```
+
+### Map assignment
+```text
+examples/map_assignment/main.velo
+```
+
+Demonstrates:
+- map element assignment
+- map element insert assignment
+- mixed map/array index assignment
+- nested map assignment
+
+Expected output:
+```text
+42
+30
+99
+77
+```
+
+### Map builtins
+
+```text
+examples/map_builtin/main.velo
+```
+
+Demonstrates:
+
+- importing `std::map`
+- `map::len`
+- map length for primitive maps
+- map length for struct maps
+- map length for empty maps
+- map length after insert assignment
+
+Expected output:
+
+```text
+2
+2
+0
+3
+```
