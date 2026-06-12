@@ -2512,3 +2512,221 @@ fn main(): int {
     EXPECT_NE(result.bytecodeText.find("BuildMap entries=1"), std::string::npos);
     EXPECT_NE(result.bytecodeText.find("LoadIndex"), std::string::npos);
 }
+
+TEST(DriverTest, ExecutesMapElementAssignment) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "map_element_assignment.velo",
+        R"(module app;
+
+fn main(): int {
+    var scores: map<string, int> = map {
+        "Alex": 10,
+        "Bob": 20
+    };
+
+    scores["Bob"] = 42;
+
+    return scores["Bob"];
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 42);
+}
+
+TEST(DriverTest, ExecutesMapElementInsertAssignment) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "map_element_insert_assignment.velo",
+        R"(module app;
+
+fn main(): int {
+    var scores: map<string, int> = map {
+        "Alex": 10
+    };
+
+    scores["Carol"] = 30;
+
+    return scores["Carol"];
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 30);
+}
+
+TEST(DriverTest, ExecutesAssignmentThroughMapIndexThenArrayIndex) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "map_array_value_assignment.velo",
+        R"(module app;
+
+fn main(): int {
+    var grouped: map<string, []int> = map {
+        "a": [1, 2]
+    };
+
+    grouped["a"][0] = 42;
+
+    return grouped["a"][0];
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 42);
+}
+
+TEST(DriverTest, ExecutesNestedMapElementAssignment) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "nested_map_element_assignment.velo",
+        R"(module app;
+
+fn main(): int {
+    var nested: map<string, map<string, int>> = map {
+        "outer": map {
+            "inner": 1
+        }
+    };
+
+    nested["outer"]["inner"] = 42;
+
+    return nested["outer"]["inner"];
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 42);
+}
+
+TEST(DriverTest, ReportsRuntimeErrorForMissingMapKeyInNestedAssignment) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "missing_map_key_nested_assignment.velo",
+        R"(module app;
+
+fn main(): int {
+    var nested: map<string, map<string, int>> = map {};
+
+    nested["outer"]["inner"] = 42;
+
+    return 0;
+}
+)"
+    );
+
+    EXPECT_FALSE(result.success);
+    EXPECT_EQ(result.exitCode, 1);
+    EXPECT_NE(result.error.find("Map key not found"), std::string::npos);
+}
+
+TEST(DriverTest, IrModePrintsMapAssignmentStoreIndexPathInstruction) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "map_assignment_ir.velo",
+        R"(module app;
+
+fn main(): int {
+    var scores: map<string, int> = map {
+        "Alex": 10
+    };
+
+    scores["Alex"] = 42;
+
+    return scores["Alex"];
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.irText.find("StoreIndexPath indexes=1"), std::string::npos);
+}
+
+TEST(DriverTest, BytecodeModePrintsMapAssignmentStoreIndexPathInstruction) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "map_assignment_bytecode.velo",
+        R"(module app;
+
+fn main(): int {
+    var scores: map<string, int> = map {
+        "Alex": 10
+    };
+
+    scores["Alex"] = 42;
+
+    return scores["Alex"];
+}
+)",
+        Velo::Driver::DriverMode::Bytecode
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.bytecodeText.find("StoreIndexPath indexes=1"), std::string::npos);
+}

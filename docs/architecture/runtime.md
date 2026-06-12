@@ -463,3 +463,27 @@ Runtime behavior:
 6. push a cloned map entry value
 
 Missing keys are runtime errors.
+
+## Map element assignment
+Map element assignment is executed by `StoreIndexPath`.
+
+`StoreIndexPath` is a generic index-path store operation.
+
+Runtime stack shape before `StoreIndexPath`:
+```text
+[..., assignedValue, rootValue, index1, index2, ...]
+```
+
+Runtime behavior:
+1. pop index values
+2. pop root value
+3. pop assigned value
+4. walk the index path
+5. use array behavior for `ArrayValuePtr + int`
+6. use map behavior for `MapValuePtr + string`
+7. replace or insert the leaf value
+8. push the updated root value back onto the stack
+
+Leaf map assignment inserts missing keys.
+
+Non-leaf missing map keys are runtime errors.

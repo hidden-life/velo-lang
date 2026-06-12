@@ -66,7 +66,6 @@ namespace Velo::Semantic {
         [[nodiscard]] auto typeFromString(const std::string &typeName) -> SemanticType;
         [[nodiscard]] auto analyzeFieldAccessExpressionType(const AST::FieldAccessExpression &expr) -> SemanticType;
         [[nodiscard]] auto analyzeIndexExpressionType(const AST::IndexExpression &expr) -> SemanticType;
-        [[nodiscard]] auto containsMapIndexInAssignmentTarget(const AST::IndexExpression &expr) -> bool;
         void analyzeFieldAssignmentStatement(const AST::FieldAssignmentStatement &stmt);
         void analyzeIndexAssignmentStatement(const AST::IndexAssignmentStatement &stmt);
 

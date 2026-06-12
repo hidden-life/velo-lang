@@ -723,3 +723,32 @@ groupped["b"][1]
 Current limitations:
 - map element assignment is not implemented yet
 - map builtins are not implemented yet
+
+## Map element assignment
+Map entries can be assigned through mutable local map values:
+```velo
+var scores: map<string, int> = map {
+    "Alex": 10
+};
+
+scores["Alex"] = 42;
+```
+
+Assigning a missing leaf key inserts that key:
+```velo
+scores["Bob"] = 20
+```
+
+Nested map paths are supported when intermediate keys already exist:
+```velo
+nested["outer"]["inner"] = 42;
+```
+
+Map values that are arrays can be updated through mixed index paths:
+```velo
+groupped["a"][0] = 42;
+```
+
+Current limitations:
+- field assignment through map index is not implemented yet
+- map builtins are not implemented yet

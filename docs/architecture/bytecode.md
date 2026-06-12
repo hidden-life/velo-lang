@@ -261,3 +261,19 @@ MapValuePtr + string    -> map entry
 ```
 
 Missing map keys are runtime errors.
+
+## Map element assignment
+Map element assignment reuses:
+```text
+StoreIndexPath
+```
+
+The VM selects behavior based on runtime values:
+```text
+ArrayValuePtr + int     -> array element assignment
+MapValuePtr + string    -> map entry assignment
+```
+
+Leaf map assignment inserts missing keys.
+
+Non-leaf missing map keys are runtime errors.

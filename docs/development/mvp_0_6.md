@@ -13,7 +13,7 @@ MVP 0.6 focuses on maps and object literals.
 
 ## Current step
 ```text
-0.6.3   map indexing read
+0.6.4   map element assignment
 ```
 
 ## 0.6.1 scope
@@ -134,4 +134,46 @@ return groupped["b"][1];
 
 Not implemented in 0.6.3:
 - map element assignment
+- map builtins
+
+## 0.6.4 scope
+Implemented in this step:
+- map element assignment
+- map element insert assignment
+- nested map element assignment
+- assignment through map index followed by array index
+- generic `StoreIndexPath` runtime behavior for arrays and maps
+- generic `StoreIndexPath` bytecode VM behavior for arrays and maps
+- parser tests
+- semantic tests
+- driver tests
+- bytecode VM tests
+- example
+
+Example:
+```velo
+var scores: map<string, int> = map {
+    "Alex": 10
+};
+
+scores["Alex"] = 42;
+scores["Bob"] = 20;
+```
+
+Mixed map/array index paths are supported:
+```velo
+var grouped: map<string, []int> = map {
+    "a": [1, 2]
+};
+
+grouped["a"][0] = 42;
+```
+
+Nested map paths are supported when intermediate keys already exist:
+```velo
+nested["outer"]["inner"] = 42;
+```
+
+Not implemented in 0.6.4:
+- field assignment through map index like `users["bob"].id = 3`
 - map builtins

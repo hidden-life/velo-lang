@@ -1664,20 +1664,9 @@ namespace Velo::Semantic {
         if (!local->isMutable) {
             _engine.error(
                 "SEM054",
-                "Cannot assign array element through immutable local variable '" + rootLocalName + "'.",
+                "Cannot assign indexed element through immutable local variable '" + rootLocalName + "'.",
                 rootName->range
             );
-        }
-
-        if (containsMapIndexInAssignmentTarget(*stmt.target)) {
-            _engine.error(
-                "SEM062",
-                "Map element assignment is not implemented yet.",
-                stmt.target->range
-            );
-
-            static_cast<void>(analyzeCheckedExpressionType(*stmt.value));
-            return;
         }
 
         const auto targetType = analyzeIndexExpressionType(*stmt.target);
@@ -1686,7 +1675,7 @@ namespace Velo::Semantic {
         if (!isUnknownType(targetType) && !isUnknownType(valueType) && !typesEqual(targetType, valueType)) {
             _engine.error(
                 "SEM055",
-                "Array element assignment type mismatch. Expected '" +
+                "Indexed element assignment type mismatch. Expected '" +
                 semanticTypeToString(targetType) +
                 "', actual '" +
                 semanticTypeToString(valueType) +
@@ -1793,19 +1782,5 @@ namespace Velo::Semantic {
         }
 
         return analyzeCheckedExpressionType(expr);
-    }
-
-    auto SemanticAnalyzer::containsMapIndexInAssignmentTarget(const AST::IndexExpression &expr) -> bool {
-        const auto objectType = analyzeCheckedExpressionType(*expr.object);
-        if (!isUnknownType(objectType) && objectType.kind == SemanticTypeKind::Map) {
-            return true;
-        }
-
-        if (expr.object->kind == AST::ExpressionKind::Index) {
-            const auto &nestedIndex = static_cast<const AST::IndexExpression&>(*expr.object);
-            return containsMapIndexInAssignmentTarget(nestedIndex);
-        }
-
-        return false;
     }
 }

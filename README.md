@@ -77,6 +77,10 @@ data model foundation based on struct.
 - map indexing read
 - field access after map indexing
 - array indexing after map indexing
+- map element assignment
+- map element insert assignment
+- nested map assignment
+- mixed map/array index assignment
 
 ## Standard modules
 Current standard modules:
@@ -254,5 +258,5 @@ MVP 0.6 is in progress.
 
 Current step:
 ```text
-0.6.3   map indexing read
+0.6.4   map element assignment
 ```

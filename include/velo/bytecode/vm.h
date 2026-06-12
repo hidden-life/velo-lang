@@ -1059,35 +1059,15 @@ namespace Velo::Bytecode {
                 return Runtime::ExecutionResult {
                     .success = false,
                     .exitCode = 1,
-                    .error = "StoreIndexPath requires a value, an array value, and index values on the stack."
+                    .error = "StoreIndexPath requires a value, a root value, and index values on the stack."
                 };
             }
 
-            std::vector<int> indexes(indexCount);
+            std::vector<Runtime::Value> indexes(indexCount);
 
             for (std::size_t reverseIdx = 0U; reverseIdx < indexCount; ++reverseIdx) {
-
-                const auto indexValue = _stack.back();
+                indexes[indexCount - 1U - reverseIdx] = Runtime::cloneValue(_stack.back());
                 _stack.pop_back();
-
-                if (!std::holds_alternative<int>(indexValue)) {
-                    return Runtime::ExecutionResult {
-                        .success = false,
-                        .exitCode = 1,
-                        .error = "StoreIndexPath expects integer indexes."
-                    };
-                }
-
-                const int index = std::get<int>(indexValue);
-                if (index < 0) {
-                    return Runtime::ExecutionResult {
-                        .success = false,
-                        .exitCode = 1,
-                        .error = "Array index out of range."
-                    };
-                }
-
-                indexes[indexCount - 1U - reverseIdx] = index;
             }
 
             const auto rootValue = _stack.back();
@@ -1096,59 +1076,99 @@ namespace Velo::Bytecode {
             const auto assignedValue = _stack.back();
             _stack.pop_back();
 
-            if (!std::holds_alternative<Runtime::ArrayValuePtr>(rootValue)) {
-                return Runtime::ExecutionResult {
-                    .success = false,
-                    .exitCode = 1,
-                    .error = "StoreIndexPath expects an array value."
-                };
-            }
-
-            const auto rootArray = std::get<Runtime::ArrayValuePtr>(rootValue);
-            if (rootArray == nullptr) {
-                return Runtime::ExecutionResult {
-                    .success = false,
-                    .exitCode = 1,
-                    .error = "StoreIndexPath received a null array value."
-                };
-            }
-
-            Runtime::ArrayValuePtr current = rootArray;
+            Runtime::Value currentValue = rootValue;
 
             for (std::size_t pathIdx = 0U; pathIdx < indexes.size(); ++pathIdx) {
-                const auto indexAsSize = static_cast<std::size_t>(indexes[pathIdx]);
-
-                if (indexAsSize >= current->elements.size()) {
-                    return Runtime::ExecutionResult {
-                        .success = false,
-                        .exitCode = 1,
-                        .error = "Array index out of range."
-                    };
-                }
-
                 const bool isLeaf = pathIdx + 1U == indexes.size();
-                if (isLeaf) {
-                    current->elements[indexAsSize] = Runtime::cloneValue(assignedValue);
-                    break;
+                const auto &indexValue = indexes[pathIdx];
+
+                if (std::holds_alternative<Runtime::ArrayValuePtr>(currentValue)) {
+                    if (!std::holds_alternative<int>(indexValue)) {
+                        return Runtime::ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "StoreIndexPath expects integer index for array value."
+                        };
+                    }
+
+                    const int index = std::get<int>(indexValue);
+                    if (index < 0) {
+                        return Runtime::ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "Array index out of range."
+                        };
+                    }
+
+                    const auto arrayValue = std::get<Runtime::ArrayValuePtr>(currentValue);
+                    if (arrayValue == nullptr) {
+                        return Runtime::ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "StoreIndexPath received a null array value."
+                        };
+                    }
+
+                    const auto indexAsSize = static_cast<std::size_t>(index);
+                    if (indexAsSize >= arrayValue->elements.size()) {
+                        return Runtime::ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "Array index out of range."
+                        };
+                    }
+
+                    if (isLeaf) {
+                        arrayValue->elements[indexAsSize] = Runtime::cloneValue(assignedValue);
+                        break;
+                    }
+
+                    currentValue = arrayValue->elements[indexAsSize];
+                    continue;
                 }
 
-                auto &nextValue = current->elements[indexAsSize];
-                if (!std::holds_alternative<Runtime::ArrayValuePtr>(nextValue)) {
-                    return Runtime::ExecutionResult {
-                        .success = false,
-                        .exitCode = 1,
-                        .error = "StoreIndexPath expected nested array value."
-                    };
+                if (std::holds_alternative<Runtime::MapValuePtr>(currentValue)) {
+                    if (!std::holds_alternative<std::string>(indexValue)) {
+                        return Runtime::ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "StoreIndexPath expects string key for map value."
+                        };
+                    }
+
+                    const auto mapValue = std::get<Runtime::MapValuePtr>(currentValue);
+                    if (mapValue == nullptr) {
+                        return Runtime::ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "StoreIndexPath received a null map value."
+                        };
+                    }
+
+                    const auto &key = std::get<std::string>(indexValue);
+                    if (isLeaf) {
+                        mapValue->entries[key] = Runtime::cloneValue(assignedValue);
+                        break;
+                    }
+
+                    const auto entryIt = mapValue->entries.find(key);
+                    if (entryIt == mapValue->entries.end()) {
+                        return Runtime::ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "Map key not found: " + key
+                        };
+                    }
+
+                    currentValue = entryIt->second;
+                    continue;
                 }
 
-                current = std::get<Runtime::ArrayValuePtr>(nextValue);
-                if (current == nullptr) {
-                    return Runtime::ExecutionResult {
-                        .success = false,
-                        .exitCode = 1,
-                        .error = "StoreIndexPath received a null nested array value."
-                    };
-                }
+                return Runtime::ExecutionResult {
+                    .success = false,
+                    .exitCode = 1,
+                    .error = "StoreIndexPath expects an array or map value while walking index path."
+                };
             }
 
             _stack.push_back(Runtime::cloneValue(rootValue));

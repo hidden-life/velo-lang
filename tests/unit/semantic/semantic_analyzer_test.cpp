@@ -4076,19 +4076,20 @@ fn main(): int {
     EXPECT_EQ(engine.diagnostics().front().code(), "SEM061");
 }
 
-TEST(SemanticAnalyzerTest, ReportsMapElementAssignmentUnsupported) {
+TEST(SemanticAnalyzerTest, AcceptsMapElementAssignment) {
     DiagnosticEngine engine;
     const auto program = parseProgram(
         R"(module app;
 
 fn main(): int {
     var scores: map<string, int> = map {
-        "Alex": 10
+        "Alex": 10,
+        "Bob": 20
     };
 
-    scores["Alex"] = 42;
+    scores["Bob"] = 42;
 
-    return 0;
+    return scores["Bob"];
 }
 )",
         engine
@@ -4100,13 +4101,39 @@ fn main(): int {
     Velo::Runtime::Runtime runtime;
     SemanticAnalyzer analyzer(*program, engine, runtime.modules());
 
-    EXPECT_FALSE(analyzer.analyze());
-
-    ASSERT_TRUE(engine.hasErrors());
-    EXPECT_EQ(engine.diagnostics().front().code(), "SEM062");
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
 }
 
-TEST(SemanticAnalyzerTest, ReportsAssignmentThroughMapIndexUnsupported) {
+TEST(SemanticAnalyzerTest, AcceptsMapElementInsertAssignment) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    var scores: map<string, int> = map {
+        "Alex": 10
+    };
+
+    scores["Carol"] = 30;
+
+    return scores["Carol"];
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, AcceptsAssignmentThroughMapIndexThenArrayIndex) {
     DiagnosticEngine engine;
     const auto program = parseProgram(
         R"(module app;
@@ -4118,6 +4145,124 @@ fn main(): int {
 
     grouped["a"][0] = 42;
 
+    return grouped["a"][0];
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, AcceptsNestedMapElementAssignment) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    var nested: map<string, map<string, int>> = map {
+        "outer": map {
+            "inner": 1
+        }
+    };
+
+    nested["outer"]["inner"] = 42;
+
+    return nested["outer"]["inner"];
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, ReportsMapElementAssignmentThroughImmutableLocal) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    let scores: map<string, int> = map {
+        "Alex": 10
+    };
+
+    scores["Alex"] = 42;
+
+    return scores["Alex"];
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM054");
+}
+
+TEST(SemanticAnalyzerTest, ReportsMapElementAssignmentTypeMismatch) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    var scores: map<string, int> = map {
+        "Alex": 10
+    };
+
+    scores["Alex"] = "bad";
+
+    return scores["Alex"];
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM055");
+}
+
+TEST(SemanticAnalyzerTest, ReportsMapElementAssignmentWithNonStringKey) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    var scores: map<string, int> = map {
+        "Alex": 10
+    };
+
+    scores[0] = 42;
+
     return 0;
 }
 )",
@@ -4133,5 +4278,5 @@ fn main(): int {
     EXPECT_FALSE(analyzer.analyze());
 
     ASSERT_TRUE(engine.hasErrors());
-    EXPECT_EQ(engine.diagnostics().front().code(), "SEM062");
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM061");
 }

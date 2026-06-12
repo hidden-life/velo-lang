@@ -452,3 +452,152 @@ TEST(BytecodeVmTest, ReportsMissingMapKey) {
     EXPECT_EQ(result.exitCode, 1);
     EXPECT_NE(result.error.find("Map key not found"), std::string::npos);
 }
+
+TEST(BytecodeVmTest, ExecutesMapElementAssignment) {
+    Velo::Bytecode::Module module;
+
+    Velo::Bytecode::Function mainFunction;
+    mainFunction.name = "main";
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::PushInt,
+        .intOperand = 10,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::BuildMap,
+        .stringOperand = "4:Alex",
+        .argsCount = 1U,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::StoreLocal,
+        .indexOperand = 0U,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::PushInt,
+        .intOperand = 42,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::LoadLocal,
+        .indexOperand = 0U,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::PushString,
+        .stringOperand = "Alex",
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::StoreIndexPath,
+        .argsCount = 1U,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::StoreLocal,
+        .indexOperand = 0U,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::LoadLocal,
+        .indexOperand = 0U,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::PushString,
+        .stringOperand = "Alex",
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::LoadIndex,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::Return,
+    });
+
+    module.functions.push_back(std::move(mainFunction));
+
+    Velo::Runtime::Runtime runtime;
+    Velo::Bytecode::VM vm(runtime);
+
+    const auto result = vm.execute(module);
+
+    ASSERT_TRUE(result.success);
+    EXPECT_EQ(result.exitCode, 42);
+    EXPECT_TRUE(result.error.empty());
+}
+
+TEST(BytecodeVmTest, ExecutesMapElementInsertAssignment) {
+    Velo::Bytecode::Module module;
+
+    Velo::Bytecode::Function mainFunction;
+    mainFunction.name = "main";
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::BuildMap,
+        .stringOperand = "",
+        .argsCount = 0U,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::StoreLocal,
+        .indexOperand = 0U,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::PushInt,
+        .intOperand = 30,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::LoadLocal,
+        .indexOperand = 0U,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::PushString,
+        .stringOperand = "Carol",
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::StoreIndexPath,
+        .argsCount = 1U,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::StoreLocal,
+        .indexOperand = 0U,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::LoadLocal,
+        .indexOperand = 0U,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::PushString,
+        .stringOperand = "Carol",
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::LoadIndex,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::Return,
+    });
+
+    module.functions.push_back(std::move(mainFunction));
+
+    Velo::Runtime::Runtime runtime;
+    Velo::Bytecode::VM vm(runtime);
+
+    const auto result = vm.execute(module);
+
+    ASSERT_TRUE(result.success);
+    EXPECT_EQ(result.exitCode, 30);
+    EXPECT_TRUE(result.error.empty());
+}

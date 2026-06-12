@@ -584,3 +584,24 @@ The same `IndexExpression` node is used for both arrays and maps:
 array[index: int]   -> element type
 map[key: string]    -> value type
 ```
+
+## Map element assignment
+Map element assignment is type-checked through the existing index assignment statement.
+
+Rules:
+- root expression must resolve to a local variable
+- root local must be mutable
+- map index expression must be `string`
+- assigned value type must match the map value type
+
+Example:
+```velo
+scores["Alex"] = 42;
+```
+
+The same semantic path supports mixed map/array indexing:
+```velo
+groupped["a"][0] = 42;
+```
+
+Field assignment through map index such as `users["bob"].id = 3` is not part of MVP 0.6.4.

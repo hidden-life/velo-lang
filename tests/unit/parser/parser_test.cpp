@@ -1346,3 +1346,75 @@ fn main(): int {
     ASSERT_NE(fieldAccess.object, nullptr);
     EXPECT_EQ(fieldAccess.object->kind, Velo::AST::ExpressionKind::Index);
 }
+
+TEST(ParserTest, ParsesMapElementAssignmentStatement) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    var scores: map<string, int> = map {
+        "Alex": 10
+    };
+
+    scores["Alex"] = 42;
+
+    return scores["Alex"];
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    const auto &mainFunction = program->functions[0];
+    ASSERT_EQ(mainFunction.statements.size(), 3U);
+    ASSERT_EQ(mainFunction.statements[1]->kind, Velo::AST::StatementKind::IndexAssignment);
+
+    const auto &assignment = static_cast<const Velo::AST::IndexAssignmentStatement&>(
+        *mainFunction.statements[1]
+    );
+
+    ASSERT_NE(assignment.target, nullptr);
+    ASSERT_NE(assignment.value, nullptr);
+
+    EXPECT_EQ(assignment.target->kind, Velo::AST::ExpressionKind::Index);
+    EXPECT_EQ(assignment.target->index->kind, Velo::AST::ExpressionKind::StringLiteral);
+    EXPECT_EQ(assignment.value->kind, Velo::AST::ExpressionKind::IntegerLiteral);
+}
+
+TEST(ParserTest, ParsesAssignmentThroughMapIndexThenArrayIndex) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    var grouped: map<string, []int> = map {
+        "a": [1, 2]
+    };
+
+    grouped["a"][0] = 42;
+
+    return grouped["a"][0];
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    const auto &mainFunction = program->functions[0];
+    ASSERT_EQ(mainFunction.statements.size(), 3U);
+    ASSERT_EQ(mainFunction.statements[1]->kind, Velo::AST::StatementKind::IndexAssignment);
+
+    const auto &assignment = static_cast<const Velo::AST::IndexAssignmentStatement&>(
+        *mainFunction.statements[1]
+    );
+
+    ASSERT_NE(assignment.target, nullptr);
+    EXPECT_EQ(assignment.target->kind, Velo::AST::ExpressionKind::Index);
+    ASSERT_NE(assignment.target->object, nullptr);
+    EXPECT_EQ(assignment.target->object->kind, Velo::AST::ExpressionKind::Index);
+}

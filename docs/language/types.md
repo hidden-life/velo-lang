@@ -405,6 +405,25 @@ For maps with array values, indexing returns the array value:
 let values: []int = groupped["a"];
 ```
 
+Map element assignment must preserve the map value type:
+```velo
+var scores: map<string, int> = map {
+    "Alex": 10
+};
+
+scores["Alex"] = 42;
+```
+
+This is rejected:
+```velo
+scores["Alex"] = "bad";
+```
+
+Assigning a missing leaf key inserts the key:
+```velo
+scores["Bob"] = 20;
+```
+
 Current limitations:
-- map element assignment is not implemented yet
+- field assignment through map index is not implemented yet
 - map builtins are not implemented yet
