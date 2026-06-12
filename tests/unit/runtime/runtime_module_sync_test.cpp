@@ -89,3 +89,20 @@ TEST(RuntimeModuleSyncTest, RegistersMapLenBuiltinInMapModule) {
     ASSERT_EQ(function->parameterTypes.size(), 1U);
     EXPECT_EQ(function->parameterTypes[0], "map");
 }
+
+TEST(RuntimeModuleSyncTest, RegistersJsonStringifyBuiltinInJsonModule) {
+    Velo::Runtime::Runtime runtime;
+
+    const auto *module = runtime.modules().find("json");
+    ASSERT_NE(module, nullptr);
+
+    const auto *function = module->findFunction("stringify");
+    ASSERT_NE(function, nullptr);
+
+    EXPECT_EQ(function->name, "stringify");
+    EXPECT_EQ(function->arity, 1U);
+    EXPECT_EQ(function->returnType, "string");
+
+    ASSERT_EQ(function->parameterTypes.size(), 1U);
+    EXPECT_EQ(function->parameterTypes[0], "json");
+}

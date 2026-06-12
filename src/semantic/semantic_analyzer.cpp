@@ -1294,6 +1294,10 @@ namespace Velo::Semantic {
             return actual.kind == SemanticTypeKind::Map;
         }
 
+        if (expected == "json") {
+            return isIntType(actual) || isStringType(actual) || isBoolType(actual);
+        }
+
         return false;
     }
 

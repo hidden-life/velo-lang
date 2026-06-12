@@ -751,3 +751,26 @@ map::len(scores)
 ```
 
 `map::len` returns `int`.
+
+## JSON stringify
+JSON helpers are available through `std::json`.
+
+```velo
+use std::json;
+```
+
+Primitive values can be serialized with `json::stringify`:
+```velo
+json::stringify(42)
+json::stringify("Alex")
+json::stringify(true)
+json::stringify(false)
+```
+
+`json::stringify` returns `string`.
+
+Current limitations:
+- arrays are not supported yet
+- maps are not supported yet
+- struct are not supported yet
+- JSON parsing is not implemented yet

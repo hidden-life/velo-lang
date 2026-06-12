@@ -444,3 +444,24 @@ Current limitations:
 - no `map::keys`
 - no `map::values`
 - no `map::remove`
+
+## JSON serialization
+`json::stringify` serializes supported Velo values to JSON text.
+
+In MVP 0.7.1, supported types are:
+- `int`
+- `string`
+- `bool`
+
+Examples:
+```velo
+let a: string = json::stringify(42);
+let b: string = json::stringify("Alex");
+let c: string = json::stringify(true);
+```
+
+Current limitations:
+- arrays are not supported yet
+- maps are not supported yet
+- structs are not supported yet
+- parsed JSON values are not implemented yet

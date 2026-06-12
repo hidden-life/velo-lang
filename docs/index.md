@@ -33,6 +33,7 @@ runtime, and MVP planning.
 - [MVP 0.4 status](development/mvp_0_4.md)
 - [MVP 0.5 status](development/mvp_0_5.md)
 - [MVP 0.6 status](development/mvp_0_6.md)
+- [MVP 0.7 status](development/mvp_0_7.md)
 
 ## Documentation rules
 When adding a new feature:

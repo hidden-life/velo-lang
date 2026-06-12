@@ -2,7 +2,7 @@
 Velo is an experimental programming language and virtual machine focused on backend
 and API-oriented development.
 
-The current goal is **Velo MVP 0.6**: a small, strict, statically checked language
+The current goal is **Velo MVP 0.7**: a small, strict, statically checked language
 with a simple VM, standard modules, and developer-friendly CLI tooling, and basic
 data model foundation based on struct.
 
@@ -83,6 +83,9 @@ data model foundation based on struct.
 - mixed map/array index assignment
 - `std::map` module
 - `map::len`
+- `std::json`
+- `json::stringify`
+- JSON serialization for primitive values
 
 ## Standard modules
 Current standard modules:
@@ -215,25 +218,18 @@ Start here:
 - [Velo v0.6.0 release notes draft](docs/development/release_notes_v0_6.md)
 
 ## Current development focus
-The project has completed **Velo MVP 0.6**.
+The project is currently moving toward **Velo MVP 0.7**.
 
-MVP 0.6 focuses on maps and object literals.
+MVP 0.7 focuses on JSON foundation and serialization.
 
-Completed steps:
+Planned steps:
 ```text
-0.6.1   map type syntax and semantic type model
-0.6.2   map/object literals and runtime map values
-0.6.3   map indexing read
-0.6.4   map element assignment
-0.6.5   map builtins and examples
-0.6.6   docs/examples/release checklist
-```
-
-The next milestone should be planned after tagging `v0.6.0`.
-
-Suggested candidate:
-```text
-MVP 0.7     JSON foundation / serialization
+0.7.1   std::json module and json::stringify primitives
+0.7.2   json::stringify arrays and maps
+0.7.3   json::stringify structs
+0.7.4   runtime json type and json::parse
+0.7.5   json access helpers and examples
+0.7.6   docs/examples/release checklist
 ```
 
 Main properties:
@@ -265,9 +261,12 @@ MVP 0.4 is tagged as `v0.4.0`.
 MVP 0.5 is tagged as `v0.5.0`.
 
 ## MVP 0.6 status
-MVP 0.6 is in progress.
+MVP 0.6 is tagged as `v0.6.0`.
+
+## MVP 0.7 status
+MVP 0.7 is currently in progress. 
 
 Current step:
 ```text
-0.6.5   map builtins and examples
+0.7.1   std::json module and json::stringify primitives
 ```

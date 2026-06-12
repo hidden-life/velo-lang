@@ -2,6 +2,8 @@
 
 #include <iostream>
 #include <limits>
+#include <sstream>
+#include <optional>
 
 namespace Velo::Runtime {
     namespace {
@@ -47,6 +49,57 @@ namespace Velo::Runtime {
 
             return "<unknown>";
         }
+
+        auto escapeJsonString(const std::string &value) -> std::string {
+            std::ostringstream stream;
+
+            for (const char ch : value) {
+                switch (ch) {
+                    case '"':
+                        stream << "\\\"";
+                        break;
+                    case '\\':
+                        stream << "\\\\";
+                        break;
+                    case '\b':
+                        stream << "\\b";
+                        break;
+                    case '\f':
+                        stream << "\\f";
+                        break;
+                    case '\n':
+                        stream << "\\n";
+                        break;
+                    case '\r':
+                        stream << "\\r";
+                        break;
+                    case '\t':
+                        stream << "\\t";
+                        break;
+                    default:
+                        stream << ch;
+                        break;
+                }
+            }
+
+            return stream.str();
+        }
+
+        auto primitiveValueToJsonString(const Value &value) -> std::optional<std::string> {
+            if (std::holds_alternative<int>(value)) {
+                return std::to_string(std::get<int>(value));
+            }
+
+            if (std::holds_alternative<bool>(value)) {
+                return std::get<bool>(value) ? std::string("true") : std::string("false");
+            }
+
+            if (std::holds_alternative<std::string>(value)) {
+                return "\"" + escapeJsonString(std::get<std::string>(value)) + "\"";
+            }
+
+            return std::nullopt;
+        }
     }
 
     Runtime::Runtime() {
@@ -59,6 +112,8 @@ namespace Velo::Runtime {
         registerStdArray();
         // map
         registerStdMap();
+        // serialization
+        registerStdJson();
 
         buildModulesFromBuiltins();
     }
@@ -315,6 +370,41 @@ namespace Velo::Runtime {
                         .exitCode = 0,
                         .error = {},
                         .returnValue = static_cast<int>(mapValue->entries.size())
+                    };
+                }
+            }
+        );
+    }
+
+    void Runtime::registerStdJson() {
+        _registry.registerFunc(
+            BuiltinFunction {
+                "json::stringify",
+                {"json"},
+                "string",
+                [](const std::vector<Value> &args) -> ExecutionResult {
+                    if (args.size() != 1U) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "json::stringify expects exactly one argument."
+                        };
+                    }
+
+                    const auto jsonText = primitiveValueToJsonString(args.front());
+                    if (!jsonText.has_value()) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "json::stringify does not support this value yet."
+                        };
+                    }
+
+                    return ExecutionResult {
+                        .success = true,
+                        .exitCode = 0,
+                        .error = {},
+                        .returnValue = *jsonText
                     };
                 }
             }

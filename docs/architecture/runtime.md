@@ -501,3 +501,30 @@ Example:
 map::len(scores)
 ```
 returns the number of keys in the map.
+
+## JSON builtins
+Runtime provides the `json::stringify` builtin.
+
+In MVP 0.7.1 it supports primitive values:
+
+- `int`
+- `string`
+- `bool`
+
+Runtime behavior:
+
+1. validate one argument
+2. serialize supported primitive value to JSON text
+3. return the JSON text as `string`
+
+String values are escaped for JSON output.
+
+Example:
+
+```velo
+json::stringify("Alex")
+```
+returns:
+```text
+"Alex"
+```

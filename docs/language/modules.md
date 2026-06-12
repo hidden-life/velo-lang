@@ -174,3 +174,52 @@ Current limitations:
 - no `map::keys`
 - no `map::values`
 - no `map::remove`
+
+## std::json
+The `std::json` module contains JSON helpers.
+
+Import:
+```velo
+use std::json;
+```
+
+### `json::stringify`
+```velo
+json::stringify(value)
+```
+
+Serializes a supported Velo value to JSON text.
+
+In MVP 0.7.1, supported values are:
+- `int`
+- `string`
+- `bool`
+
+Example:
+```velo
+module app;
+
+use std::console;
+use std::json;
+
+fn main(): int {
+    console::println(json::stringify(42));
+    console::println(json::stringify("Alex"));
+    console::println(json::stringify(true));
+
+    return 0;
+}
+```
+
+Expected output:
+```text
+42
+"Alex"
+true
+```
+
+Current limitations:
+- arrays are not supported yet
+- maps are not supported yet
+- struct are not supported yet
+- `json::parse` is not implemented yet

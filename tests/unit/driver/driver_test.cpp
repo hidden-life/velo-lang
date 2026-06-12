@@ -2894,3 +2894,152 @@ fn main(): int {
 
     EXPECT_NE(result.bytecodeText.find("CallBuiltin map::len args=1"), std::string::npos);
 }
+
+TEST(DriverTest, ExecutesJsonStringifyInt) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_stringify_int.velo",
+        R"(module app;
+
+use std::json;
+use std::string;
+
+fn main(): int {
+    return string::len(json::stringify(42));
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 2);
+}
+
+TEST(DriverTest, ExecutesJsonStringifyString) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_stringify_string.velo",
+        R"(module app;
+
+use std::json;
+use std::string;
+
+fn main(): int {
+    return string::len(json::stringify("Alex"));
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 6);
+}
+
+TEST(DriverTest, ExecutesJsonStringifyBool) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_stringify_bool.velo",
+        R"(module app;
+
+use std::json;
+use std::string;
+
+fn main(): int {
+    return string::len(json::stringify(true));
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 4);
+}
+
+TEST(DriverTest, IrModePrintsJsonStringifyBuiltinCall) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_stringify_ir.velo",
+        R"(module app;
+
+use std::json;
+
+fn main(): int {
+    let text: string = json::stringify(42);
+
+    return 0;
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.irText.find("CallBuiltin json::stringify args=1"), std::string::npos);
+}
+
+TEST(DriverTest, BytecodeModePrintsJsonStringifyBuiltinCall) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_stringify_bytecode.velo",
+        R"(module app;
+
+use std::json;
+
+fn main(): int {
+    let text: string = json::stringify(42);
+
+    return 0;
+}
+)",
+        Velo::Driver::DriverMode::Bytecode
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.bytecodeText.find("CallBuiltin json::stringify args=1"), std::string::npos);
+}

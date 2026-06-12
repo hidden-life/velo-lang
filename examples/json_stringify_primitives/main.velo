@@ -1,0 +1,13 @@
+module app;
+
+use std::console;
+use std::json;
+
+fn main(): int {
+    console::println(json::stringify(42));
+    console::println(json::stringify("Alex"));
+    console::println(json::stringify(true));
+    console::println(json::stringify(false));
+
+    return 0;
+}

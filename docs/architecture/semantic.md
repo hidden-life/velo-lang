@@ -627,3 +627,27 @@ Rejected:
 map::len([1, 2, 3])
 map::Len(1)
 ```
+
+## JSON builtins
+
+The semantic analyzer validates `json::stringify` through builtin metadata.
+
+`json::stringify` uses the builtin parameter marker:
+
+```text
+json
+```
+
+In MVP 0.7.1, this marker accepts:
+
+- `int`
+- `string`
+- `bool`
+
+Rejected for now:
+
+- arrays
+- maps
+- structs
+
+These will be added in later MVP 0.7 steps.
