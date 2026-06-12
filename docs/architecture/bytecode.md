@@ -247,3 +247,17 @@ BuildMap entries=2
 StoreLocal local[0]
 ```
 The map key metadata is stored in the instruction string operand.
+
+## Map indexing
+Map indexing reuses the same bytecode opcode as array indexing:
+```text
+LoadIndex
+```
+
+The VM selects behavior based on the runtime target value:
+```text
+ArrayValuePtr + int     -> array element
+MapValuePtr + string    -> map entry
+```
+
+Missing map keys are runtime errors.

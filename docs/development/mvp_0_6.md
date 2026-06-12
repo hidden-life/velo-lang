@@ -13,7 +13,7 @@ MVP 0.6 focuses on maps and object literals.
 
 ## Current step
 ```text
-0.6.2   map/object literals and runtime map values
+0.6.3   map indexing read
 ```
 
 ## 0.6.1 scope
@@ -94,5 +94,44 @@ let scores: map<string, int> = map {};
 
 Not implemented in 0.6.2:
 - map indexing
+- map element assignment
+- map builtins
+
+## 0.6.3 scope
+Implemented in this step:
+- map index read expressions
+- semantic validation for map index type
+- runtime map index reads
+- missing map key runtime error
+- field access after map indexing
+- array indexing after map indexing
+- bytecode VM support for map index reads
+- parser tests
+- semantic tests
+- driver tests
+- bytecode VM tests
+- example
+
+Example:
+```velo
+let scores: map<string, int> = map {
+    "Alex": 10,
+    "Bob": 20
+};
+
+return scores["Bob"];
+```
+
+Maps of structs can be indexed and then accessed with field access:
+```velo
+return users["bob"].id;
+```
+
+Maps with array values can be indexed repeatedly:
+```velo
+return groupped["b"][1];
+```
+
+Not implemented in 0.6.3:
 - map element assignment
 - map builtins

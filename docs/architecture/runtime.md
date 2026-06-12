@@ -445,3 +445,21 @@ A runtime map stores:
 `Runtime::cloneValue(...)` deep-copies maps recursively.
 
 This preserves value semantics for maps in the same way as structs and arrays.
+
+## Map indexing
+Map indexing is executed by `LoadIndex`.
+
+Runtime stack shape before `LoadIndex`:
+```text
+[..., mapValue, keyValue]
+```
+
+Runtime behavior:
+1. pop key value
+2. pop map value
+3. validate that key is `string`
+4. validate that target is a runtime map
+5. look up the key
+6. push a cloned map entry value
+
+Missing keys are runtime errors.

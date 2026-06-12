@@ -1264,3 +1264,85 @@ fn main(): int {
     const auto &mapLiteral = static_cast<const Velo::AST::MapLiteralExpression&>(*varDecl.initializer);
     EXPECT_EQ(mapLiteral.entries.size(), 2U);
 }
+
+TEST(ParserTest, ParsesMapIndexExpression) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    let scores: map<string, int> = map {
+        "Alex": 10,
+        "Bob": 20
+    };
+
+    return scores["Bob"];
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    const auto &mainFunction = program->functions[0];
+    ASSERT_EQ(mainFunction.statements.size(), 2U);
+
+    const auto &returnStmt = static_cast<const Velo::AST::ReturnStatement&>(
+        *mainFunction.statements[1]
+    );
+
+    ASSERT_NE(returnStmt.expression, nullptr);
+    ASSERT_EQ(returnStmt.expression->kind, Velo::AST::ExpressionKind::Index);
+
+    const auto &indexExpr = static_cast<const Velo::AST::IndexExpression&>(
+        *returnStmt.expression
+    );
+
+    ASSERT_NE(indexExpr.object, nullptr);
+    ASSERT_NE(indexExpr.index, nullptr);
+
+    EXPECT_EQ(indexExpr.object->kind, Velo::AST::ExpressionKind::Name);
+    EXPECT_EQ(indexExpr.index->kind, Velo::AST::ExpressionKind::StringLiteral);
+}
+
+TEST(ParserTest, ParsesMapIndexFollowedByFieldAccess) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+struct User {
+    id: int;
+}
+
+fn main(): int {
+    let users: map<string, User> = map {
+        "bob": User { id: 2 }
+    };
+
+    return users["bob"].id;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    const auto &mainFunction = program->functions[0];
+    const auto &returnStmt = static_cast<const Velo::AST::ReturnStatement&>(
+        *mainFunction.statements[1]
+    );
+
+    ASSERT_NE(returnStmt.expression, nullptr);
+    ASSERT_EQ(returnStmt.expression->kind, Velo::AST::ExpressionKind::FieldAccess);
+
+    const auto &fieldAccess = static_cast<const Velo::AST::FieldAccessExpression&>(
+        *returnStmt.expression
+    );
+
+    EXPECT_EQ(fieldAccess.fieldName, "id");
+
+    ASSERT_NE(fieldAccess.object, nullptr);
+    EXPECT_EQ(fieldAccess.object->kind, Velo::AST::ExpressionKind::Index);
+}

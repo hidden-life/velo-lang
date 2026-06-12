@@ -368,11 +368,6 @@ struct Store {
 }
 ```
 
-Current limitations:
-- map indexing is not implemented yet
-- map element assignment is not implemented yet
-- map builtins are not implemented yet
-
 Map literals create runtime map values:
 ```velo
 let scores: map<string, int> = map {
@@ -390,3 +385,26 @@ let scores: map<string, int> = map {
     "Bob": "bad",
 };
 ```
+
+Map indexing returns the map value type:
+```velo
+let scores: map<string, int> = map {
+    "Alex": 10
+};
+
+let score: int = scores["Alex"];
+```
+
+For maps of structs, indexing returns the struct value:
+```velo
+let user: User = users["Alex"];
+```
+
+For maps with array values, indexing returns the array value:
+```velo
+let values: []int = groupped["a"];
+```
+
+Current limitations:
+- map element assignment is not implemented yet
+- map builtins are not implemented yet

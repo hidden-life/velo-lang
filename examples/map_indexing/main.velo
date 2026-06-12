@@ -1,0 +1,31 @@
+module app;
+
+use std::console;
+
+struct User {
+    id: int;
+    name: string;
+}
+
+fn main(): int {
+    let scores: map<string, int> = map {
+        "Alex": 10,
+        "Bob": 20
+    };
+
+    let users: map<string, User> = map {
+        "alex": User { id: 1, name: "Alex" },
+        "bob": User { id: 2, name: "Bob" }
+    };
+
+    let grouped: map<string, []int> = map {
+        "a": [1, 2],
+        "b": [3, 4]
+    };
+
+    console::println(scores["Bob"]);
+    console::println(users["bob"].name);
+    console::println(grouped["b"][1]);
+
+    return 0;
+}

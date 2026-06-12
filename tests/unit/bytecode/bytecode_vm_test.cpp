@@ -363,3 +363,92 @@ TEST(BytecodeVmTest, ExecutesBuildMap) {
     EXPECT_EQ(std::get<int>(mapValue->entries.at("Alex")), 10);
     EXPECT_EQ(std::get<int>(mapValue->entries.at("Bob")), 20);
 }
+
+TEST(BytecodeVmTest, ExecutesMapIndexRead) {
+    Velo::Bytecode::Module module;
+
+    Velo::Bytecode::Function mainFunction;
+    mainFunction.name = "main";
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::PushInt,
+        .intOperand = 10,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::PushInt,
+        .intOperand = 20,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::BuildMap,
+        .stringOperand = "4:Alex3:Bob",
+        .argsCount = 2U,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::PushString,
+        .stringOperand = "Bob",
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::LoadIndex,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::Return,
+    });
+
+    module.functions.push_back(std::move(mainFunction));
+
+    Velo::Runtime::Runtime runtime;
+    Velo::Bytecode::VM vm(runtime);
+
+    const auto result = vm.execute(module);
+
+    ASSERT_TRUE(result.success);
+    EXPECT_EQ(result.exitCode, 20);
+    EXPECT_TRUE(result.error.empty());
+}
+
+TEST(BytecodeVmTest, ReportsMissingMapKey) {
+    Velo::Bytecode::Module module;
+
+    Velo::Bytecode::Function mainFunction;
+    mainFunction.name = "main";
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::PushInt,
+        .intOperand = 10,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::BuildMap,
+        .stringOperand = "4:Alex",
+        .argsCount = 1U,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::PushString,
+        .stringOperand = "Bob",
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::LoadIndex,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::Return,
+    });
+
+    module.functions.push_back(std::move(mainFunction));
+
+    Velo::Runtime::Runtime runtime;
+    Velo::Bytecode::VM vm(runtime);
+
+    const auto result = vm.execute(module);
+
+    EXPECT_FALSE(result.success);
+    EXPECT_EQ(result.exitCode, 1);
+    EXPECT_NE(result.error.find("Map key not found"), std::string::npos);
+}

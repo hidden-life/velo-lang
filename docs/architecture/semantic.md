@@ -561,3 +561,26 @@ Validation rules:
 - maps can appear in struct fields
 
 Runtime map values are not part of MVP 0.6.1.
+
+## Map indexing
+Map indexing is type-checked as an expression.
+
+Rules:
+- target expression must have map type
+- index expression must have type `string`
+- result type is the map value type
+
+Example:
+```velo
+let scores: map<string, int> = map {
+    "Alex": 10
+};
+
+return scores["Alex"];
+```
+
+The same `IndexExpression` node is used for both arrays and maps:
+```text
+array[index: int]   -> element type
+map[key: string]    -> value type
+```

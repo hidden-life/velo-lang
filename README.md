@@ -74,6 +74,9 @@ data model foundation based on struct.
 - map literals
 - runtime map values
 - map value semantics
+- map indexing read
+- field access after map indexing
+- array indexing after map indexing
 
 ## Standard modules
 Current standard modules:
@@ -251,5 +254,5 @@ MVP 0.6 is in progress.
 
 Current step:
 ```text
-0.6.2   map/object literals and runtime map values
+0.6.3   map indexing read
 ```

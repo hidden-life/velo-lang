@@ -696,3 +696,30 @@ Current limitations:
 - map indexing is not implemented yet
 - map element assignment is not implemented yet
 - map builtins are not implemented yet
+
+## Map indexing
+Map values can be read with index expressions.
+```velo
+let scores: map<string, int> = map {
+    "Alex": 10,
+    "Bob": 20
+};
+
+scores["Bob"]
+```
+
+Map indexes must be `string`.
+
+Maps of structs can be indexed and then accessed with field access:
+```velo
+users["bob"].name
+```
+
+Maps with array values can be indexed repeatedly:
+```velo
+groupped["b"][1]
+```
+
+Current limitations:
+- map element assignment is not implemented yet
+- map builtins are not implemented yet

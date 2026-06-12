@@ -1586,29 +1586,53 @@ namespace Velo::Semantic {
         const auto objectType = analyzeCheckedExpressionType(*expr.object);
         const auto indexType = analyzeCheckedExpressionType(*expr.index);
 
-        if (!isUnknownType(indexType) && !isIntType(indexType)) {
-            _engine.error(
-                "SEM052",
-                "Array index must be int, actual '" + semanticTypeToString(indexType) + "'.",
-                expr.index->range
-            );
-        }
-
         if (isUnknownType(objectType)) {
             return {};
         }
 
-        if (objectType.kind != SemanticTypeKind::Array || objectType.elementType == nullptr) {
-            _engine.error(
-                "SEM051",
-                "Array index target must be array, actual '" + semanticTypeToString(objectType) + "'.",
-                expr.object->range
-            );
+        if (objectType.kind == SemanticTypeKind::Array) {
+            if (!isUnknownType(indexType) && !isIntType(indexType)) {
+                _engine.error(
+                    "SEM052",
+                    "Array index must be int, actual '" + semanticTypeToString(indexType) + "'.",
+                    expr.index->range
+                );
 
-            return {};
+                return {};
+            }
+
+            if (objectType.elementType == nullptr) {
+                return {};
+            }
+
+            return *objectType.elementType;
         }
 
-        return *objectType.elementType;
+        if (objectType.kind == SemanticTypeKind::Map) {
+            if (!isUnknownType(indexType) && !isStringType(indexType)) {
+                _engine.error(
+                    "SEM061",
+                    "Map index must be string, actual '" + semanticTypeToString(indexType) + "'.",
+                    expr.index->range
+                );
+
+                return {};
+            }
+
+            if (objectType.valueType == nullptr) {
+                return {};
+            }
+
+            return *objectType.valueType;
+        }
+
+        _engine.error(
+            "SEM051",
+            "Index target must be array or map, actual '" + semanticTypeToString(objectType) + "'.",
+            expr.object->range
+        );
+
+        return {};
     }
 
     void SemanticAnalyzer::analyzeIndexAssignmentStatement(const AST::IndexAssignmentStatement &stmt) {
@@ -1643,6 +1667,17 @@ namespace Velo::Semantic {
                 "Cannot assign array element through immutable local variable '" + rootLocalName + "'.",
                 rootName->range
             );
+        }
+
+        if (containsMapIndexInAssignmentTarget(*stmt.target)) {
+            _engine.error(
+                "SEM062",
+                "Map element assignment is not implemented yet.",
+                stmt.target->range
+            );
+
+            static_cast<void>(analyzeCheckedExpressionType(*stmt.value));
+            return;
         }
 
         const auto targetType = analyzeIndexExpressionType(*stmt.target);
@@ -1758,5 +1793,19 @@ namespace Velo::Semantic {
         }
 
         return analyzeCheckedExpressionType(expr);
+    }
+
+    auto SemanticAnalyzer::containsMapIndexInAssignmentTarget(const AST::IndexExpression &expr) -> bool {
+        const auto objectType = analyzeCheckedExpressionType(*expr.object);
+        if (!isUnknownType(objectType) && objectType.kind == SemanticTypeKind::Map) {
+            return true;
+        }
+
+        if (expr.object->kind == AST::ExpressionKind::Index) {
+            const auto &nestedIndex = static_cast<const AST::IndexExpression&>(*expr.object);
+            return containsMapIndexInAssignmentTarget(nestedIndex);
+        }
+
+        return false;
     }
 }

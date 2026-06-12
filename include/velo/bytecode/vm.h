@@ -955,62 +955,95 @@ namespace Velo::Bytecode {
                 return Runtime::ExecutionResult {
                     .success = false,
                     .exitCode = 1,
-                    .error = "LoadIndex requires an array value and an index value on the stack."
+                    .error = "LoadIndex requires a target value and an index value on the stack."
                 };
             }
 
             const auto indexValue = _stack.back();
             _stack.pop_back();
 
-            const auto arrayValue = _stack.back();
+            const auto targetValue = _stack.back();
             _stack.pop_back();
 
-            if (!std::holds_alternative<int>(indexValue)) {
-                return Runtime::ExecutionResult {
-                    .success = false,
-                    .exitCode = 1,
-                    .error = "LoadIndex expects integer index."
-                };
+            if (std::holds_alternative<Runtime::ArrayValuePtr>(targetValue)) {
+                if (!std::holds_alternative<int>(indexValue)) {
+                    return Runtime::ExecutionResult {
+                        .success = false,
+                        .exitCode = 1,
+                        .error = "LoadIndex expects integer index for array value."
+                    };
+                }
+
+                const int index = std::get<int>(indexValue);
+                if (index < 0) {
+                    return Runtime::ExecutionResult {
+                        .success = false,
+                        .exitCode = 1,
+                        .error = "Array index out of range."
+                    };
+                }
+
+                const auto array = std::get<Runtime::ArrayValuePtr>(targetValue);
+                if (array == nullptr) {
+                    return Runtime::ExecutionResult {
+                        .success = false,
+                        .exitCode = 1,
+                        .error = "LoadIndex received a null array value."
+                    };
+                }
+
+                const auto indexAsSize = static_cast<std::size_t>(index);
+                if (indexAsSize >= array->elements.size()) {
+                    return Runtime::ExecutionResult {
+                        .success = false,
+                        .exitCode = 1,
+                        .error = "Array index out of range."
+                    };
+                }
+
+                _stack.push_back(Runtime::cloneValue(array->elements[indexAsSize]));
+
+                return {};
             }
 
-            const int index = std::get<int>(indexValue);
-            if (index < 0) {
-                return Runtime::ExecutionResult {
-                    .success = false,
-                    .exitCode = 1,
-                    .error = "Array index out of range."
-                };
+            if (std::holds_alternative<Runtime::MapValuePtr>(targetValue)) {
+                if (!std::holds_alternative<std::string>(indexValue)) {
+                    return Runtime::ExecutionResult {
+                        .success = false,
+                        .exitCode = 1,
+                        .error = "LoadIndex expects string key for map value."
+                    };
+                }
+
+                const auto mapValue = std::get<Runtime::MapValuePtr>(targetValue);
+                if (mapValue == nullptr) {
+                    return Runtime::ExecutionResult {
+                        .success = false,
+                        .exitCode = 1,
+                        .error = "LoadIndex received a null map value."
+                    };
+                }
+
+                const auto &key = std::get<std::string>(indexValue);
+                const auto entryIt = mapValue->entries.find(key);
+                if (entryIt == mapValue->entries.end()) {
+                    return Runtime::ExecutionResult {
+                        .success = false,
+                        .exitCode = 1,
+                        .error = "Map key not found: " + key
+                    };
+                }
+
+                _stack.push_back(Runtime::cloneValue(entryIt->second));
+
+                return {};
             }
 
-            if (!std::holds_alternative<Runtime::ArrayValuePtr>(arrayValue)) {
-                return Runtime::ExecutionResult {
-                    .success = false,
-                    .exitCode = 1,
-                    .error = "LoadIndex expects an array value."
-                };
-            }
-
-            const auto array = std::get<Runtime::ArrayValuePtr>(arrayValue);
-            if (array == nullptr) {
-                return Runtime::ExecutionResult {
-                    .success = false,
-                    .exitCode = 1,
-                    .error = "LoadIndex received a null array value."
-                };
-            }
-
-            const auto indexAsSize = static_cast<std::size_t>(index);
-            if (indexAsSize >= array->elements.size()) {
-                return Runtime::ExecutionResult {
-                    .success = false,
-                    .exitCode = 1,
-                    .error = "Array index out of range."
-                };
-            }
-
-            _stack.push_back(Runtime::cloneValue(array->elements[indexAsSize]));
-
-            return {};
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "LoadIndex expects an array or map value."
+            };
         }
 
         [[nodiscard]] auto storeIndexPath(std::size_t indexCount) -> Runtime::ExecutionResult {

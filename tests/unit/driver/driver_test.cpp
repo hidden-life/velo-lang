@@ -2329,3 +2329,186 @@ fn main(): int {
     ASSERT_TRUE(result.success);
     EXPECT_NE(result.bytecodeText.find("BuildMap entries=2"), std::string::npos);
 }
+
+TEST(DriverTest, ExecutesMapIndexRead) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "map_index_read.velo",
+        R"(module app;
+
+fn main(): int {
+    let scores: map<string, int> = map {
+        "Alex": 10,
+        "Bob": 20
+    };
+
+    return scores["Bob"];
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 20);
+}
+
+TEST(DriverTest, ExecutesMapIndexReadOnStructMap) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "map_index_struct_read.velo",
+        R"(module app;
+
+struct User {
+    id: int;
+    name: string;
+}
+
+fn main(): int {
+    let users: map<string, User> = map {
+        "alex": User { id: 1, name: "Alex" },
+        "bob": User { id: 2, name: "Bob" }
+    };
+
+    return users["bob"].id;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 2);
+}
+
+TEST(DriverTest, ExecutesMapIndexReadWithArrayValue) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "map_index_array_value.velo",
+        R"(module app;
+
+fn main(): int {
+    let grouped: map<string, []int> = map {
+        "a": [1, 2],
+        "b": [3, 4]
+    };
+
+    return grouped["b"][1];
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 4);
+}
+
+TEST(DriverTest, ReportsRuntimeErrorForMissingMapKey) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "missing_map_key.velo",
+        R"(module app;
+
+fn main(): int {
+    let scores: map<string, int> = map {
+        "Alex": 10
+    };
+
+    return scores["Bob"];
+}
+)"
+    );
+
+    EXPECT_FALSE(result.success);
+    EXPECT_EQ(result.exitCode, 1);
+    EXPECT_NE(result.error.find("Map key not found"), std::string::npos);
+}
+
+TEST(DriverTest, IrModePrintsMapIndexLoadIndexInstruction) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "map_index_ir.velo",
+        R"(module app;
+
+fn main(): int {
+    let scores: map<string, int> = map {
+        "Alex": 10
+    };
+
+    return scores["Alex"];
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.irText.find("BuildMap entries=1"), std::string::npos);
+    EXPECT_NE(result.irText.find("LoadIndex"), std::string::npos);
+}
+
+TEST(DriverTest, BytecodeModePrintsMapIndexLoadIndexInstruction) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "map_index_bytecode.velo",
+        R"(module app;
+
+fn main(): int {
+    let scores: map<string, int> = map {
+        "Alex": 10
+    };
+
+    return scores["Alex"];
+}
+)",
+        Velo::Driver::DriverMode::Bytecode
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.bytecodeText.find("BuildMap entries=1"), std::string::npos);
+    EXPECT_NE(result.bytecodeText.find("LoadIndex"), std::string::npos);
+}

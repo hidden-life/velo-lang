@@ -100,6 +100,8 @@ SEM057  Map type must have key and value types
 SEM058  Cannot infer type of empty map literal
 SEM059  Map literal value type mismatch
 SEM060  Duplicate map literal key
+SEM061  Map index must be string
+SEM062  Map element assignment is not implemented yet
 ```
 
 This list should be updated when adding new diagnostics.
