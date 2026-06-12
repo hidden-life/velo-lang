@@ -13,7 +13,7 @@ MVP 0.6 focuses on maps and object literals.
 
 ## Current step
 ```text
-0.6.4   map element assignment
+0.6.5   map builtins and examples
 ```
 
 ## 0.6.1 scope
@@ -177,3 +177,44 @@ nested["outer"]["inner"] = 42;
 Not implemented in 0.6.4:
 - field assignment through map index like `users["bob"].id = 3`
 - map builtins
+
+## 0.6.5 scope
+Implemented in this step:
+- `std::map` module
+- `map::len` builtin
+- semantic validation for map builtin argument type
+- runtime implementation for map length
+- runtime module sync test
+- semantic tests
+- driver tests
+- example
+- documentation
+
+Example:
+```velo
+module app;
+
+use std::map;
+
+fn main(): int {
+    let scores: map<string, int> = map {
+        "Alex": 10,
+        "Bob": 20
+    };
+
+    return map::len(scores);
+}
+```
+
+`map::len` works with maps of any value type:
+```velo
+map::len(map<string, int>)
+map::len(map<string, User>)
+map::len(map<string, []int>)
+```
+
+Not implemented in 0.6.5:
+- `map::has`
+- `map::keys`
+- `map::values`
+- `map::remove`

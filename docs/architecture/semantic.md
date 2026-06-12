@@ -605,3 +605,25 @@ groupped["a"][0] = 42;
 ```
 
 Field assignment through map index such as `users["bob"].id = 3` is not part of MVP 0.6.4.
+
+## Map builtins
+The semantic analyzer validates builtin metadata from the runtime module registry.
+
+`map::len` uses a special builtin parameter marker.
+
+```text
+map
+```
+
+This marker accepts any semantic type with kind `Map`.
+
+Accepted:
+```velo
+map::len(scores)
+```
+
+Rejected:
+```velo
+map::len([1, 2, 3])
+map::Len(1)
+```

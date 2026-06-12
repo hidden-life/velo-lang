@@ -57,6 +57,8 @@ namespace Velo::Runtime {
 
         // array
         registerStdArray();
+        // map
+        registerStdMap();
 
         buildModulesFromBuiltins();
     }
@@ -270,6 +272,49 @@ namespace Velo::Runtime {
                         .exitCode = 0,
                         .error = {},
                         .returnValue = static_cast<int>(arrayValue->elements.size())
+                    };
+                }
+            }
+        );
+    }
+
+    void Runtime::registerStdMap() {
+        _registry.registerFunc(
+            BuiltinFunction {
+                "map::len",
+                {"map"},
+                "int",
+                [](const std::vector<Value> &args) -> ExecutionResult {
+                    if (args.size() != 1U) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "map::len expects exactly one argument."
+                        };
+                    }
+
+                    if (!std::holds_alternative<MapValuePtr>(args[0])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "map::len expects an map argument."
+                        };
+                    }
+
+                    const auto mapValue = std::get<MapValuePtr>(args[0]);
+                    if (mapValue == nullptr) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "map::len received a null map value."
+                        };
+                    }
+
+                    return ExecutionResult {
+                        .success = true,
+                        .exitCode = 0,
+                        .error = {},
+                        .returnValue = static_cast<int>(mapValue->entries.size())
                     };
                 }
             }

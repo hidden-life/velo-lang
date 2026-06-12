@@ -664,10 +664,6 @@ Arrays of maps are supported:
 []map<string, int>
 ```
 
-Current limitations:
-- map/object literals are not implemented yet
-- map indexing is not implemented yet
-
 ## Map literals
 Map literals use explicit `map {...}` syntax:
 ```velo
@@ -692,11 +688,6 @@ Empty map literals require an expected map type:
 let scores: map<string, int> = map {};
 ```
 
-Current limitations:
-- map indexing is not implemented yet
-- map element assignment is not implemented yet
-- map builtins are not implemented yet
-
 ## Map indexing
 Map values can be read with index expressions.
 ```velo
@@ -719,10 +710,6 @@ Maps with array values can be indexed repeatedly:
 ```velo
 groupped["b"][1]
 ```
-
-Current limitations:
-- map element assignment is not implemented yet
-- map builtins are not implemented yet
 
 ## Map element assignment
 Map entries can be assigned through mutable local map values:
@@ -749,6 +736,18 @@ Map values that are arrays can be updated through mixed index paths:
 groupped["a"][0] = 42;
 ```
 
-Current limitations:
-- field assignment through map index is not implemented yet
-- map builtins are not implemented yet
+## Map builtins
+Map helpers are available through `std::map`.
+
+```velo
+use std::map;
+
+let scores: map<string, int> = map {
+    "Alex": 10,
+    "Bob": 20
+};
+
+map::len(scores)
+```
+
+`map::len` returns `int`.

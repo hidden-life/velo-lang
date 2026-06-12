@@ -487,3 +487,17 @@ Runtime behavior:
 Leaf map assignment inserts missing keys.
 
 Non-leaf missing map keys are runtime errors.
+
+## Map builtins
+Runtime provides the `map::len` builtin.
+
+Runtime behavior:
+1. validate one argument
+2. validate that argument is `MapValuePtr`
+3. return map entry count as `int`
+
+Example:
+```velo
+map::len(scores)
+```
+returns the number of keys in the map.

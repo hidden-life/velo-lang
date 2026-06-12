@@ -23,6 +23,7 @@ namespace Velo::Runtime {
         void registerStdBool();
 
         void registerStdArray();
+        void registerStdMap();
 
         BuiltinRegistry _registry {};
         Module::ModuleRegistry _modules {};

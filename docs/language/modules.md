@@ -137,3 +137,40 @@ Current limitations:
 - no `array::pop`
 - no `array::is_empty`
 - no iterators
+
+## std::map
+The `std::map` module contains helpers for map values.
+
+Import:
+```velo
+use std::map;
+```
+
+### `map::len`
+```velo
+map::len(values)
+```
+
+Returns the number of entries in a map.
+
+Example:
+```velo
+module app;
+
+use std::map;
+
+fn main(): int {
+    let scores: map<string, int> = map {
+        "Alex": 10,
+        "Bob": 20
+    };
+
+    return map::len(scores);
+}
+```
+
+Current limitations:
+- no `map::has`
+- no `map::keys`
+- no `map::values`
+- no `map::remove`

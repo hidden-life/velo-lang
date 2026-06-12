@@ -2730,3 +2730,167 @@ fn main(): int {
 
     EXPECT_NE(result.bytecodeText.find("StoreIndexPath indexes=1"), std::string::npos);
 }
+
+TEST(DriverTest, ExecutesMapLenBuiltinForIntMap) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "map_len_int.velo",
+        R"(module app;
+
+use std::map;
+
+fn main(): int {
+    let scores: map<string, int> = map {
+        "Alex": 10,
+        "Bob": 20
+    };
+
+    return map::len(scores);
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 2);
+}
+
+TEST(DriverTest, ExecutesMapLenBuiltinForEmptyMap) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "map_len_empty.velo",
+        R"(module app;
+
+use std::map;
+
+fn main(): int {
+    let scores: map<string, int> = map {};
+
+    return map::len(scores);
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 0);
+}
+
+TEST(DriverTest, ExecutesMapLenBuiltinAfterMapInsertAssignment) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "map_len_after_insert.velo",
+        R"(module app;
+
+use std::map;
+
+fn main(): int {
+    var scores: map<string, int> = map {
+        "Alex": 10
+    };
+
+    scores["Bob"] = 20;
+    scores["Carol"] = 30;
+
+    return map::len(scores);
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 3);
+}
+
+TEST(DriverTest, IrModePrintsMapLenBuiltinCall) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "map_len_ir.velo",
+        R"(module app;
+
+use std::map;
+
+fn main(): int {
+    let scores: map<string, int> = map {
+        "Alex": 10
+    };
+
+    return map::len(scores);
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.irText.find("CallBuiltin map::len args=1"), std::string::npos);
+}
+
+TEST(DriverTest, BytecodeModePrintsMapLenBuiltinCall) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "map_len_bytecode.velo",
+        R"(module app;
+
+use std::map;
+
+fn main(): int {
+    let scores: map<string, int> = map {
+        "Alex": 10
+    };
+
+    return map::len(scores);
+}
+)",
+        Velo::Driver::DriverMode::Bytecode
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.bytecodeText.find("CallBuiltin map::len args=1"), std::string::npos);
+}

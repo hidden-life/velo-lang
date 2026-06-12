@@ -424,6 +424,23 @@ Assigning a missing leaf key inserts the key:
 scores["Bob"] = 20;
 ```
 
+Map length can be read with `map::len` from `std::map`.
+
+```velo
+use std::map;
+
+let scores: map<string, int> = map {
+    "Alex": 10,
+    "Bob": 20
+};
+
+let count: int = map::len(scores)
+```
+
+`map::len` accepts maps of any value type and returns `int`.
+
 Current limitations:
-- field assignment through map index is not implemented yet
-- map builtins are not implemented yet
+- no `map::has`
+- no `map::keys`
+- no `map::values`
+- no `map::remove`

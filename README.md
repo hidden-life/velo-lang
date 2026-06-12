@@ -81,6 +81,8 @@ data model foundation based on struct.
 - map element insert assignment
 - nested map assignment
 - mixed map/array index assignment
+- `std::map` module
+- `map::len`
 
 ## Standard modules
 Current standard modules:
@@ -258,5 +260,5 @@ MVP 0.6 is in progress.
 
 Current step:
 ```text
-0.6.4   map element assignment
+0.6.5   map builtins and examples
 ```

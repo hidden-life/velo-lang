@@ -1290,6 +1290,10 @@ namespace Velo::Semantic {
             return actual.kind == SemanticTypeKind::Array;
         }
 
+        if (expected == "map") {
+            return actual.kind == SemanticTypeKind::Map;
+        }
+
         return false;
     }
 

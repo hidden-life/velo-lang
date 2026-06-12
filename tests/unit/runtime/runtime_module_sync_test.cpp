@@ -72,3 +72,20 @@ TEST(RuntimeModuleSyncTest, RegistersArrayLenBuiltinInArrayModule) {
     ASSERT_EQ(function->parameterTypes.size(), 1U);
     EXPECT_EQ(function->parameterTypes[0], "array");
 }
+
+TEST(RuntimeModuleSyncTest, RegistersMapLenBuiltinInMapModule) {
+    Velo::Runtime::Runtime runtime;
+
+    const auto *module = runtime.modules().find("map");
+    ASSERT_NE(module, nullptr);
+
+    const auto *function = module->findFunction("len");
+    ASSERT_NE(function, nullptr);
+
+    EXPECT_EQ(function->name, "len");
+    EXPECT_EQ(function->arity, 1U);
+    EXPECT_EQ(function->returnType, "int");
+
+    ASSERT_EQ(function->parameterTypes.size(), 1U);
+    EXPECT_EQ(function->parameterTypes[0], "map");
+}
