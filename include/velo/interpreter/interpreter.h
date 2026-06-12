@@ -21,6 +21,7 @@ namespace Velo::Interpreter {
         [[nodiscard]] auto callFunction(const std::string &name, std::size_t argsCount) -> Runtime::ExecutionResult;
         [[nodiscard]] auto buildStruct(const std::string &encodedOperand, std::size_t fieldsCount) -> Runtime::ExecutionResult;
         [[nodiscard]] auto buildArray(std::size_t elementsCount) -> Runtime::ExecutionResult;
+        [[nodiscard]] auto buildMap(const std::string &encodedKeys, std::size_t entriesCount) -> Runtime::ExecutionResult;
         [[nodiscard]] auto loadField(const std::string &fieldName) -> Runtime::ExecutionResult;
         [[nodiscard]] auto loadIndex() -> Runtime::ExecutionResult;
         [[nodiscard]] auto storeFieldPath(const std::string &encodedPath) -> Runtime::ExecutionResult;

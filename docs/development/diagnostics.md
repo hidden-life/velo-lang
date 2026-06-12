@@ -97,6 +97,9 @@ SEM054  Cannot assign array element through immutable local variable
 SEM055  Array element assignment type mismatch
 SEM056  Map key type must be string
 SEM057  Map type must have key and value types
+SEM058  Cannot infer type of empty map literal
+SEM059  Map literal value type mismatch
+SEM060  Duplicate map literal key
 ```
 
 This list should be updated when adding new diagnostics.

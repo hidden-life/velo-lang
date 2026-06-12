@@ -13,7 +13,7 @@ MVP 0.6 focuses on maps and object literals.
 
 ## Current step
 ```text
-0.6.1   map type syntax and semantic type model
+0.6.2   map/object literals and runtime map values
 ```
 
 ## 0.6.1 scope
@@ -54,9 +54,45 @@ map<int, int>
 
 Map values cannot be `void`.
 
-## Not implemented in 0.6.1
+Not implemented in 0.6.1
 - map/object literals
 - runtime map values
+- map indexing
+- map element assignment
+- map builtins
+
+## 0.6.2 scope
+Implemented in this step:
+- map literal expressions
+- empty map literals with an expected map type
+- semantic validation for map literal value types
+- duplicate map literal key diagnostics
+- runtime map value
+- deep-copy support for runtime maps
+- IR lowering for map literals
+- interpreter support for building runtime maps
+- bytecode support for map build instructions
+- parser tests
+- semantic tests
+- runtime tests
+- driver tests
+- bytecode VM tests
+- example
+
+Example:
+```velo
+let scores: map<string, int> = map {
+    "Alex": 10,
+    "Bob": 20,
+};
+```
+
+Empty map literals require an expected map type:
+```velo
+let scores: map<string, int> = map {};
+```
+
+Not implemented in 0.6.2:
 - map indexing
 - map element assignment
 - map builtins

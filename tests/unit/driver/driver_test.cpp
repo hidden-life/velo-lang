@@ -2250,3 +2250,82 @@ fn main(): int {
     EXPECT_NE(result.bytecodeText.find("BuildArray elements=3"), std::string::npos);
     EXPECT_NE(result.bytecodeText.find("CallBuiltin array::len args=1"), std::string::npos);
 }
+
+TEST(DriverTest, ExecutesMapLiteralProgram) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "map_literal.velo",
+        R"(module app;
+
+use std::console;
+
+fn main(): int {
+    let scores: map<string, int> = map {
+        "Alex": 10,
+        "Bob": 20
+    };
+
+    console::println(scores);
+
+    return 0;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 0);
+}
+
+TEST(DriverTest, IrModePrintsBuildMapInstruction) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "map_literal_ir.velo",
+        R"(module app;
+
+fn main(): int {
+    let scores: map<string, int> = map {
+        "Alex": 10,
+        "Bob": 20
+    };
+
+    return 0;
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    ASSERT_TRUE(result.success);
+    EXPECT_NE(result.irText.find("BuildMap entries=2"), std::string::npos);
+}
+
+TEST(DriverTest, BytecodeModePrintsBuildMapInstruction) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "map_literal_bytecode.velo",
+        R"(module app;
+
+fn main(): int {
+    let scores: map<string, int> = map {
+        "Alex": 10,
+        "Bob": 20
+    };
+
+    return 0;
+}
+)",
+        Velo::Driver::DriverMode::Bytecode
+    );
+
+    ASSERT_TRUE(result.success);
+    EXPECT_NE(result.bytecodeText.find("BuildMap entries=2"), std::string::npos);
+}

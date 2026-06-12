@@ -434,3 +434,14 @@ returns:
 ```text
 3
 ```
+
+## Runtime map values
+Runtime maps are represented as `MapValuePtr`.
+
+A runtime map stores:
+- string keys
+- runtime values
+
+`Runtime::cloneValue(...)` deep-copies maps recursively.
+
+This preserves value semantics for maps in the same way as structs and arrays.

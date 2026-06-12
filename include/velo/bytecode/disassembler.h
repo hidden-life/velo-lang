@@ -91,6 +91,10 @@ namespace Velo::Bytecode {
                     stream << " elements=" << instruction.argsCount;
                     break;
 
+                case OpCode::BuildMap:
+                    stream << " entries=" << instruction.argsCount;
+                    break;
+
                 case OpCode::LoadField:
                     stream << " " << instruction.stringOperand;
                     break;

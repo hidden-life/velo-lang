@@ -266,6 +266,7 @@ namespace Velo::Bytecode {
 
             VELO_BYTECODE_OPCODE_FROM_STRING(BuildStruct)
             VELO_BYTECODE_OPCODE_FROM_STRING(BuildArray)
+            VELO_BYTECODE_OPCODE_FROM_STRING(BuildMap)
             VELO_BYTECODE_OPCODE_FROM_STRING(LoadField)
             VELO_BYTECODE_OPCODE_FROM_STRING(StoreFieldPath)
             VELO_BYTECODE_OPCODE_FROM_STRING(LoadIndex)

@@ -42,6 +42,7 @@ namespace Velo::AST {
         Call,
         StructLiteral,
         ArrayLiteral,
+        MapLiteral,
         FieldAccess,
         Index,
         Binary,
@@ -145,6 +146,22 @@ namespace Velo::AST {
         ) : Expression(ExpressionKind::ArrayLiteral, literalRange), elements(std::move(literalElements)) {}
 
         std::vector<std::unique_ptr<Expression>> elements {};
+    };
+
+    struct MapLiteralEntry final {
+        std::string key {};
+        Source::SourceRange keyRange {};
+        std::unique_ptr<Expression> value {};
+        Source::SourceRange range {};
+    };
+
+    struct MapLiteralExpression final : Expression {
+        MapLiteralExpression(
+            std::vector<MapLiteralEntry> literalEntries,
+            Source::SourceRange literalRange
+        ) : Expression(ExpressionKind::MapLiteral, literalRange), entries(std::move(literalEntries)) {}
+
+        std::vector<MapLiteralEntry> entries {};
     };
 
     struct FieldAccessExpression final : Expression {

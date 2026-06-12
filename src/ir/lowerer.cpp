@@ -64,6 +64,18 @@ namespace {
 
         return encoded;
     }
+
+    [[nodiscard]] auto encodeMapKeys(const std::vector<std::string> &keys) -> std::string {
+        std::string encoded;
+
+        for (const auto &key : keys) {
+            encoded += std::to_string(key.size());
+            encoded += ":";
+            encoded += key;
+        }
+
+        return encoded;
+    }
 }
 
 namespace Velo::IR {
@@ -338,6 +350,12 @@ namespace Velo::IR {
             case ExpressionKind::ArrayLiteral: {
                 const auto &arrayLiteral = static_cast<const ArrayLiteralExpression&>(expr);
                 lowerArrayLiteralExpression(arrayLiteral, func);
+                return;
+            }
+
+            case ExpressionKind::MapLiteral: {
+                const auto &mapLiteral = static_cast<const MapLiteralExpression&>(expr);
+                lowerMapLiteralExpression(mapLiteral, func);
                 return;
             }
 
@@ -748,6 +766,22 @@ namespace Velo::IR {
         func.instructions.push_back(Instruction {
             .code = OpCode::StoreLocal,
             .indexOperand = *localIdx,
+        });
+    }
+
+    void Lowerer::lowerMapLiteralExpression(const AST::MapLiteralExpression &expr, Function &func) {
+        std::vector<std::string> keys;
+        keys.reserve(expr.entries.size());
+
+        for (const auto &entry : expr.entries) {
+            keys.push_back(entry.key);
+            lowerExpression(*entry.value, func);
+        }
+
+        func.instructions.push_back(Instruction {
+            .code = OpCode::BuildMap,
+            .stringOperand = encodeMapKeys(keys),
+            .argsCount = expr.entries.size(),
         });
     }
 }

@@ -87,3 +87,39 @@ TEST(RuntimeValueTest, CloneValueDeepCopiesArrayValues) {
     EXPECT_EQ(std::get<int>(clonedArray->elements[0]), 1);
     EXPECT_EQ(std::get<int>(clonedNested->elements[0]), 7);
 }
+
+TEST(RuntimeValueTest, CloneValueDeepCopiesMapValues) {
+    auto nestedArray = std::make_shared<Velo::Runtime::ArrayValue>();
+    nestedArray->elements.emplace_back(7);
+
+    auto mapValue = std::make_shared<Velo::Runtime::MapValue>();
+    mapValue->entries.emplace("answer", 42);
+    mapValue->entries.emplace("name", std::string("Alex"));
+    mapValue->entries.emplace("values", nestedArray);
+
+    const Velo::Runtime::Value clonedValue = Velo::Runtime::cloneValue(
+        Velo::Runtime::Value {mapValue}
+    );
+
+    ASSERT_TRUE(std::holds_alternative<Velo::Runtime::MapValuePtr>(clonedValue));
+
+    const auto clonedMap = std::get<Velo::Runtime::MapValuePtr>(clonedValue);
+    ASSERT_NE(clonedMap, nullptr);
+    EXPECT_NE(clonedMap.get(), mapValue.get());
+
+    ASSERT_EQ(clonedMap->entries.size(), 3U);
+    EXPECT_EQ(std::get<int>(clonedMap->entries.at("answer")), 42);
+    EXPECT_EQ(std::get<std::string>(clonedMap->entries.at("name")), "Alex");
+
+    ASSERT_TRUE(std::holds_alternative<Velo::Runtime::ArrayValuePtr>(clonedMap->entries.at("values")));
+
+    const auto clonedArray = std::get<Velo::Runtime::ArrayValuePtr>(clonedMap->entries.at("values"));
+    ASSERT_NE(clonedArray, nullptr);
+    EXPECT_NE(clonedArray.get(), nestedArray.get());
+
+    nestedArray->elements[0] = 99;
+    mapValue->entries["answer"] = 100;
+
+    EXPECT_EQ(std::get<int>(clonedMap->entries.at("answer")), 42);
+    EXPECT_EQ(std::get<int>(clonedArray->elements[0]), 7);
+}

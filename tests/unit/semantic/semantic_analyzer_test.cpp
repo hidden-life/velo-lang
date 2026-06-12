@@ -3769,3 +3769,195 @@ fn main(): int {
     ASSERT_TRUE(engine.hasErrors());
     EXPECT_EQ(engine.diagnostics().front().code(), "SEM031");
 }
+
+TEST(SemanticAnalyzerTest, AcceptsMapLiteral) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    let scores: map<string, int> = map {
+        "Alex": 10,
+        "Bob": 20
+    };
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, AcceptsEmptyMapLiteralWithDeclaredType) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    let scores: map<string, int> = map {};
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, AcceptsMapLiteralOfStructValues) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+struct User {
+    id: int;
+    name: string;
+}
+
+fn main(): int {
+    let users: map<string, User> = map {
+        "alex": User { id: 1, name: "Alex" },
+        "bob": User { id: 2, name: "Bob" }
+    };
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, AcceptsMapLiteralWithArrayValues) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    let grouped: map<string, []int> = map {
+        "a": [1, 2],
+        "b": [3, 4]
+    };
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, ReportsMapLiteralValueTypeMismatch) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    let scores: map<string, int> = map {
+        "Alex": 10,
+        "Bob": "bad"
+    };
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM059");
+}
+
+TEST(SemanticAnalyzerTest, ReportsCannotInferEmptyMapLiteralType) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    return map {};
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM058");
+}
+
+TEST(SemanticAnalyzerTest, ReportsDuplicateMapLiteralKey) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    let scores: map<string, int> = map {
+        "Alex": 10,
+        "Alex": 20
+    };
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM060");
+}

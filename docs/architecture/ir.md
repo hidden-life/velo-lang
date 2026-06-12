@@ -428,3 +428,22 @@ PushInt 0
 StoreIndexPath indexes=2
 StoreLocal local[0]
 ```
+
+## Map literals
+Map literals are lowered to `BuildMap`.
+
+Example source:
+```velo
+let scores: map<string, int> = map {
+    "Alex": 10,
+    "Bob": 20
+};
+```
+
+Representative IR:
+```text
+PushInt 10
+PushInt 20
+BuildMap entries=2
+StoreLocal local[0]
+```

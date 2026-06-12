@@ -115,6 +115,8 @@ namespace Velo::Bytecode {
                     return OpCode::BuildStruct;
                 case IR::OpCode::BuildArray:
                     return OpCode::BuildArray;
+                case IR::OpCode::BuildMap:
+                    return OpCode::BuildMap;
 
                 case IR::OpCode::LoadField:
                     return OpCode::LoadField;

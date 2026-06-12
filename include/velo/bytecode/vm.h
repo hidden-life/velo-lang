@@ -180,6 +180,38 @@ namespace Velo::Bytecode {
         [[nodiscard]] inline auto splitFieldPath(const std::string &encodedPath) -> std::vector<std::string> {
             return splitString(encodedPath, '.');
         }
+
+        [[nodiscard]] inline auto decodeMapKeys(const std::string &encodedKeys) -> std::vector<std::string> {
+            std::vector<std::string> keys;
+            std::size_t offset = 0U;
+
+            while (offset < encodedKeys.size()) {
+                const auto colon = encodedKeys.find(':', offset);
+                if (colon == std::string::npos) {
+                    return {};
+                }
+
+                const auto lengthText = encodedKeys.substr(offset, colon - offset);
+                std::size_t keyLength = 0U;
+
+                try {
+                    keyLength = static_cast<std::size_t>(std::stoull(lengthText));
+                } catch (...) {
+                    return {};
+                }
+
+                const auto keyBegin = colon + 1U;
+                const auto keyEnd = keyBegin + keyLength;
+                if (keyEnd > encodedKeys.size()) {
+                    return {};
+                }
+
+                keys.push_back(encodedKeys.substr(keyBegin, keyLength));
+                offset = keyEnd;
+            }
+
+            return keys;
+        }
     }
 
     class VM final {
@@ -371,65 +403,68 @@ namespace Velo::Bytecode {
                         }
                     );
 
-                    case OpCode::CompareLessInt:
-                return Detail::compareIntegerValues(_stack, [](int left, int right) {
-                    return left < right;
-                });
+                case OpCode::CompareLessInt:
+                    return Detail::compareIntegerValues(_stack, [](int left, int right) {
+                        return left < right;
+                    });
 
-            case OpCode::CompareGreaterInt:
-                return Detail::compareIntegerValues(_stack, [](int left, int right) {
-                    return left > right;
-                });
+                case OpCode::CompareGreaterInt:
+                    return Detail::compareIntegerValues(_stack, [](int left, int right) {
+                        return left > right;
+                    });
 
-            case OpCode::CompareLessEqualInt:
-                return Detail::compareIntegerValues(_stack, [](int left, int right) {
-                    return left <= right;
-                });
+                case OpCode::CompareLessEqualInt:
+                    return Detail::compareIntegerValues(_stack, [](int left, int right) {
+                        return left <= right;
+                    });
 
-            case OpCode::CompareGreaterEqualInt:
-                return Detail::compareIntegerValues(_stack, [](int left, int right) {
-                    return left >= right;
-                });
+                case OpCode::CompareGreaterEqualInt:
+                    return Detail::compareIntegerValues(_stack, [](int left, int right) {
+                        return left >= right;
+                    });
 
-            case OpCode::Jump:
-                return {};
+                case OpCode::Jump:
+                    return {};
 
-            case OpCode::JumpIfFalse:
-                return jumpIfFalse();
+                case OpCode::JumpIfFalse:
+                    return jumpIfFalse();
 
-            case OpCode::CallFunction:
-                return callFunction(instruction.stringOperand, instruction.argsCount);
+                case OpCode::CallFunction:
+                    return callFunction(instruction.stringOperand, instruction.argsCount);
 
-            case OpCode::CallBuiltin:
-                return callBuiltin(instruction.stringOperand, instruction.argsCount);
+                case OpCode::CallBuiltin:
+                    return callBuiltin(instruction.stringOperand, instruction.argsCount);
 
-            case OpCode::BuildStruct:
-                return buildStruct(instruction.stringOperand, instruction.argsCount);
+                case OpCode::BuildStruct:
+                    return buildStruct(instruction.stringOperand, instruction.argsCount);
 
-            case OpCode::BuildArray:
-                return buildArray(instruction.argsCount);
+                case OpCode::BuildArray:
+                    return buildArray(instruction.argsCount);
 
-            case OpCode::LoadField:
-                return loadField(instruction.stringOperand);
+                case OpCode::BuildMap:
+                    return buildMap(instruction.stringOperand, instruction.argsCount);
 
-            case OpCode::StoreFieldPath:
-                return storeFieldPath(instruction.stringOperand);
+                case OpCode::LoadField:
+                    return loadField(instruction.stringOperand);
 
-            case OpCode::LoadIndex:
-                return loadIndex();
+                case OpCode::StoreFieldPath:
+                    return storeFieldPath(instruction.stringOperand);
 
-            case OpCode::StoreIndexPath:
-                return storeIndexPath(instruction.argsCount);
+                case OpCode::LoadIndex:
+                    return loadIndex();
 
-            case OpCode::Return:
-                return returnFromFunction();
+                case OpCode::StoreIndexPath:
+                    return storeIndexPath(instruction.argsCount);
 
-            case OpCode::Pop:
-                if (!_stack.empty()) {
-                    _stack.pop_back();
+                case OpCode::Return:
+                    return returnFromFunction();
+
+                case OpCode::Pop:
+                    if (!_stack.empty()) {
+                        _stack.pop_back();
+                    }
+                    return {};
                 }
-                return {};
-            }
 
             return Runtime::ExecutionResult {
                 .success = false,
@@ -750,6 +785,38 @@ namespace Velo::Bytecode {
 
             _stack.erase(first, _stack.end());
             _stack.push_back(arrayValue);
+
+            return {};
+        }
+
+        [[nodiscard]] auto buildMap(const std::string &encodedKeys, std::size_t entriesCount) -> Runtime::ExecutionResult {
+            const auto keys = Detail::decodeMapKeys(encodedKeys);
+            if (keys.size() != entriesCount) {
+                return Runtime::ExecutionResult {
+                    .success = false,
+                    .exitCode = 1,
+                    .error = "Map key metadata does not match entries count."
+                };
+            }
+
+            if (_stack.size() < entriesCount) {
+                return Runtime::ExecutionResult {
+                    .success = false,
+                    .exitCode = 1,
+                    .error = "Operand stack underflow while building map."
+                };
+            }
+
+            auto mapValue = std::make_shared<Runtime::MapValue>();
+            const auto first = _stack.end() - static_cast<std::ptrdiff_t>(entriesCount);
+            for (std::size_t idx = 0U; idx < entriesCount; ++idx) {
+                mapValue->entries[keys[idx]] = Runtime::cloneValue(
+                    *(first + static_cast<std::ptrdiff_t>(idx))
+                );
+            }
+
+            _stack.erase(first, _stack.end());
+            _stack.push_back(mapValue);
 
             return {};
         }

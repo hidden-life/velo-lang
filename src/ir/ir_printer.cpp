@@ -86,6 +86,10 @@ namespace Velo::IR {
                 stream << " elements=" << instruction.argsCount;
                 break;
 
+            case OpCode::BuildMap:
+                stream << " entries=" << instruction.argsCount;
+                break;
+
             case OpCode::LoadField:
                 stream << " " << instruction.stringOperand;
                 break;
@@ -209,6 +213,9 @@ namespace Velo::IR {
 
             case OpCode::BuildArray:
                 return "BuildArray";
+
+            case OpCode::BuildMap:
+                return "BuildMap";
 
             case OpCode::LoadField:
                 return "LoadField";

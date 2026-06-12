@@ -2,7 +2,7 @@
 Velo is an experimental programming language and virtual machine focused on backend
 and API-oriented development.
 
-The current goal is **Velo MVP 0.5**: a small, strict, statically checked language
+The current goal is **Velo MVP 0.6**: a small, strict, statically checked language
 with a simple VM, standard modules, and developer-friendly CLI tooling, and basic
 data model foundation based on struct.
 
@@ -71,6 +71,9 @@ data model foundation based on struct.
 - bytecode module writer
 - bytecode module reader
 - bytecode module roundtrip tests
+- map literals
+- runtime map values
+- map value semantics
 
 ## Standard modules
 Current standard modules:
@@ -195,6 +198,10 @@ Start here:
 - [MVP v0.2.0 release notes draft](docs/development/release_notes_v0_2.md)
 - [MVP 0.3 status](docs/development/mvp_0_3.md)
 - [Velo v0.3.0 release notes draft](docs/development/release_notes_v0_3.md)
+- [MVP 0.4 status](docs/development/mvp_0_4.md)
+- [Velo v0.4.0 release notes draft](docs/development/release_notes_v0_4.md)
+- [MVP 0.5 status](docs/development/mvp_0_5.md)
+- [Velo v0.5.0 release notes draft](docs/development/release_notes_v0_5.md)
 
 ## Current development focus
 The project is currently moving toward **Velo MVP 0.6**.
@@ -241,3 +248,8 @@ MVP 0.5 is tagged as `v0.5.0`.
 
 ## MVP 0.6 status
 MVP 0.6 is in progress.
+
+Current step:
+```text
+0.6.2   map/object literals and runtime map values
+```

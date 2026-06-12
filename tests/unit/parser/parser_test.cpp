@@ -1171,3 +1171,96 @@ struct Store {
     ASSERT_EQ(type.mapValueType->name.segments.size(), 1U);
     EXPECT_EQ(type.mapValueType->name.segments[0], "int");
 }
+
+TEST(ParserTest, ParsesMapLiteralExpression) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    let scores: map<string, int> = map {
+        "Alex": 10,
+        "Bob": 20
+    };
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    const auto &mainFunction = program->functions[0];
+    ASSERT_EQ(mainFunction.statements.size(), 2U);
+
+    const auto &varDecl = static_cast<const Velo::AST::VariableDeclarationStatement&>(
+        *mainFunction.statements[0]
+    );
+
+    ASSERT_NE(varDecl.initializer, nullptr);
+    ASSERT_EQ(varDecl.initializer->kind, Velo::AST::ExpressionKind::MapLiteral);
+
+    const auto &mapLiteral = static_cast<const Velo::AST::MapLiteralExpression&>(*varDecl.initializer);
+    ASSERT_EQ(mapLiteral.entries.size(), 2U);
+    EXPECT_EQ(mapLiteral.entries[0].key, "Alex");
+    EXPECT_EQ(mapLiteral.entries[1].key, "Bob");
+}
+
+TEST(ParserTest, ParsesEmptyMapLiteralExpression) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    let scores: map<string, int> = map {};
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    const auto &mainFunction = program->functions[0];
+    const auto &varDecl = static_cast<const Velo::AST::VariableDeclarationStatement&>(
+        *mainFunction.statements[0]
+    );
+
+    ASSERT_EQ(varDecl.initializer->kind, Velo::AST::ExpressionKind::MapLiteral);
+
+    const auto &mapLiteral = static_cast<const Velo::AST::MapLiteralExpression&>(*varDecl.initializer);
+    EXPECT_TRUE(mapLiteral.entries.empty());
+}
+
+TEST(ParserTest, ParsesMapLiteralWithTrailingComma) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+fn main(): int {
+    let scores: map<string, int> = map {
+        "Alex": 10,
+        "Bob": 20,
+    };
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    const auto &mainFunction = program->functions[0];
+    const auto &varDecl = static_cast<const Velo::AST::VariableDeclarationStatement&>(
+        *mainFunction.statements[0]
+    );
+
+    const auto &mapLiteral = static_cast<const Velo::AST::MapLiteralExpression&>(*varDecl.initializer);
+    EXPECT_EQ(mapLiteral.entries.size(), 2U);
+}

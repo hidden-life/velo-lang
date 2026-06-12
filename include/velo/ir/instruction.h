@@ -16,6 +16,7 @@ namespace Velo::IR {
 
         BuildStruct,
         BuildArray,
+        BuildMap,
         LoadField,
         LoadIndex,
         StoreIndexPath,

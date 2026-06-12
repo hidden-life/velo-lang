@@ -85,6 +85,7 @@ CallFunction
 CallBuiltin
 BuildStruct
 BuildArray
+BuildMap
 LoadField
 StoreFieldPath
 LoadIndex
@@ -234,3 +235,15 @@ Current non-goals:
 The VM exists as a separate execution path in MVP 0.5.
 
 The main CLI `run` mode still uses the existing IR interpreter path.
+
+## Map literals
+Map literals compile to `BuildMap`.
+
+Representative bytecode:
+```text
+PushInt 10
+PushInt 20
+BuildMap entries=2
+StoreLocal local[0]
+```
+The map key metadata is stored in the instruction string operand.

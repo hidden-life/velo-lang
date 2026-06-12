@@ -318,3 +318,48 @@ TEST(BytecodeVmTest, ReportsMissingMainFunction) {
     EXPECT_EQ(result.exitCode, 1);
     EXPECT_NE(result.error.find("main"), std::string::npos);
 }
+
+TEST(BytecodeVmTest, ExecutesBuildMap) {
+    Velo::Bytecode::Module module;
+
+    Velo::Bytecode::Function mainFunction;
+    mainFunction.name = "main";
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::PushInt,
+        .intOperand = 10,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::PushInt,
+        .intOperand = 20,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::BuildMap,
+        .stringOperand = "4:Alex3:Bob",
+        .argsCount = 2U,
+    });
+
+    mainFunction.instructions.push_back(Velo::Bytecode::Instruction {
+        .code = Velo::Bytecode::OpCode::Return,
+    });
+
+    module.functions.push_back(std::move(mainFunction));
+
+    Velo::Runtime::Runtime runtime;
+    Velo::Bytecode::VM vm(runtime);
+
+    const auto result = vm.execute(module);
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.returnValue.has_value());
+    ASSERT_TRUE(std::holds_alternative<Velo::Runtime::MapValuePtr>(*result.returnValue));
+
+    const auto mapValue = std::get<Velo::Runtime::MapValuePtr>(*result.returnValue);
+    ASSERT_NE(mapValue, nullptr);
+
+    ASSERT_EQ(mapValue->entries.size(), 2U);
+    EXPECT_EQ(std::get<int>(mapValue->entries.at("Alex")), 10);
+    EXPECT_EQ(std::get<int>(mapValue->entries.at("Bob")), 20);
+}

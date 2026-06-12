@@ -728,6 +728,10 @@ namespace Velo::Parser {
         }
 
         if (check(TokenKind::OpenBrace)) {
+            if (qualifiedName->segments.size() == 1U && qualifiedName->segments.front() == "map") {
+                return parseMapLiteralExpression(*qualifiedName);
+            }
+
             return parseStructLiteralExpression(*qualifiedName);
         }
 
@@ -1231,5 +1235,67 @@ namespace Velo::Parser {
             std::move(elements),
             Source::SourceRange(openBracket.range().begin(), closeBracket->range().end())
         );
+    }
+
+    auto Parser::parseMapLiteralExpression(const AST::QualifiedName &mapName) -> std::unique_ptr<AST::Expression> {
+        const Token *openBrace = consume(TokenKind::OpenBrace, "PAR150", "Expected '{' after 'map'.");
+        if (openBrace == nullptr) {
+            return nullptr;
+        }
+
+        std::vector<AST::MapLiteralEntry> entries;
+
+        if (!check(TokenKind::CloseBrace)) {
+            while (true) {
+                const Token *keyToken = consume(
+                    TokenKind::StringLiteral,
+                    "PAR151",
+                    "Expected string key in map literal."
+                );
+
+                if (keyToken == nullptr) {
+                    return nullptr;
+                }
+
+                if (consume(TokenKind::Colon, "PAR152", "Expected ':' after map literal key.") == nullptr) {
+                    return nullptr;
+                }
+
+                auto value = parseExpression();
+                if (value == nullptr) {
+                    return nullptr;
+                }
+
+                auto valueEnd = value->range.end();
+                entries.push_back(AST::MapLiteralEntry {
+                    .key = std::string(keyToken->text()),
+                    .keyRange = keyToken->range(),
+                    .value = std::move(value),
+                    .range = Source::SourceRange(keyToken->range().begin(), valueEnd)
+                });
+
+                entries.back().range = Source::SourceRange(keyToken->range().begin(), entries.back().value->range.end());
+
+                if (!match(TokenKind::Comma)) {
+                    break;
+                }
+
+                // Allow trailing comma:
+                //
+                // map {
+                //      "Alex": 10,
+                // }
+                if (check(TokenKind::CloseBrace)) {
+                    break;
+                }
+            }
+        }
+
+        const Token *closeBrace = consume(TokenKind::CloseBrace, "PAR153", "Expected '}' after map literal.");
+        if (closeBrace == nullptr) {
+            return nullptr;
+        }
+
+        return std::make_unique<AST::MapLiteralExpression>(std::move(entries), Source::SourceRange(mapName.range.begin(), closeBrace->range().end()));
     }
 }

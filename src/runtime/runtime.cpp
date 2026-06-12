@@ -36,6 +36,15 @@ namespace Velo::Runtime {
                 return "<array len=" + std::to_string(arrayVal->elements.size()) + ">";
             }
 
+            if (std::holds_alternative<MapValuePtr>(value)) {
+                const auto &mapVal = std::get<MapValuePtr>(value);
+                if (mapVal == nullptr) {
+                    return "<map:null>";
+                }
+
+                return "<map len=" + std::to_string(mapVal->entries.size()) + ">";
+            }
+
             return "<unknown>";
         }
     }

@@ -226,13 +226,7 @@ namespace Velo::Semantic {
                     return;
                 }
 
-                SemanticType actual {};
-                if (returnStmt.expression->kind == AST::ExpressionKind::ArrayLiteral) {
-                    const auto &arrayLiteral = static_cast<const AST::ArrayLiteralExpression&>(*returnStmt.expression);
-                    actual = analyzeArrayLiteralExpressionType(arrayLiteral, &expectedType);
-                } else {
-                    actual = analyzeCheckedExpressionType(*returnStmt.expression);
-                }
+                const auto actual = analyzeExpressionTypeWithExpected(*returnStmt.expression, &expectedType);
 
                 if (isVoidType(expectedType)) {
                     _engine.error(
@@ -262,13 +256,7 @@ namespace Velo::Semantic {
                     declType = {};
                 }
 
-                SemanticType initType {};
-                if (varDecl.initializer->kind == AST::ExpressionKind::ArrayLiteral) {
-                    const auto &arrayLiteral = static_cast<const AST::ArrayLiteralExpression&>(*varDecl.initializer);
-                    initType = analyzeArrayLiteralExpressionType(arrayLiteral, &declType);
-                } else {
-                    initType = analyzeCheckedExpressionType(*varDecl.initializer);
-                }
+                const auto initType = analyzeExpressionTypeWithExpected(*varDecl.initializer, &declType);
 
                 if (!isUnknownType(declType) && !isUnknownType(initType) && !typesEqual(initType, declType)) {
                     _engine.error(
@@ -316,7 +304,7 @@ namespace Velo::Semantic {
                     );
                 }
 
-                const auto valueType = analyzeCheckedExpressionType(*assignment.value);
+                const auto valueType = analyzeExpressionTypeWithExpected(*assignment.value, &local->type);
 
                 if (!isUnknownType(valueType) && !isUnknownType(local->type) && !typesEqual(valueType, local->type)) {
                     _engine.error(
@@ -509,6 +497,12 @@ namespace Velo::Semantic {
                 return;
             }
 
+            case AST::ExpressionKind::MapLiteral: {
+                const auto &mapLiteral = static_cast<const AST::MapLiteralExpression&>(expr);
+                static_cast<void>(analyzeMapLiteralExpressionType(mapLiteral));
+                return;
+            }
+
             case AST::ExpressionKind::FieldAccess: {
                 const auto &fieldAccess = static_cast<const AST::FieldAccessExpression&>(expr);
                 static_cast<void>(analyzeFieldAccessExpressionType(fieldAccess));
@@ -698,6 +692,12 @@ namespace Velo::Semantic {
             case ExpressionKind::ArrayLiteral: {
                 const auto &arrayLiteral = static_cast<const ArrayLiteralExpression&>(expression);
                 return analyzeArrayLiteralExpressionType(arrayLiteral);
+            }
+
+            case ExpressionKind::MapLiteral: {
+                const auto &mapLiteral = static_cast<const MapLiteralExpression&>(expression);
+
+                return analyzeMapLiteralExpressionType(mapLiteral);
             }
 
             case ExpressionKind::FieldAccess: {
@@ -924,13 +924,7 @@ namespace Velo::Semantic {
                 }
 
                 const auto expectedType = typeFromTypeName(targetFunc.parameters[idx].type);
-                SemanticType actualType {};
-                if (callExpr.arguments[idx]->kind == AST::ExpressionKind::ArrayLiteral) {
-                    const auto &arrayLiteral = static_cast<const AST::ArrayLiteralExpression&>(*callExpr.arguments[idx]);
-                    actualType = analyzeArrayLiteralExpressionType(arrayLiteral, &expectedType);
-                } else {
-                    actualType = analyzeCheckedExpressionType(*callExpr.arguments[idx]);
-                }
+                const auto actualType = analyzeExpressionTypeWithExpected(*callExpr.arguments[idx], &expectedType);
 
                 if (!isUnknownType(expectedType) && !isUnknownType(actualType) && !typesEqual(actualType, expectedType)) {
                     _engine.error(
@@ -1495,13 +1489,7 @@ namespace Velo::Semantic {
             }
 
             const auto expectedType = typeFromTypeName(declaredIt->second->type);
-            SemanticType actualType {};
-            if (literalField.value->kind == AST::ExpressionKind::ArrayLiteral) {
-                const auto &arrayLiteral = static_cast<const AST::ArrayLiteralExpression&>(*literalField.value);
-                actualType = analyzeArrayLiteralExpressionType(arrayLiteral, &expectedType);
-            } else {
-                actualType = analyzeCheckedExpressionType(*literalField.value);
-            }
+            const auto actualType = analyzeExpressionTypeWithExpected(*literalField.value, &expectedType);
 
             if (!isUnknownType(expectedType) && !isUnknownType(actualType) && !typesEqual(actualType, expectedType)) {
                 _engine.error(
@@ -1533,6 +1521,11 @@ namespace Velo::Semantic {
     auto SemanticAnalyzer::analyzeArrayLiteralExpressionType(
         const AST::ArrayLiteralExpression &expr,
         const SemanticType *expectedType) -> SemanticType {
+        const SemanticType *expected = nullptr;
+        if (expectedType != nullptr && expectedType->kind == SemanticTypeKind::Array && expectedType->elementType != nullptr) {
+            expected = expectedType->elementType.get();
+        }
+
         if (expr.elements.empty()) {
             if (expectedType != nullptr && expectedType->kind == SemanticTypeKind::Array && expectedType->elementType != nullptr) {
                 return *expectedType;
@@ -1547,13 +1540,14 @@ namespace Velo::Semantic {
             return {};
         }
 
-        SemanticType elementType = analyzeCheckedExpressionType(*expr.elements.front());
+        SemanticType elementType = analyzeExpressionTypeWithExpected(*expr.elements.front(), expected);
         if (isUnknownType(elementType)) {
             return {};
         }
 
         for (std::size_t idx = 1U; idx < expr.elements.size(); ++idx) {
-            const auto currentType = analyzeCheckedExpressionType(*expr.elements[idx]);
+            const auto currentType = analyzeExpressionTypeWithExpected(*expr.elements[idx], expected);
+
             if (!isUnknownType(currentType) && !typesEqual(currentType, elementType)) {
                 _engine.error(
                     "SEM050",
@@ -1573,10 +1567,7 @@ namespace Velo::Semantic {
             .elementType = std::make_shared<SemanticType>(std::move(elementType)),
         };
 
-        if (expectedType != nullptr
-            && expectedType->kind == SemanticTypeKind::Array
-            && !typesEqual(result, *expectedType)
-        ) {
+        if (expectedType != nullptr && expectedType->kind == SemanticTypeKind::Array && !typesEqual(result, *expectedType)) {
             _engine.error(
                 "SEM050",
                 "Array literal type mismatch. Expected '" +
@@ -1655,14 +1646,7 @@ namespace Velo::Semantic {
         }
 
         const auto targetType = analyzeIndexExpressionType(*stmt.target);
-
-        SemanticType valueType {};
-        if (stmt.value->kind == AST::ExpressionKind::ArrayLiteral) {
-            const auto &arrayLiteral = static_cast<const AST::ArrayLiteralExpression&>(*stmt.value);
-            valueType = analyzeArrayLiteralExpressionType(arrayLiteral, &targetType);
-        } else {
-            valueType = analyzeCheckedExpressionType(*stmt.value);
-        }
+        const auto valueType = analyzeExpressionTypeWithExpected(*stmt.value, &targetType);
 
         if (!isUnknownType(targetType) && !isUnknownType(valueType) && !typesEqual(targetType, valueType)) {
             _engine.error(
@@ -1675,5 +1659,104 @@ namespace Velo::Semantic {
                 stmt.range
             );
         }
+    }
+
+    auto SemanticAnalyzer::analyzeMapLiteralExpressionType(const AST::MapLiteralExpression &expr,
+        const SemanticType *expected) -> SemanticType {
+        const SemanticType *expectedValueType = nullptr;
+
+        if (expected != nullptr && expected->kind == SemanticTypeKind::Map && expected->valueType != nullptr) {
+            expectedValueType = expected->valueType.get();
+        }
+
+        if (expr.entries.empty()) {
+            if (expected != nullptr && expected->kind == SemanticTypeKind::Map && expected->keyType != nullptr && expected->valueType != nullptr) {
+                return *expected;
+            }
+
+            _engine.error(
+                "SEM058",
+                "Cannot infer type of empty map literal.",
+                expr.range
+            );
+
+            return {};
+        }
+
+        std::unordered_set<std::string> keys;
+        for (const auto &entry : expr.entries) {
+            const auto [it, inserted] = keys.emplace(entry.key);
+            static_cast<void>(it);
+
+            if (!inserted) {
+                _engine.error(
+                    "SEM060",
+                    "Duplicate key '" + entry.key + "' in map literal.",
+                    entry.keyRange
+                );
+            }
+        }
+
+        SemanticType valueType = analyzeExpressionTypeWithExpected(*expr.entries.front().value, expectedValueType);
+        if (isUnknownType(valueType)) {
+            return {};
+        }
+
+        for (std::size_t idx = 1U; idx < expr.entries.size(); ++idx) {
+            const auto currentType = analyzeExpressionTypeWithExpected(*expr.entries[idx].value, expectedValueType);
+
+            if (!isUnknownType(currentType) && !typesEqual(currentType, valueType)) {
+                _engine.error(
+                    "SEM059",
+                    "Map literal value type mismatch. Expected '" +
+                    semanticTypeToString(valueType) +
+                    "', actual '" +
+                    semanticTypeToString(currentType) +
+                    "'.",
+                    expr.entries[idx].range
+                );
+            }
+        }
+
+        SemanticType result {
+            .kind = SemanticTypeKind::Map,
+            .name = {},
+            .elementType = {},
+            .keyType = std::make_shared<SemanticType>(SemanticType {
+                .kind = SemanticTypeKind::String,
+            }),
+            .valueType = std::make_shared<SemanticType>(std::move(valueType)),
+        };
+
+        if (expected != nullptr && expected->kind == SemanticTypeKind::Map && !typesEqual(result, *expected)) {
+            _engine.error(
+                "SEM059",
+                "Map literal type mismatch. Expected '" +
+                semanticTypeToString(*expected) +
+                "', actual '" +
+                semanticTypeToString(result) +
+                "'.",
+                expr.range
+            );
+        }
+
+        return result;
+    }
+
+    auto SemanticAnalyzer::analyzeExpressionTypeWithExpected(const AST::Expression &expr,
+        const SemanticType *expected) -> SemanticType {
+        if (expr.kind == AST::ExpressionKind::ArrayLiteral) {
+            const auto &arrayLiteral = static_cast<const AST::ArrayLiteralExpression&>(expr);
+
+            return analyzeArrayLiteralExpressionType(arrayLiteral, expected);
+        }
+
+        if (expr.kind == AST::ExpressionKind::MapLiteral) {
+            const auto &mapLiteral = static_cast<const AST::MapLiteralExpression&>(expr);
+
+            return analyzeMapLiteralExpressionType(mapLiteral, expected);
+        }
+
+        return analyzeCheckedExpressionType(expr);
     }
 }

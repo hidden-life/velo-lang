@@ -41,6 +41,7 @@ namespace Velo::Bytecode {
 
         BuildStruct,
         BuildArray,
+        BuildMap,
         LoadField,
         StoreFieldPath,
         LoadIndex,
@@ -133,6 +134,8 @@ namespace Velo::Bytecode {
                 return "BuildStruct";
             case OpCode::BuildArray:
                 return "BuildArray";
+            case OpCode::BuildMap:
+                return "BuildMap";
             case OpCode::LoadField:
                 return "LoadField";
             case OpCode::StoreFieldPath:

@@ -667,3 +667,32 @@ Arrays of maps are supported:
 Current limitations:
 - map/object literals are not implemented yet
 - map indexing is not implemented yet
+
+## Map literals
+Map literals use explicit `map {...}` syntax:
+```velo
+let scores: map<string, int> = map {
+    "Alex": 10,
+    "Bob": 20,
+};
+```
+
+Map keys are string literals.
+
+Trailing commas are allowed:
+```velo
+let scores: map<string, int> = map {
+    "Alex": 10,
+    "Bob": 20,
+};
+```
+
+Empty map literals require an expected map type:
+```velo
+let scores: map<string, int> = map {};
+```
+
+Current limitations:
+- map indexing is not implemented yet
+- map element assignment is not implemented yet
+- map builtins are not implemented yet

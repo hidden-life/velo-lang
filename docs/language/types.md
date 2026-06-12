@@ -369,8 +369,24 @@ struct Store {
 ```
 
 Current limitations:
-- map/object literals are not implemented yet
-- runtime map values are not implemented yet
 - map indexing is not implemented yet
 - map element assignment is not implemented yet
 - map builtins are not implemented yet
+
+Map literals create runtime map values:
+```velo
+let scores: map<string, int> = map {
+    "Alex": 10,
+    "Bob": 20,
+};
+```
+
+Map literal values must have consistent value types.
+
+This is rejected:
+```velo
+let scores: map<string, int> = map {
+    "Alex": 10,
+    "Bob": "bad",
+};
+```

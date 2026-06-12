@@ -253,6 +253,21 @@ namespace Velo::AST {
                     break;
                 }
 
+                case ExpressionKind::MapLiteral: {
+                    const auto &mapLiteral = static_cast<const MapLiteralExpression&>(expression);
+                    writeIndent(stream, indentLevel);
+                    stream << "MapLiteral\n";
+
+                    for (const auto &entry : mapLiteral.entries) {
+                        writeIndent(stream, indentLevel + 1U);
+                        stream << "Entry \"" << entry.key << "\"\n";
+
+                        printExpression(stream, *entry.value, indentLevel + 2U);
+                    }
+
+                    break;
+                }
+
                 case ExpressionKind::FieldAccess: {
                     const auto &fieldAccess = static_cast<const FieldAccessExpression&>(expression);
                     writeIndent(stream, indentLevel);

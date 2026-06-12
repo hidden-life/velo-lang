@@ -187,6 +187,38 @@ namespace {
         return {std::move(typeName), std::move(fields)};
     }
 
+    [[nodiscard]] auto decodeMapKeys(const std::string &encodedKeys) -> std::vector<std::string> {
+        std::vector<std::string> keys;
+        std::size_t offset = 0U;
+
+        while (offset < encodedKeys.size()) {
+            const auto colon = encodedKeys.find(':', offset);
+            if (colon == std::string::npos) {
+                return {};
+            }
+
+            const auto lengthText = encodedKeys.substr(offset, colon - offset);
+            std::size_t keyLength = 0U;
+
+            try {
+                keyLength = static_cast<std::size_t>(std::stoull(lengthText));
+            } catch (...) {
+                return {};
+            }
+
+            const auto keyBegin = colon + 1U;
+            const auto keyEnd = keyBegin + keyLength;
+            if (keyEnd > encodedKeys.size()) {
+                return {};
+            }
+
+            keys.push_back(encodedKeys.substr(keyBegin, keyLength));
+            offset = keyEnd;
+        }
+
+        return keys;
+    }
+
     [[nodiscard]] auto splitFieldPath(const std::string &encoded) -> std::vector<std::string> {
         std::vector<std::string> result;
         std::stringstream stream(encoded);
@@ -479,6 +511,9 @@ namespace Velo::Interpreter {
             case OpCode::BuildArray: {
                 return buildArray(inst.argsCount);
             }
+            case OpCode::BuildMap: {
+                return buildMap(inst.stringOperand, inst.argsCount);
+            }
             case OpCode::LoadField: {
                 return loadField(inst.stringOperand);
             }
@@ -686,6 +721,38 @@ namespace Velo::Interpreter {
 
         _stack.erase(first, _stack.end());
         _stack.push_back(arrayValue);
+
+        return {};
+    }
+
+    auto Interpreter::buildMap(const std::string &encodedKeys, std::size_t entriesCount) -> Runtime::ExecutionResult {
+        const auto keys = decodeMapKeys(encodedKeys);
+        if (keys.size() != entriesCount) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "Map key metadata does not match entries count."
+            };
+        }
+
+        if (_stack.size() < entriesCount) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "Operand stack underflow while building map."
+            };
+        }
+
+        auto mapValue = std::make_shared<Runtime::MapValue>();
+        const auto first = _stack.end() - static_cast<std::ptrdiff_t>(entriesCount);
+        for (std::size_t idx = 0U; idx < entriesCount; ++idx) {
+            mapValue->entries[keys[idx]] = Runtime::cloneValue(
+                *(first + static_cast<std::ptrdiff_t>(idx))
+            );
+        }
+
+        _stack.erase(first, _stack.end());
+        _stack.push_back(mapValue);
 
         return {};
     }

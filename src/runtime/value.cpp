@@ -34,6 +34,20 @@ namespace Velo::Runtime {
             return cloned;
         }
 
+        if (std::holds_alternative<MapValuePtr>(value)) {
+            const auto &mapValue = std::get<MapValuePtr>(value);
+            if (mapValue == nullptr) {
+                return MapValuePtr {};
+            }
+
+            auto cloned = std::make_shared<MapValue>();
+            for (const auto &[key, entryValue] : mapValue->entries) {
+                cloned->entries.emplace(key, cloneValue(entryValue));
+            }
+
+            return cloned;
+        }
+
         return value;
     }
 }

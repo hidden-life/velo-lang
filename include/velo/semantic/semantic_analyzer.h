@@ -82,6 +82,14 @@ namespace Velo::Semantic {
             const AST::ArrayLiteralExpression &expr,
             const SemanticType *expectedType = nullptr
             ) -> SemanticType;
+        [[nodiscard]] auto analyzeMapLiteralExpressionType(
+            const AST::MapLiteralExpression &expr,
+            const SemanticType *expected = nullptr
+            ) -> SemanticType;
+        [[nodiscard]] auto analyzeExpressionTypeWithExpected(
+            const AST::Expression &expr,
+            const SemanticType *expected
+        ) -> SemanticType;
 
         void validateDeclaredType(
             const AST::TypeName &typeName,

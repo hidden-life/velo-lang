@@ -10,11 +10,13 @@
 namespace Velo::Runtime {
     struct StructValue;
     struct ArrayValue;
+    struct MapValue;
 
     using StructValuePtr = std::shared_ptr<StructValue>;
     using ArrayValuePtr = std::shared_ptr<ArrayValue>;
+    using MapValuePtr = std::shared_ptr<MapValue>;
     // Runtime value used by interpreter.
-    using Value = std::variant<int, std::string, bool, StructValuePtr, ArrayValuePtr>;
+    using Value = std::variant<int, std::string, bool, StructValuePtr, ArrayValuePtr, MapValuePtr>;
 
     struct StructValue final {
         std::string typeName {};
@@ -23,6 +25,10 @@ namespace Velo::Runtime {
 
     struct ArrayValue final {
         std::vector<Value> elements {};
+    };
+
+    struct MapValue final {
+        std::map<std::string, Value> entries {};
     };
 
     // Creates an independent runtime value.
