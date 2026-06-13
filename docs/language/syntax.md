@@ -769,8 +769,30 @@ json::stringify(false)
 
 `json::stringify` returns `string`.
 
+Arrays and maps can be serialized when their values are JSON-serializable.
+
+```velo
+json::stringify([1, 2, 3])
+json::stringify(["Alex", "Bob"])
+
+let scores: map<string, int> = map {
+    "Alex": 10,
+    "Bob": 20
+};
+
+json::stringify(scores)
+```
+
+Nested arrays/maps are supported:
+```velo
+let grouped: map<string, []int> = map {
+    "a": [1, 2],
+    "b": [3, 4]
+};
+
+json::stringify(grouped)
+```
+
 Current limitations:
-- arrays are not supported yet
-- maps are not supported yet
-- struct are not supported yet
+- struct are not supported by `json::stringify` yet
 - JSON parsing is not implemented yet

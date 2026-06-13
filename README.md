@@ -86,6 +86,9 @@ data model foundation based on struct.
 - `std::json`
 - `json::stringify`
 - JSON serialization for primitive values
+- JSON serialization for arrays
+- JSON serialization for maps
+- recursive JSON serialization for nested collections
 
 ## Standard modules
 Current standard modules:
@@ -241,14 +244,6 @@ Main properties:
 - avoid adding large language features before the MVP foundation is stable
 
 ## MVP 0.2 status
-The Velo MVP 0.2 data model foundation is complete when the release checklist passes.
-
-Before tagging or announcing `v0.2.0`, run the release checklist:
-- [MVP release checklist](docs/development/release_checklist.md)
-
-Release notes draft:
-- [Velo v0.2.0 release notes draft](docs/development/release_notes_v0_2.md)
-
 MVP 0.2 is tagged as `v0.2.0`.
 
 ## MVP 0.3 status
@@ -268,5 +263,5 @@ MVP 0.7 is currently in progress.
 
 Current step:
 ```text
-0.7.1   std::json module and json::stringify primitives
+0.7.2   json::stringify arrays and maps
 ```

@@ -1,0 +1,28 @@
+module app;
+
+use std::console;
+use std::json;
+
+fn main(): int {
+    let ids: []int = [1, 2, 3];
+    let names: []string = ["Alex", "Bob"];
+    let flags: []bool = [true, false];
+
+    let scores: map<string, int> = map {
+        "Alex": 10,
+        "Bob": 20
+    };
+
+    let grouped: map<string, []int> = map {
+        "a": [1, 2],
+        "b": [3, 4]
+    };
+
+    console::println(json::stringify(ids));
+    console::println(json::stringify(names));
+    console::println(json::stringify(flags));
+    console::println(json::stringify(scores));
+    console::println(json::stringify(grouped));
+
+    return 0;
+}

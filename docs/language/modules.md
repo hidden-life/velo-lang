@@ -194,6 +194,8 @@ In MVP 0.7.1, supported values are:
 - `int`
 - `string`
 - `bool`
+- arrays of supported values
+- maps with string keys and supported values
 
 Example:
 ```velo
@@ -218,8 +220,25 @@ Expected output:
 true
 ```
 
+Collections are supported:
+```velo
+let ids: []int = [1, 2, 3];
+
+let scores: map<string, int> = map {
+    "Alex": 10,
+    "Bob": 20
+};
+
+console::println(json::stringify(ids));
+console::println(json::stringify(scores));
+```
+
+Expected output:
+```text
+[1,2,3]
+{"Alex":10,"Bob":20}
+```
+
 Current limitations:
-- arrays are not supported yet
-- maps are not supported yet
 - struct are not supported yet
 - `json::parse` is not implemented yet

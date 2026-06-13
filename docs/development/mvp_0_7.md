@@ -13,7 +13,7 @@ MVP 0.7 focuses on JSON foundation and serialization.
 
 ## Current step
 ```text
-0.7.1   std::json module and json::stringify primitives
+0.7.2   json::stringify arrays and maps
 ```
 
 ## 0.7.1 scope
@@ -47,3 +47,38 @@ Not implemented in 0.7.1:
 - `json::parse`
 - runtime JSON value type
 - JSON access helpers
+
+## 0.7.2 scope
+Implemented in this step:
+- JSON serialization for arrays
+- JSON serialization for maps
+- recursive JSON serialization for nested arrays/maps
+- semantic validation for JSON-serializable collection types
+- driver tests
+- semantic tests
+- example
+- documentation
+
+Supported examples:
+```velo
+json::stringify([1, 2, 3])
+json::stringify(["Alex", "Bob"])
+json::stringify([true, false])
+json::stringify(scores)
+json::stringify(grouped)
+```
+
+Example output:
+```json
+[1,2,3]
+["Alex","Bob"]
+[true,false]
+{"Alex":10,"Bob":20}
+{"a":[1,2],"b":[3,4]}
+```
+
+Current limitations:
+- structs are not supported by `json::stringify` yet
+- arrays of structs are not supported yet
+- maps with struct values are not supported yet
+- `json::parse` is not implemented yet

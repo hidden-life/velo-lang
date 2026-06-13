@@ -85,7 +85,7 @@ namespace Velo::Runtime {
             return stream.str();
         }
 
-        auto primitiveValueToJsonString(const Value &value) -> std::optional<std::string> {
+        auto valueToJsonString(const Value &value) -> std::optional<std::string> {
             if (std::holds_alternative<int>(value)) {
                 return std::to_string(std::get<int>(value));
             }
@@ -96,6 +96,64 @@ namespace Velo::Runtime {
 
             if (std::holds_alternative<std::string>(value)) {
                 return "\"" + escapeJsonString(std::get<std::string>(value)) + "\"";
+            }
+
+            if (std::holds_alternative<ArrayValuePtr>(value)) {
+                const auto arrayValue = std::get<ArrayValuePtr>(value);
+                if (arrayValue == nullptr) {
+                    return std::nullopt;
+                }
+
+                std::ostringstream stream;
+                stream << "[";
+
+                for (std::size_t idx = 0U; idx < arrayValue->elements.size(); ++idx) {
+                    if (idx > 0U) {
+                        stream << ",";
+                    }
+
+                    const auto elementJson = valueToJsonString(arrayValue->elements[idx]);
+                    if (!elementJson.has_value()) {
+                        return std::nullopt;
+                    }
+
+                    stream << *elementJson;
+                }
+
+                stream << "]";
+
+                return stream.str();
+            }
+
+            if (std::holds_alternative<MapValuePtr>(value)) {
+                const auto mapValue = std::get<MapValuePtr>(value);
+                if (mapValue == nullptr) {
+                    return std::nullopt;
+                }
+
+                std::ostringstream stream;
+                stream << "{";
+
+                std::size_t idx = 0U;
+                for (const auto &[key, val] : mapValue->entries) {
+                    if (idx > 0U) {
+                        stream << ",";
+                    }
+
+                    const auto entryJson = valueToJsonString(val);
+                    if (!entryJson.has_value()) {
+                        return std::nullopt;
+                    }
+
+                    stream << "\"" << escapeJsonString(key) << "\":";
+                    stream << *entryJson;
+
+                    ++idx;
+                }
+
+                stream << "}";
+
+                return stream.str();
             }
 
             return std::nullopt;
@@ -391,7 +449,7 @@ namespace Velo::Runtime {
                         };
                     }
 
-                    const auto jsonText = primitiveValueToJsonString(args.front());
+                    const auto jsonText = valueToJsonString(args.front());
                     if (!jsonText.has_value()) {
                         return ExecutionResult {
                             .success = false,

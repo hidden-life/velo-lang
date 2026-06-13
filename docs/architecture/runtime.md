@@ -505,26 +505,29 @@ returns the number of keys in the map.
 ## JSON builtins
 Runtime provides the `json::stringify` builtin.
 
-In MVP 0.7.1 it supports primitive values:
-
+`json::stringify` supports recursive serialization for:
 - `int`
 - `string`
 - `bool`
+- arrays
+- maps
 
 Runtime behavior:
-
 1. validate one argument
 2. serialize supported primitive value to JSON text
 3. return the JSON text as `string`
 
-String values are escaped for JSON output.
+Runtime behavior for arrays:
+1. validate runtime value is `ArrayValuePtr`
+2. serialize each element recursively
+3. join elements with commas
+4. return JSON array text
 
-Example:
+Runtime behavior for maps:
+1. validate runtime value is `MapValuePtr`
+2. serialize each key as a JSON string
+3. serialize each value recursively
+4. join entries with commas
+5. return JSON object text
 
-```velo
-json::stringify("Alex")
-```
-returns:
-```text
-"Alex"
-```
+Unsupported runtime values return a runtime error.

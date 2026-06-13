@@ -3043,3 +3043,197 @@ fn main(): int {
 
     EXPECT_NE(result.bytecodeText.find("CallBuiltin json::stringify args=1"), std::string::npos);
 }
+
+TEST(DriverTest, ExecutesJsonStringifyIntArray) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_stringify_int_array.velo",
+        R"(module app;
+
+use std::json;
+use std::string;
+
+fn main(): int {
+    let ids: []int = [1, 2, 3];
+
+    return string::len(json::stringify(ids));
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 7);
+}
+
+TEST(DriverTest, ExecutesJsonStringifyStringArray) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_stringify_string_array.velo",
+        R"(module app;
+
+use std::json;
+use std::string;
+
+fn main(): int {
+    let names: []string = ["Alex", "Bob"];
+
+    return string::len(json::stringify(names));
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 14);
+}
+
+TEST(DriverTest, ExecutesJsonStringifyIntMap) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_stringify_int_map.velo",
+        R"(module app;
+
+use std::json;
+use std::string;
+
+fn main(): int {
+    let scores: map<string, int> = map {
+        "Alex": 10,
+        "Bob": 20
+    };
+
+    return string::len(json::stringify(scores));
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 20);
+}
+
+TEST(DriverTest, ExecutesJsonStringifyMapWithArrayValues) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_stringify_map_array_values.velo",
+        R"(module app;
+
+use std::json;
+use std::string;
+
+fn main(): int {
+    let grouped: map<string, []int> = map {
+        "a": [1, 2],
+        "b": [3, 4]
+    };
+
+    return string::len(json::stringify(grouped));
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 21);
+}
+
+TEST(DriverTest, IrModePrintsJsonStringifyCollectionBuiltinCall) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_stringify_collection_ir.velo",
+        R"(module app;
+
+use std::json;
+
+fn main(): int {
+    let ids: []int = [1, 2, 3];
+    let text: string = json::stringify(ids);
+
+    return 0;
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.irText.find("CallBuiltin json::stringify args=1"), std::string::npos);
+}
+
+TEST(DriverTest, BytecodeModePrintsJsonStringifyCollectionBuiltinCall) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_stringify_collection_bytecode.velo",
+        R"(module app;
+
+use std::json;
+
+fn main(): int {
+    let ids: []int = [1, 2, 3];
+    let text: string = json::stringify(ids);
+
+    return 0;
+}
+)",
+        Velo::Driver::DriverMode::Bytecode
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.bytecodeText.find("CallBuiltin json::stringify args=1"), std::string::npos);
+}

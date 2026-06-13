@@ -452,16 +452,36 @@ In MVP 0.7.1, supported types are:
 - `int`
 - `string`
 - `bool`
+- arrays of supported values
+- maps with string keys and supported values
 
 Examples:
 ```velo
 let a: string = json::stringify(42);
 let b: string = json::stringify("Alex");
 let c: string = json::stringify(true);
+
+let ids: []int = [1, 2, 3];
+let idsJson: string = json::stringify(ids);
+
+let scores: map<string, int> = map {
+    "Alex": 10,
+    "Bob": 20
+};
+
+let scoresJson: string = json::stringify(scores);
+```
+
+Nested collections are supported when all nested values are supported:
+```velo
+let grouped: map<string, []int> = map {
+    "a": [1, 2],
+    "b": [3, 4]
+};
+
+let groupedJson: string = json::stringify(grouped);
 ```
 
 Current limitations:
-- arrays are not supported yet
-- maps are not supported yet
 - structs are not supported yet
 - parsed JSON values are not implemented yet

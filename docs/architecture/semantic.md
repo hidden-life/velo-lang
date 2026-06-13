@@ -638,16 +638,26 @@ The semantic analyzer validates `json::stringify` through builtin metadata.
 json
 ```
 
-In MVP 0.7.1, this marker accepts:
+In MVP 0.7.2, this marker accepts:
 
 - `int`
 - `string`
 - `bool`
+- arrays of JSON-serializable values
+- maps with string keys and JSON-serializable values
 
-Rejected for now:
+The semantic analyzer checks JSON compatibility recursively.
 
-- arrays
-- maps
-- structs
+Examples accepted:
+```velo
+json::stringify([1, 2, 3])
+json::stringify(map { "a": 1 })
+json::stringify(map { "a": [1, 2] })
+```
 
-These will be added in later MVP 0.7 steps.
+Examples rejected until struct serialization is added:
+```velo
+json::stringify(User { id: 1 })
+json::stringify([]User)
+json::stringify(map<string, User>)
+```
