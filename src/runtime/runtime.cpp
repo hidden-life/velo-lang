@@ -98,6 +98,37 @@ namespace Velo::Runtime {
                 return "\"" + escapeJsonString(std::get<std::string>(value)) + "\"";
             }
 
+            if (std::holds_alternative<StructValuePtr>(value)) {
+                const auto structValue = std::get<StructValuePtr>(value);
+                if (structValue == nullptr) {
+                    return std::nullopt;
+                }
+
+                std::ostringstream stream;
+                stream << "{";
+
+                std::size_t idx = 0U;
+                for (const auto &[name, val] : structValue->fields) {
+                    if (idx > 0U) {
+                        stream << ",";
+                    }
+
+                    const auto fieldJson = valueToJsonString(val);
+                    if (!fieldJson.has_value()) {
+                        return std::nullopt;
+                    }
+
+                    stream << "\"" << escapeJsonString(name) << "\":";
+                    stream << *fieldJson;
+
+                    ++idx;
+                }
+
+                stream << "}";
+
+                return stream.str();
+            }
+
             if (std::holds_alternative<ArrayValuePtr>(value)) {
                 const auto arrayValue = std::get<ArrayValuePtr>(value);
                 if (arrayValue == nullptr) {

@@ -511,6 +511,7 @@ Runtime provides the `json::stringify` builtin.
 - `bool`
 - arrays
 - maps
+- structs
 
 Runtime behavior:
 1. validate one argument
@@ -530,4 +531,11 @@ Runtime behavior for maps:
 4. join entries with commas
 5. return JSON object text
 
-Unsupported runtime values return a runtime error.
+Runtime behavior for structs:
+1. validate runtime value is `StructValuePtr`
+2. iterate runtime fields
+3. serialize field names as JSON object keys
+4. serialize field values recursively
+5. return JSON object text
+
+Struct field order follows the runtime field storage order.

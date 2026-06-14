@@ -645,14 +645,16 @@ In MVP 0.7.2, this marker accepts:
 - `bool`
 - arrays of JSON-serializable values
 - maps with string keys and JSON-serializable values
+- structs
 
 The semantic analyzer checks JSON compatibility recursively.
 
 Examples accepted:
 ```velo
-json::stringify([1, 2, 3])
-json::stringify(map { "a": 1 })
-json::stringify(map { "a": [1, 2] })
+json::stringify(User { id: 1 })
+json::stringify([]User)
+json::stringify(map<string, User>)
+json::stringify(map<string, []User>)
 ```
 
 Examples rejected until struct serialization is added:

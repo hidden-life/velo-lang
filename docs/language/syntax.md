@@ -793,6 +793,38 @@ let grouped: map<string, []int> = map {
 json::stringify(grouped)
 ```
 
+Structs can be serialized when all field values are JSON-serializable:
+```velo
+struct User {
+    id: int;
+    name: string;
+    active: bool;
+}
+
+let user: User = User {
+    id: 1,
+    name: "Alex",
+    active: true
+};
+
+json::stringify(user)
+```
+
+Arrays and maps containing structs are also supported:
+```velo
+let users: []User = [
+    User { id: 1, name: "Alex", active: true }
+];
+
+let usersByName: map<string, User> = map {
+    "alex": User { id: 1, name: "Alex", active: true }
+};
+
+json::stringify(users)
+json::stringify(usersByName)
+```
+
 Current limitations:
-- struct are not supported by `json::stringify` yet
 - JSON parsing is not implemented yet
+- custom JSON field names are not implemented yet
+- pretty formatting is not implemented yet

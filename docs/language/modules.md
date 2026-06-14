@@ -196,6 +196,7 @@ In MVP 0.7.1, supported values are:
 - `bool`
 - arrays of supported values
 - maps with string keys and supported values
+- structs with supported fields
 
 Example:
 ```velo
@@ -239,6 +240,31 @@ Expected output:
 {"Alex":10,"Bob":20}
 ```
 
+Structs are supported:
+```velo
+struct User {
+    id: int;
+    name: string;
+    active: bool;
+}
+
+let user: User = {
+    id: 1,
+    name: "Alex",
+    active: true,
+};
+
+console::println(json::stringify(user));
+```
+
+Expected output:
+```text
+{"active":true,"id":1,"name":"Alex"}
+```
+
+Struct field order follows the runtime field storage order.
+
 Current limitations:
-- struct are not supported yet
 - `json::parse` is not implemented yet
+- custom JSON field names are not implemented yet
+- pretty formatting is not implemented yet

@@ -3237,3 +3237,268 @@ fn main(): int {
 
     EXPECT_NE(result.bytecodeText.find("CallBuiltin json::stringify args=1"), std::string::npos);
 }
+
+TEST(DriverTest, ExecutesJsonStringifyStruct) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_stringify_struct.velo",
+        R"(module app;
+
+use std::json;
+use std::string;
+
+struct User {
+    id: int;
+}
+
+fn main(): int {
+    let user: User = User { id: 1 };
+
+    return string::len(json::stringify(user));
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    // {"id":1}
+    EXPECT_EQ(result.exitCode, 8);
+}
+
+TEST(DriverTest, ExecutesJsonStringifyStructWithStringField) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_stringify_struct_string_field.velo",
+        R"(module app;
+
+use std::json;
+use std::string;
+
+struct User {
+    name: string;
+}
+
+fn main(): int {
+    let user: User = User { name: "Alex" };
+
+    return string::len(json::stringify(user));
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    // {"name":"Alex"}
+    EXPECT_EQ(result.exitCode, 15);
+}
+
+TEST(DriverTest, ExecutesJsonStringifyStructArray) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_stringify_struct_array.velo",
+        R"(module app;
+
+use std::json;
+use std::string;
+
+struct User {
+    id: int;
+}
+
+fn main(): int {
+    let users: []User = [
+        User { id: 1 },
+        User { id: 2 }
+    ];
+
+    return string::len(json::stringify(users));
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    // [{"id":1},{"id":2}]
+    EXPECT_EQ(result.exitCode, 19);
+}
+
+TEST(DriverTest, ExecutesJsonStringifyStructMap) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_stringify_struct_map.velo",
+        R"(module app;
+
+use std::json;
+use std::string;
+
+struct User {
+    id: int;
+}
+
+fn main(): int {
+    let users: map<string, User> = map {
+        "a": User { id: 1 },
+        "b": User { id: 2 }
+    };
+
+    return string::len(json::stringify(users));
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    // {"a":{"id":1},"b":{"id":2}}
+    EXPECT_EQ(result.exitCode, 27);
+}
+
+TEST(DriverTest, ExecutesJsonStringifyStructProgram) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_stringify_struct_program.velo",
+        R"(module app;
+
+use std::console;
+use std::json;
+
+struct User {
+    id: int;
+    name: string;
+    active: bool;
+}
+
+fn main(): int {
+    let user: User = User {
+        id: 1,
+        name: "Alex",
+        active: true
+    };
+
+    console::println(json::stringify(user));
+
+    return 0;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 0);
+}
+
+TEST(DriverTest, IrModePrintsJsonStringifyStructBuiltinCall) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_stringify_struct_ir.velo",
+        R"(module app;
+
+use std::json;
+
+struct User {
+    id: int;
+}
+
+fn main(): int {
+    let user: User = User { id: 1 };
+    let text: string = json::stringify(user);
+
+    return 0;
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.irText.find("CallBuiltin json::stringify args=1"), std::string::npos);
+}
+
+TEST(DriverTest, BytecodeModePrintsJsonStringifyStructBuiltinCall) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_stringify_struct_bytecode.velo",
+        R"(module app;
+
+use std::json;
+
+struct User {
+    id: int;
+}
+
+fn main(): int {
+    let user: User = User { id: 1 };
+    let text: string = json::stringify(user);
+
+    return 0;
+}
+)",
+        Velo::Driver::DriverMode::Bytecode
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.bytecodeText.find("CallBuiltin json::stringify args=1"), std::string::npos);
+}

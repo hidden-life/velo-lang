@@ -4649,7 +4649,7 @@ fn main(): int {
     EXPECT_FALSE(engine.hasErrors());
 }
 
-TEST(SemanticAnalyzerTest, ReportsJsonStringifyStructNotSupportedYet) {
+TEST(SemanticAnalyzerTest, AcceptsJsonStringifyStruct) {
     DiagnosticEngine engine;
     const auto program = parseProgram(
         R"(module app;
@@ -4659,10 +4659,16 @@ use std::json;
 struct User {
     id: int;
     name: string;
+    active: bool;
 }
 
 fn main(): int {
-    let user: User = User { id: 1, name: "Alex" };
+    let user: User = User {
+        id: 1,
+        name: "Alex",
+        active: true
+    };
+
     let text: string = json::stringify(user);
 
     return 0;
@@ -4677,13 +4683,11 @@ fn main(): int {
     Velo::Runtime::Runtime runtime;
     SemanticAnalyzer analyzer(*program, engine, runtime.modules());
 
-    EXPECT_FALSE(analyzer.analyze());
-
-    ASSERT_TRUE(engine.hasErrors());
-    EXPECT_EQ(engine.diagnostics().front().code(), "SEM033");
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
 }
 
-TEST(SemanticAnalyzerTest, ReportsJsonStringifyStructArrayNotSupportedYet) {
+TEST(SemanticAnalyzerTest, AcceptsJsonStringifyStructArray) {
     DiagnosticEngine engine;
     const auto program = parseProgram(
         R"(module app;
@@ -4714,13 +4718,11 @@ fn main(): int {
     Velo::Runtime::Runtime runtime;
     SemanticAnalyzer analyzer(*program, engine, runtime.modules());
 
-    EXPECT_FALSE(analyzer.analyze());
-
-    ASSERT_TRUE(engine.hasErrors());
-    EXPECT_EQ(engine.diagnostics().front().code(), "SEM033");
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
 }
 
-TEST(SemanticAnalyzerTest, ReportsJsonStringifyStructMapNotSupportedYet) {
+TEST(SemanticAnalyzerTest, AcceptsJsonStringifyStructMap) {
     DiagnosticEngine engine;
     const auto program = parseProgram(
         R"(module app;
@@ -4733,7 +4735,8 @@ struct User {
 
 fn main(): int {
     let users: map<string, User> = map {
-        "alex": User { id: 1 }
+        "alex": User { id: 1 },
+        "bob": User { id: 2 }
     };
 
     let text: string = json::stringify(users);
@@ -4750,8 +4753,43 @@ fn main(): int {
     Velo::Runtime::Runtime runtime;
     SemanticAnalyzer analyzer(*program, engine, runtime.modules());
 
-    EXPECT_FALSE(analyzer.analyze());
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
 
-    ASSERT_TRUE(engine.hasErrors());
-    EXPECT_EQ(engine.diagnostics().front().code(), "SEM033");
+TEST(SemanticAnalyzerTest, AcceptsJsonStringifyNestedStructCollections) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::json;
+
+struct User {
+    id: int;
+}
+
+fn main(): int {
+    let grouped: map<string, []User> = map {
+        "admins": [
+            User { id: 1 },
+            User { id: 2 }
+        ]
+    };
+
+    let text: string = json::stringify(grouped);
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
 }

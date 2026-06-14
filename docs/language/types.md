@@ -454,6 +454,7 @@ In MVP 0.7.1, supported types are:
 - `bool`
 - arrays of supported values
 - maps with string keys and supported values
+- structs with supported fields
 
 Examples:
 ```velo
@@ -482,6 +483,32 @@ let grouped: map<string, []int> = map {
 let groupedJson: string = json::stringify(grouped);
 ```
 
+Struct example:
+```velo
+struct User {
+    id: int;
+    name: string;
+}
+
+let user: User = User {
+    id: 1,
+    name: "Alex"
+};
+
+let jsonText: string = json::stringify(user);
+```
+
+Arrays and maps of structs are supported:
+```velo
+let users: []User = [
+    User { id: 1, name: "Alex" }
+];
+
+let usersByName: map<string, User> = map {
+    "alex": User { id: 1, name: "Alex" }
+};
+```
+
 Current limitations:
-- structs are not supported yet
 - parsed JSON values are not implemented yet
+- custom JSON field names are not implemented yet

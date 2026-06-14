@@ -83,6 +83,10 @@ namespace {
             return true;
         }
 
+        if (type.kind == SemanticTypeKind::Struct) {
+            return true;
+        }
+
         if (type.kind == SemanticTypeKind::Array) {
             if (type.elementType == nullptr) {
                 return false;

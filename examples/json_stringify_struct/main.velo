@@ -1,0 +1,34 @@
+module app;
+
+use std::console;
+use std::json;
+
+struct User {
+    id: int;
+    name: string;
+    active: bool;
+}
+
+fn main(): int {
+    let user: User = User {
+        id: 1,
+        name: "Alex",
+        active: true
+    };
+
+    let users: []User = [
+        User { id: 1, name: "Alex", active: true },
+        User { id: 2, name: "Bob", active: false }
+    ];
+
+    let usersByName: map<string, User> = map {
+        "alex": User { id: 1, name: "Alex", active: true },
+        "bob": User { id: 2, name: "Bob", active: false }
+    };
+
+    console::println(json::stringify(user));
+    console::println(json::stringify(users));
+    console::println(json::stringify(usersByName));
+
+    return 0;
+}
