@@ -49,6 +49,24 @@ namespace Velo::Runtime {
                 return "<map len=" + std::to_string(mapVal->entries.size()) + ">";
             }
 
+            if (std::holds_alternative<HttpRequestValuePtr>(value)) {
+                const auto requestValue = std::get<HttpRequestValuePtr>(value);
+                if (requestValue == nullptr) {
+                    return "<http_request:null>";
+                }
+
+                return "<http_request " + requestValue->method + " " + requestValue->path + ">";
+            }
+
+            if (std::holds_alternative<HttpResponseValuePtr>(value)) {
+                const auto responseValue = std::get<HttpResponseValuePtr>(value);
+                if (responseValue == nullptr) {
+                    return "<http_response:null>";
+                }
+
+                return "<http_response " + std::to_string(responseValue->status) + " len=" + std::to_string(responseValue->body.size()) + ">";
+            }
+
             return "<unknown>";
         }
 

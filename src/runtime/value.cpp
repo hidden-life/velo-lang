@@ -75,6 +75,35 @@ namespace Velo::Runtime {
             return cloneJsonValue(std::get<JsonValuePtr>(value));
         }
 
+        if (std::holds_alternative<HttpRequestValuePtr>(value)) {
+            const auto &requestValue = std::get<HttpRequestValuePtr>(value);
+            if (requestValue == nullptr) {
+                return HttpRequestValuePtr {};
+            }
+
+            auto cloned = std::make_shared<HttpRequestValue>();
+            cloned->method = requestValue->method;
+            cloned->path = requestValue->path;
+            cloned->headers = requestValue->headers;
+            cloned->body = requestValue->body;
+
+            return cloned;
+        }
+
+        if (std::holds_alternative<HttpResponseValuePtr>(value)) {
+            const auto &responseValue = std::get<HttpResponseValuePtr>(value);
+            if (responseValue == nullptr) {
+                return HttpResponseValuePtr {};
+            }
+
+            auto cloned = std::make_shared<HttpResponseValue>();
+            cloned->status = responseValue->status;
+            cloned->headers = responseValue->headers;
+            cloned->body = responseValue->body;
+
+            return cloned;
+        }
+
         return value;
     }
 }

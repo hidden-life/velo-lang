@@ -22,6 +22,9 @@ namespace Velo::Semantic {
         Array,
         Map,
         Json,
+
+        HttpRequest,
+        HttpResponse,
     };
 
     struct SemanticType final {

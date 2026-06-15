@@ -1054,6 +1054,18 @@ namespace Velo::Semantic {
             };
         }
 
+        if (typeName == "http_request") {
+            return SemanticType {
+                .kind = SemanticTypeKind::HttpRequest,
+            };
+        }
+
+        if (typeName == "http_response") {
+            return SemanticType {
+                .kind = SemanticTypeKind::HttpResponse,
+            };
+        }
+
         return {};
     }
 
@@ -1464,6 +1476,10 @@ namespace Velo::Semantic {
             return typesEqual(*left.keyType, *right.keyType) && typesEqual(*left.valueType, *right.valueType);
         }
 
+        if (left.kind == SemanticTypeKind::HttpRequest || left.kind == SemanticTypeKind::HttpResponse) {
+            return left.kind == right.kind;
+        }
+
         return true;
     }
 
@@ -1495,6 +1511,10 @@ namespace Velo::Semantic {
                 return "map<" + semanticTypeToString(*type.keyType) + ", " + semanticTypeToString(*type.valueType) + ">";
             case SemanticTypeKind::Json:
                 return "json";
+            case SemanticTypeKind::HttpRequest:
+                return "http_request";
+            case SemanticTypeKind::HttpResponse:
+                return "http_response";
         }
 
         return "unknown";

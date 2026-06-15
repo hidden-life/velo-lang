@@ -583,3 +583,33 @@ Runtime behavior:
 6. return the corresponding Velo value
 
 `json::get_json` returns a deep copy of the selected JSON subtree.
+
+## Runtime HTTP values
+Runtime HTTP request values are represented as `HttpRequestValuePtr`.
+
+Runtime HTTP response values are represented as `HttpResponseValuePtr`.
+
+HTTP request value fields:
+```text
+method
+path
+headers
+body
+```
+
+HTTP response value fields:
+```text
+status
+headers
+body
+```
+
+`Runtime::cloneValue(...)` deep-copies HTTP request and response values.
+
+Debug string output:
+```text
+<http_request METHOD PATH>
+<http_response STATUS len=BODY_LENGTH>
+```
+
+The MVP 0.8.1 runtime model does not include a real HTTP server.

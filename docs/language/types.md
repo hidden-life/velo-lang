@@ -542,3 +542,39 @@ Current limitations:
 - JSON values cannot be indexed directly yet
 - JSON access helpers are not implemented yet
 - JSON floats are not implemented yet
+
+## HTTP runtime types
+Velo has HTTP runtime foundation types:
+```velo
+http_request
+http_response
+```
+
+These types are used to model HTTP request and response values.
+
+HTTP request model:
+```text
+method: string
+path: string
+headers: map<string, string>
+body: string
+```
+
+HTTP response model:
+```text
+status: int
+headers: map<string, string>
+body: string
+```
+
+In MVP 0.8.1, these types can be used in function signatures:
+```velo
+fn handle(req: http_request): http_response {
+    return fallback(req);
+}
+```
+
+Current limitations:
+- HTTP builders are not implemented yet
+- HTTP access helpers are not implemented yet
+- real HTTP server/runtime is not implemented yet

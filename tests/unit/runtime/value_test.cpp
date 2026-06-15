@@ -123,3 +123,69 @@ TEST(RuntimeValueTest, CloneValueDeepCopiesMapValues) {
     EXPECT_EQ(std::get<int>(clonedMap->entries.at("answer")), 42);
     EXPECT_EQ(std::get<int>(clonedArray->elements[0]), 7);
 }
+
+TEST(RuntimeValueTest, CloneValueDeepCopiesHttpRequestValues) {
+    auto requestValue = std::make_shared<Velo::Runtime::HttpRequestValue>();
+    requestValue->method = "POST";
+    requestValue->path = "/users";
+    requestValue->headers.emplace("Content-Type", "application/json");
+    requestValue->body = "{\"name\":\"Alex\"}";
+
+    const Velo::Runtime::Value clonedValue = Velo::Runtime::cloneValue(
+        Velo::Runtime::Value {requestValue}
+    );
+
+    ASSERT_TRUE(std::holds_alternative<Velo::Runtime::HttpRequestValuePtr>(clonedValue));
+
+    const auto clonedRequest = std::get<Velo::Runtime::HttpRequestValuePtr>(clonedValue);
+    ASSERT_NE(clonedRequest, nullptr);
+    EXPECT_NE(clonedRequest.get(), requestValue.get());
+
+    EXPECT_EQ(clonedRequest->method, "POST");
+    EXPECT_EQ(clonedRequest->path, "/users");
+    EXPECT_EQ(clonedRequest->body, "{\"name\":\"Alex\"}");
+
+    ASSERT_EQ(clonedRequest->headers.size(), 1U);
+    EXPECT_EQ(clonedRequest->headers.at("Content-Type"), "application/json");
+
+    requestValue->method = "GET";
+    requestValue->path = "/changed";
+    requestValue->headers["Content-Type"] = "text/plain";
+    requestValue->body = "changed";
+
+    EXPECT_EQ(clonedRequest->method, "POST");
+    EXPECT_EQ(clonedRequest->path, "/users");
+    EXPECT_EQ(clonedRequest->headers.at("Content-Type"), "application/json");
+    EXPECT_EQ(clonedRequest->body, "{\"name\":\"Alex\"}");
+}
+
+TEST(RuntimeValueTest, CloneValueDeepCopiesHttpResponseValues) {
+    auto responseValue = std::make_shared<Velo::Runtime::HttpResponseValue>();
+    responseValue->status = 201;
+    responseValue->headers.emplace("Content-Type", "application/json");
+    responseValue->body = "{\"ok\":true}";
+
+    const Velo::Runtime::Value clonedValue = Velo::Runtime::cloneValue(
+        Velo::Runtime::Value {responseValue}
+    );
+
+    ASSERT_TRUE(std::holds_alternative<Velo::Runtime::HttpResponseValuePtr>(clonedValue));
+
+    const auto clonedResponse = std::get<Velo::Runtime::HttpResponseValuePtr>(clonedValue);
+    ASSERT_NE(clonedResponse, nullptr);
+    EXPECT_NE(clonedResponse.get(), responseValue.get());
+
+    EXPECT_EQ(clonedResponse->status, 201);
+    EXPECT_EQ(clonedResponse->body, "{\"ok\":true}");
+
+    ASSERT_EQ(clonedResponse->headers.size(), 1U);
+    EXPECT_EQ(clonedResponse->headers.at("Content-Type"), "application/json");
+
+    responseValue->status = 500;
+    responseValue->headers["Content-Type"] = "text/plain";
+    responseValue->body = "changed";
+
+    EXPECT_EQ(clonedResponse->status, 201);
+    EXPECT_EQ(clonedResponse->headers.at("Content-Type"), "application/json");
+    EXPECT_EQ(clonedResponse->body, "{\"ok\":true}");
+}

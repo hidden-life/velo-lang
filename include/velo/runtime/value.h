@@ -22,12 +22,29 @@ namespace Velo::Runtime {
     struct MapValue;
     struct JsonValue;
 
+    struct HttpRequestValue;
+    struct HttpResponseValue;
+
     using StructValuePtr = std::shared_ptr<StructValue>;
     using ArrayValuePtr = std::shared_ptr<ArrayValue>;
     using MapValuePtr = std::shared_ptr<MapValue>;
     using JsonValuePtr = std::shared_ptr<JsonValue>;
+
+    // HTTP
+    using HttpRequestValuePtr = std::shared_ptr<HttpRequestValue>;
+    using HttpResponseValuePtr = std::shared_ptr<HttpResponseValue>;
     // Runtime value used by interpreter.
-    using Value = std::variant<int, std::string, bool, StructValuePtr, ArrayValuePtr, MapValuePtr, JsonValuePtr>;
+    using Value = std::variant<
+        int,
+        std::string,
+        bool,
+        StructValuePtr,
+        ArrayValuePtr,
+        MapValuePtr,
+        JsonValuePtr,
+        HttpRequestValuePtr,
+        HttpResponseValuePtr
+    >;
 
     struct StructValue final {
         std::string typeName {};
@@ -50,6 +67,20 @@ namespace Velo::Runtime {
         std::string stringValue {};
         std::vector<JsonValuePtr> arrayValues {};
         std::map<std::string, JsonValuePtr> objectValues {};
+    };
+
+    // HTTP
+    struct HttpRequestValue final {
+        std::string method {};
+        std::string path {};
+        std::map<std::string, std::string> headers {};
+        std::string body {};
+    };
+
+    struct HttpResponseValue final {
+        int status { 200 };
+        std::map<std::string, std::string> headers {};
+        std::string body {};
     };
 
     // Creates an independent runtime value.

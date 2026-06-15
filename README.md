@@ -2,7 +2,7 @@
 Velo is an experimental programming language and virtual machine focused on backend
 and API-oriented development.
 
-The current goal is **Velo MVP 0.7**: a small, strict, statically checked language
+The current goal is **Velo MVP 0.8**: a small, strict, statically checked language
 with a simple VM, standard modules, and developer-friendly CLI tooling, and basic
 data model foundation based on struct.
 
@@ -101,6 +101,10 @@ data model foundation based on struct.
 - `json::get_bool`
 - `json::get_json`
 - nested JSON object access
+- runtime HTTP request values
+- runtime HTTP response values
+- `http_request`
+- `http_response`
 
 ## Standard modules
 Current standard modules:
@@ -235,18 +239,18 @@ Start here:
 - [Velo v0.7.0 release notes draft](docs/development/release_notes_v0_7.md)
 
 ## Current development focus
-The project has completed **Velo MVP 0.7**.
+The project is currently moving toward **Velo MVP 0.8**.
 
-MVP 0.7 focuses on JSON foundation and serialization.
+MVP 0.8 focuses on HTTP runtime foundation.
 
-Completed steps:
+Planned steps:
 ```text
-0.7.1   std::json module and json::stringify primitives
-0.7.2   json::stringify arrays and maps
-0.7.3   json::stringify structs
-0.7.4   runtime json type and json::parse
-0.7.5   json access helpers and examples
-0.7.6   docs/examples/release checklist
+0.8.1   runtime http request/response values
+0.8.2   std::http response builders
+0.8.3   std::http response access helpers
+0.8.4   std::http request builders and access helpers
+0.8.5   http/json integration examples and micro-benchmark scaffold
+0.8.6   docs/examples/release checklist
 ```
 
 Suggested next milestone:

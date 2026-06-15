@@ -703,3 +703,23 @@ json::get_json      json, string -> json
 The semantic analyzer validates only helper signatures.
 
 Missing keys and field type mismatches are runtime errors.
+
+## HTTP semantic types
+The semantic type model includes:
+```velo
+http_request
+http_response
+```
+
+These are concrete semantic types used by future `std::http` helpers.
+
+Examples:
+```velo
+fn handle(req: http_request): http_response {
+    return fallback(req);
+}
+```
+
+MVP 0.8.1 only adds the type foundation.
+
+HTTP builders and access helpers are implemented in later MVP 0.8 steps.
