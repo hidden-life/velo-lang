@@ -13,7 +13,7 @@ MVP 0.7 focuses on JSON foundation and serialization.
 
 ## Current step
 ```text
-0.7.3   json::stringify structs
+0.7.4   runtime json type and json::parse
 ```
 
 ## 0.7.1 scope
@@ -103,9 +103,33 @@ Example output:
 {"a":{"id":1},"b":{"id":2}}
 ```
 
+## 0.7.4 scope
+Implemented in this step:
+- `json` semantic type
+- runtime JSON value representation
+- deep-copy support for runtime JSON values
+- `json::parse` builtin
+- JSON parsing for `null`
+- JSON parsing for `bool`
+- JSON parsing for `int`
+- JSON parsing for `string`
+- JSON parsing for arrays
+- JSON parsing for objects
+- `json::stringify` support for parsed JSON values
+- runtime error for invalid JSON input
+- semantic tests
+- driver tests
+- example
+- documentation
+
+Example:
+```velo
+let value: json = json::parse("{\"id\":42}");
+let text: string = json::stringify(value);
+```
+
 Current limitations:
-- `json::parse` is not implemented yet
-- runtime JSON value type is not implemented yet
+- JSON floats are not implemented yet
+- unicode escape parsing such as `\uXXXX` is not implemented yet
 - JSON access helpers are not implemented yet
-- custom JSON field names are not implemented yet
-- pretty formatting is not implemented yet
+- JSON parser is intentionally small and MVP-focused

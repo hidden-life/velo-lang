@@ -264,7 +264,46 @@ Expected output:
 
 Struct field order follows the runtime field storage order.
 
+`json::stringify` also accepts parsed `json` values.
+
+### `json::parse`
+```velo
+json::parse(text)
+```
+
+Parses JSON text and returns a runtime `json` value.
+
+Example:
+```velo
+module app;
+
+use std::console;
+use std::json;
+
+fn main(): int {
+    let value: json = json::parse("{\"id\":42}");
+
+    console::println(json::stringify(value));
+
+    return 0;
+}
+```
+
+Expected output:
+```text
+{"id": 42}
+```
+
+Supported JSON input in MVP 0.7.4:
+- `null`
+- `true`
+- `false`
+- integer numbers
+- strings
+- arrays
+- objects
+
 Current limitations:
-- `json::parse` is not implemented yet
-- custom JSON field names are not implemented yet
-- pretty formatting is not implemented yet
+- floats are not implemented yet
+- unicode escapes such as `\uXXXX` are not implemented yet
+- JSON access helpers are not implemented yet

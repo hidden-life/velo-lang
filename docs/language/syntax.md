@@ -824,7 +824,20 @@ json::stringify(users)
 json::stringify(usersByName)
 ```
 
+## JSON parse
+JSON text can be parsed with `json::parse`.
+```velo
+use std::json;
+
+let value: json = json::parse("{\"id\":42}");
+```
+
+Parsed JSON values can be serialized back to text:
+```velo
+let text: string = json::stringify(value);
+```
+
 Current limitations:
-- JSON parsing is not implemented yet
-- custom JSON field names are not implemented yet
-- pretty formatting is not implemented yet
+- JSON access helpers are not implemented yet
+- JSON fields are not implemented yet
+- unicode escape parsing is not implemented yet

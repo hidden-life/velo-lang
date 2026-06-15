@@ -104,5 +104,22 @@ TEST(RuntimeModuleSyncTest, RegistersJsonStringifyBuiltinInJsonModule) {
     EXPECT_EQ(function->returnType, "string");
 
     ASSERT_EQ(function->parameterTypes.size(), 1U);
-    EXPECT_EQ(function->parameterTypes[0], "json");
+    EXPECT_EQ(function->parameterTypes[0], "json_serializable");
+}
+
+TEST(RuntimeModuleSyncTest, RegistersJsonParseBuiltinInJsonModule) {
+    Velo::Runtime::Runtime runtime;
+
+    const auto *module = runtime.modules().find("json");
+    ASSERT_NE(module, nullptr);
+
+    const auto *function = module->findFunction("parse");
+    ASSERT_NE(function, nullptr);
+
+    EXPECT_EQ(function->name, "parse");
+    EXPECT_EQ(function->arity, 1U);
+    EXPECT_EQ(function->returnType, "json");
+
+    ASSERT_EQ(function->parameterTypes.size(), 1U);
+    EXPECT_EQ(function->parameterTypes[0], "string");
 }

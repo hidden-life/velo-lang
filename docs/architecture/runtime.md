@@ -539,3 +539,27 @@ Runtime behavior for structs:
 5. return JSON object text
 
 Struct field order follows the runtime field storage order.
+
+## Runtime JSON values
+Runtime JSON values are represented as `JsonValuePtr`.
+
+Supported JSON value kinds:
+- null
+- bool
+- string
+- int
+- array
+- object
+
+`Runtime::cloneValue(...)` deep-copies JSON values recursively.
+
+## JSON parse builtin
+`json::parse` parses JSON text and returns a runtime JSON value.
+
+Runtime behavior:
+1. validate one string argument
+2. parse JSON text
+3. return `JsonValuePtr`
+4. return runtime error or invalid JSON input
+
+The MVP parser supports integers but not floats.

@@ -663,3 +663,27 @@ json::stringify(User { id: 1 })
 json::stringify([]User)
 json::stringify(map<string, User>)
 ```
+
+## JSON type
+The semantic type model includes a concrete `json` type.
+
+It is different from the `json_serializable` builtin marker.
+
+- `json` is a Velo type
+- `json_serializable` is a builtin parameter marker used by `json::stringify`
+
+Examples:
+```velo
+let value: json = json::parse("{\"id\":42}");
+let text: string = json::stringify(value);
+```
+
+`json::parse` signature:
+```text
+string -> json
+```
+
+`json::stringify` signature:
+```text
+json_serializable -> string
+```

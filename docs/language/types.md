@@ -509,6 +509,23 @@ let usersByName: map<string, User> = map {
 };
 ```
 
+## JSON type
+Velo has a runtime JSON value type:
+```velo
+json
+```
+
+JSON values are created with `json::parse`:
+```velo
+let value: json = json::parse("{\"id\":42}");
+```
+
+JSON values can be serialized with `json::stringify`:
+```velo
+let text: string = json::stringify(value);
+```
+
 Current limitations:
-- parsed JSON values are not implemented yet
-- custom JSON field names are not implemented yet
+- JSON values cannot be indexed directly yet
+- JSON access helpers are not implemented yet
+- JSON floats are not implemented yet

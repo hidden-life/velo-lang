@@ -8,15 +8,26 @@
 #include <vector>
 
 namespace Velo::Runtime {
+    enum class JsonValueKind {
+        Null,
+        Bool,
+        Int,
+        String,
+        Array,
+        Object,
+    };
+
     struct StructValue;
     struct ArrayValue;
     struct MapValue;
+    struct JsonValue;
 
     using StructValuePtr = std::shared_ptr<StructValue>;
     using ArrayValuePtr = std::shared_ptr<ArrayValue>;
     using MapValuePtr = std::shared_ptr<MapValue>;
+    using JsonValuePtr = std::shared_ptr<JsonValue>;
     // Runtime value used by interpreter.
-    using Value = std::variant<int, std::string, bool, StructValuePtr, ArrayValuePtr, MapValuePtr>;
+    using Value = std::variant<int, std::string, bool, StructValuePtr, ArrayValuePtr, MapValuePtr, JsonValuePtr>;
 
     struct StructValue final {
         std::string typeName {};
@@ -29,6 +40,16 @@ namespace Velo::Runtime {
 
     struct MapValue final {
         std::map<std::string, Value> entries {};
+    };
+
+    struct JsonValue final {
+        JsonValueKind kind { JsonValueKind::Null };
+
+        bool boolValue {false};
+        int intValue {0};
+        std::string stringValue {};
+        std::vector<JsonValuePtr> arrayValues {};
+        std::map<std::string, JsonValuePtr> objectValues {};
     };
 
     // Creates an independent runtime value.

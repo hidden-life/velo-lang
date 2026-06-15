@@ -4,6 +4,8 @@
 #include <limits>
 #include <sstream>
 #include <optional>
+#include <cctype>
+#include <charconv>
 
 namespace Velo::Runtime {
     namespace {
@@ -83,6 +85,135 @@ namespace Velo::Runtime {
             }
 
             return stream.str();
+        }
+
+        auto decodeStringEscapes(const std::string &value) -> std::string {
+            std::string result;
+            result.reserve(value.size());
+
+            for (std::size_t idx = 0U; idx < value.size(); ++idx) {
+                const char ch = value[idx];
+
+                if (ch != '\\' || idx + 1U >= value.size()) {
+                    result.push_back(ch);
+                    continue;
+                }
+
+                const char escaped = value[idx + 1U];
+                ++idx;
+
+                switch (escaped) {
+                    case '"':
+                        result.push_back('"');
+                        break;
+
+                    case '\\':
+                        result.push_back('\\');
+                        break;
+
+                    case '/':
+                        result.push_back('/');
+                        break;
+
+                    case 'b':
+                        result.push_back('\b');
+                        break;
+
+                    case 'f':
+                        result.push_back('\f');
+                        break;
+
+                    case 'n':
+                        result.push_back('\n');
+                        break;
+
+                    case 'r':
+                        result.push_back('\r');
+                        break;
+
+                    case 't':
+                        result.push_back('\t');
+                        break;
+
+                    default:
+                        // Keep unknown escapes as-is for now.
+                        result.push_back('\\');
+                        result.push_back(escaped);
+                        break;
+                }
+            }
+
+            return result;
+        }
+
+        auto jsonValueToString(const JsonValuePtr &value) -> std::optional<std::string> {
+            if (value == nullptr) {
+                return std::nullopt;
+            }
+
+            switch (value->kind) {
+                case JsonValueKind::Null:
+                    return std::string("null");
+
+                case JsonValueKind::Bool:
+                    return value->boolValue ? std::string("true") : std::string("false");
+
+                case JsonValueKind::Int:
+                    return std::to_string(value->intValue);
+
+                case JsonValueKind::String:
+                    return "\"" + escapeJsonString(value->stringValue) + "\"";
+
+                case JsonValueKind::Array: {
+                    std::ostringstream stream;
+                    stream << "[";
+
+                    for (std::size_t idx = 0U; idx < value->arrayValues.size(); ++idx) {
+                        if (idx > 0U) {
+                            stream << ",";
+                        }
+
+                        const auto elementJson = jsonValueToString(value->arrayValues[idx]);
+                        if (!elementJson.has_value()) {
+                            return std::nullopt;
+                        }
+
+                        stream << *elementJson;
+                    }
+
+                    stream << "]";
+
+                    return stream.str();
+                }
+
+                case JsonValueKind::Object: {
+                    std::ostringstream stream;
+                    stream << "{";
+
+                    std::size_t idx = 0U;
+                    for (const auto &[key, entryValue]: value->objectValues) {
+                        if (idx > 0U) {
+                            stream << ",";
+                        }
+
+                        const auto entryJson = jsonValueToString(entryValue);
+                        if (!entryJson.has_value()) {
+                            return std::nullopt;
+                        }
+
+                        stream << "\"" << escapeJsonString(key) << "\":";
+                        stream << *entryJson;
+
+                        ++idx;
+                    }
+
+                    stream << "}";
+
+                    return stream.str();
+                }
+            }
+
+            return std::nullopt;
         }
 
         auto valueToJsonString(const Value &value) -> std::optional<std::string> {
@@ -187,8 +318,313 @@ namespace Velo::Runtime {
                 return stream.str();
             }
 
+            if (std::holds_alternative<JsonValuePtr>(value)) {
+                return jsonValueToString(std::get<JsonValuePtr>(value));
+            }
+
             return std::nullopt;
         }
+
+        class JsonParser final {
+        public:
+            explicit JsonParser(std::string_view text): _text(text) {}
+
+            [[nodiscard]] auto parse() -> std::optional<JsonValuePtr> {
+                skipWhitespace();
+
+                auto value = parseValue();
+                if (!value.has_value()) {
+                    return std::nullopt;
+                }
+
+                skipWhitespace();
+
+                if (!isAtEnd()) {
+                    return std::nullopt;
+                }
+
+                return value;
+            }
+
+        private:
+            [[nodiscard]] auto parseValue() -> std::optional<JsonValuePtr> {
+                skipWhitespace();
+                if (isAtEnd()) {
+                    return std::nullopt;
+                }
+
+                const char ch = peek();
+                if (ch == '"') {
+                    return parseStringValue();
+                }
+
+                if (ch == '-' || std::isdigit(static_cast<unsigned char>(ch)) != 0) {
+                    return parseIntValue();
+                }
+
+                if (matchLiteral("true")) {
+                    auto value = std::make_shared<JsonValue>();
+                    value->kind = JsonValueKind::Bool;
+                    value->boolValue = true;
+
+                    return value;
+                }
+
+                if (matchLiteral("false")) {
+                    auto value = std::make_shared<JsonValue>();
+                    value->kind = JsonValueKind::Bool;
+                    value->boolValue = false;
+
+                    return value;
+                }
+
+                if (matchLiteral("null")) {
+                    auto value = std::make_shared<JsonValue>();
+                    value->kind = JsonValueKind::Null;
+
+                    return value;
+                }
+
+                if (ch == '[') {
+                    return parseArrayValue();
+                }
+
+                if (ch == '{') {
+                    return parseObjectValue();
+                }
+
+                return std::nullopt;
+            }
+
+            [[nodiscard]] auto parseStringValue() -> std::optional<JsonValuePtr> {
+                auto stringValue = parseString();
+                if (!stringValue.has_value()) {
+                    return std::nullopt;
+                }
+
+                auto value = std::make_shared<JsonValue>();
+                value->kind = JsonValueKind::String;
+                value->stringValue = std::move(*stringValue);
+
+                return value;
+            }
+
+            [[nodiscard]] auto parseString() -> std::optional<std::string> {
+                if (!consume('"')) {
+                    return std::nullopt;
+                }
+
+                std::string result;
+                while (!isAtEnd()) {
+                    const char ch = advance();
+                    if (ch == '"') {
+                        return result;
+                    }
+
+                    if (ch != '\\') {
+                        result.push_back(ch);
+                        continue;
+                    }
+
+                    if (isAtEnd()) {
+                        return std::nullopt;
+                    }
+
+                    const char escaped = advance();
+                    switch (escaped) {
+                        case '"':
+                            result.push_back('"');
+                            break;
+                        case '\\':
+                            result.push_back('\\');
+                            break;
+                        case '/':
+                            result.push_back('/');
+                            break;
+                        case 'b':
+                            result.push_back('\b');
+                            break;
+                        case 'f':
+                            result.push_back('\f');
+                            break;
+                        case 'n':
+                            result.push_back('\n');
+                            break;
+                        case 'r':
+                            result.push_back('\r');
+                            break;
+                        case 't':
+                            result.push_back('\t');
+                            break;
+                        default:
+                            return std::nullopt;
+                    }
+                }
+
+                return std::nullopt;
+            }
+
+            [[nodiscard]] auto parseIntValue() -> std::optional<JsonValuePtr> {
+                const auto start = _offset;
+                if (peek() == '-') {
+                    [[maybe_unused]] auto c = advance();
+                }
+
+                if (isAtEnd() || std::isdigit(static_cast<unsigned char>(peek())) == 0) {
+                    return std::nullopt;
+                }
+
+                while (!isAtEnd() && std::isdigit(static_cast<unsigned char>(peek())) != 0) {
+                    [[maybe_unused]] auto c = advance();
+                }
+
+                const auto token = _text.substr(start, _offset - start);
+                int number = 0;
+                const auto *begin = token.data();
+                const auto *end = token.data() + token.size();
+                const auto parseResult = std::from_chars(begin, end, number);
+
+                if (parseResult.ec != std::errc {} || parseResult.ptr != end) {
+                    return std::nullopt;
+                }
+
+                auto value = std::make_shared<JsonValue>();
+                value->kind = JsonValueKind::Int;
+                value->intValue = number;
+
+                return value;
+            }
+
+            [[nodiscard]] auto parseArrayValue() -> std::optional<JsonValuePtr> {
+                if (!consume('[')) {
+                    return std::nullopt;
+                }
+
+                auto value = std::make_shared<JsonValue>();
+                value->kind = JsonValueKind::Array;
+
+                skipWhitespace();
+
+                if (consume(']')) {
+                    return value;
+                }
+
+                while (true) {
+                    auto element = parseValue();
+                    if (!element.has_value()) {
+                        return std::nullopt;
+                    }
+
+                    value->arrayValues.push_back(std::move(*element));
+
+                    skipWhitespace();
+
+                    if (consume(']')) {
+                        break;
+                    }
+
+                    if (!consume(',')) {
+                        return std::nullopt;
+                    }
+                }
+
+                return value;
+            }
+
+            [[nodiscard]] auto parseObjectValue() -> std::optional<JsonValuePtr> {
+                if (!consume('{')) {
+                    return std::nullopt;
+                }
+
+                auto value = std::make_shared<JsonValue>();
+                value->kind = JsonValueKind::Object;
+
+                skipWhitespace();
+
+                if (consume('}')) {
+                    return value;
+                }
+
+                while (true) {
+                    skipWhitespace();
+
+                    auto key = parseString();
+                    if (!key.has_value()) {
+                        return std::nullopt;
+                    }
+
+                    skipWhitespace();
+
+                    if (!consume(':')) {
+                        return std::nullopt;
+                    }
+
+                    auto entryValue = parseValue();
+                    if (!entryValue.has_value()) {
+                        return std::nullopt;
+                    }
+
+                    value->objectValues[*key] = std::move(*entryValue);
+
+                    skipWhitespace();
+
+                    if (consume('}')) {
+                        break;
+                    }
+
+                    if (!consume(',')) {
+                        return std::nullopt;
+                    }
+                }
+
+                return value;
+            }
+
+            void skipWhitespace() {
+                while (!isAtEnd() && std::isspace(static_cast<unsigned char>(peek())) != 0) {
+                    [[maybe_unused]] auto c = advance();
+                }
+            }
+
+            [[nodiscard]] auto matchLiteral(std::string_view literal) -> bool {
+                if (_text.substr(_offset, literal.size()) != literal) {
+                    return false;
+                }
+
+                _offset += literal.size();
+
+                return true;
+            }
+
+            [[nodiscard]] auto consume(char expected) -> bool {
+                skipWhitespace();
+                if (isAtEnd() || peek() != expected) {
+                    return false;
+                }
+
+                [[maybe_unused]] auto c = advance();
+
+                return true;
+            }
+
+            [[nodiscard]] auto peek() const -> char {
+                return _text[_offset];
+            }
+
+            [[nodiscard]] auto advance() -> char {
+                const char ch = _text[_offset];
+                ++_offset;
+
+                return ch;
+            }
+
+            [[nodiscard]] auto isAtEnd() const -> bool {
+                return _offset >= _text.size();
+            }
+
+            std::string_view _text;
+            std::size_t _offset { 0U };
+        };
     }
 
     Runtime::Runtime() {
@@ -469,7 +905,7 @@ namespace Velo::Runtime {
         _registry.registerFunc(
             BuiltinFunction {
                 "json::stringify",
-                {"json"},
+                {"json_serializable"},
                 "string",
                 [](const std::vector<Value> &args) -> ExecutionResult {
                     if (args.size() != 1U) {
@@ -494,6 +930,49 @@ namespace Velo::Runtime {
                         .exitCode = 0,
                         .error = {},
                         .returnValue = *jsonText
+                    };
+                }
+            }
+        );
+
+        _registry.registerFunc(
+            BuiltinFunction {
+                "json::parse",
+                {"string"},
+                "json",
+                [](const std::vector<Value> &args) -> ExecutionResult {
+                    if (args.size() != 1U) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "json::parse expects exactly one argument."
+                        };
+                    }
+
+                    if (!std::holds_alternative<std::string>(args.front())) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "json::parse expects a string argument."
+                        };
+                    }
+
+                    const auto decoded = decodeStringEscapes(std::get<std::string>(args.front()));
+                    JsonParser parser(decoded);
+                    auto parsed = parser.parse();
+                    if (!parsed.has_value()) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "Invalid JSON input."
+                        };
+                    }
+
+                    return ExecutionResult {
+                        .success = true,
+                        .exitCode = 0,
+                        .error = {},
+                        .returnValue = *parsed
                     };
                 }
             }

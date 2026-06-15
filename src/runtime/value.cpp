@@ -1,6 +1,29 @@
 #include "velo/runtime/value.h"
 
 namespace Velo::Runtime {
+    auto cloneJsonValue(const JsonValuePtr &value) -> JsonValuePtr {
+        if (value == nullptr) {
+            return {};
+        }
+
+        auto cloned = std::make_shared<JsonValue>();
+        cloned->kind = value->kind;
+        cloned->boolValue = value->boolValue;
+        cloned->intValue = value->intValue;
+        cloned->stringValue = value->stringValue;
+
+        cloned->arrayValues.reserve(value->arrayValues.size());
+        for (const auto &element : value->arrayValues) {
+            cloned->arrayValues.push_back(cloneJsonValue(element));
+        }
+
+        for (const auto &[key, entry]: value->objectValues) {
+            cloned->objectValues.emplace(key, cloneJsonValue(entry));
+        }
+
+        return cloned;
+    };
+
     auto cloneValue(const Value &value) -> Value {
         if (std::holds_alternative<StructValuePtr>(value)) {
             const auto &structValue = std::get<StructValuePtr>(value);
@@ -46,6 +69,10 @@ namespace Velo::Runtime {
             }
 
             return cloned;
+        }
+
+        if (std::holds_alternative<JsonValuePtr>(value)) {
+            return cloneJsonValue(std::get<JsonValuePtr>(value));
         }
 
         return value;

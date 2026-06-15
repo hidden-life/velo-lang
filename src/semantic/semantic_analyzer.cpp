@@ -79,7 +79,10 @@ namespace {
     [[nodiscard]] auto isJsonSerializableType(const Velo::Semantic::SemanticType &type) -> bool {
         using Velo::Semantic::SemanticTypeKind;
 
-        if (type.kind == SemanticTypeKind::Int || type.kind == SemanticTypeKind::String || type.kind == SemanticTypeKind::Bool) {
+        if (type.kind == SemanticTypeKind::Int ||
+            type.kind == SemanticTypeKind::String ||
+            type.kind == SemanticTypeKind::Bool ||
+            type.kind == SemanticTypeKind::Json) {
             return true;
         }
 
@@ -1045,6 +1048,12 @@ namespace Velo::Semantic {
             };
         }
 
+        if (typeName == "json") {
+            return SemanticType {
+                .kind = SemanticTypeKind::Json,
+            };
+        }
+
         return {};
     }
 
@@ -1328,8 +1337,12 @@ namespace Velo::Semantic {
             return actual.kind == SemanticTypeKind::Map;
         }
 
-        if (expected == "json") {
+        if (expected == "json_serializable") {
             return isJsonSerializableType(actual);
+        }
+
+        if (expected == "json") {
+            return actual.kind == SemanticTypeKind::Json;
         }
 
         return false;
@@ -1480,6 +1493,8 @@ namespace Velo::Semantic {
                 }
 
                 return "map<" + semanticTypeToString(*type.keyType) + ", " + semanticTypeToString(*type.valueType) + ">";
+            case SemanticTypeKind::Json:
+                return "json";
         }
 
         return "unknown";

@@ -1,0 +1,16 @@
+module app;
+
+use std::console;
+use std::json;
+
+fn main(): int {
+    let objectValue: json = json::parse("{\"id\":42,\"name\":\"Alex\"}");
+    let arrayValue: json = json::parse("[1,2,3]");
+    let stringValue: json = json::parse("\"hello\"");
+
+    console::println(json::stringify(objectValue));
+    console::println(json::stringify(arrayValue));
+    console::println(json::stringify(stringValue));
+
+    return 0;
+}

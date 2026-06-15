@@ -4793,3 +4793,138 @@ fn main(): int {
     EXPECT_TRUE(analyzer.analyze());
     EXPECT_FALSE(engine.hasErrors());
 }
+
+TEST(SemanticAnalyzerTest, AcceptsJsonTypeLocalVariable) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::json;
+
+fn main(): int {
+    let value: json = json::parse("{\"id\":42}");
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, AcceptsJsonParseBuiltin) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::json;
+
+fn main(): int {
+    let value: json = json::parse("[1,2,3]");
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, AcceptsJsonStringifyParsedJsonValue) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::json;
+
+fn main(): int {
+    let value: json = json::parse("{\"id\":42}");
+    let text: string = json::stringify(value);
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, ReportsJsonParseArgumentTypeMismatch) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::json;
+
+fn main(): int {
+    let value: json = json::parse(42);
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM033");
+}
+
+TEST(SemanticAnalyzerTest, ReportsJsonParseWrongArity) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::json;
+
+fn main(): int {
+    let value: json = json::parse();
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM010");
+}

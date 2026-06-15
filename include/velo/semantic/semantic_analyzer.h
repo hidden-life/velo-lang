@@ -21,6 +21,7 @@ namespace Velo::Semantic {
         Struct,
         Array,
         Map,
+        Json,
     };
 
     struct SemanticType final {

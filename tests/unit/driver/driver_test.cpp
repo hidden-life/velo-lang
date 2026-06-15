@@ -3502,3 +3502,182 @@ fn main(): int {
 
     EXPECT_NE(result.bytecodeText.find("CallBuiltin json::stringify args=1"), std::string::npos);
 }
+
+TEST(DriverTest, ExecutesJsonParseObjectAndStringify) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_parse_object.velo",
+        R"(module app;
+
+use std::json;
+use std::string;
+
+fn main(): int {
+    let value: json = json::parse("{\"id\":42}");
+
+    return string::len(json::stringify(value));
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    // {"id":42}
+    EXPECT_EQ(result.exitCode, 9);
+}
+
+TEST(DriverTest, ExecutesJsonParseArrayAndStringify) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_parse_array.velo",
+        R"(module app;
+
+use std::json;
+use std::string;
+
+fn main(): int {
+    let value: json = json::parse("[1,2,3]");
+
+    return string::len(json::stringify(value));
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    // [1,2,3]
+    EXPECT_EQ(result.exitCode, 7);
+}
+
+TEST(DriverTest, ExecutesJsonParseStringAndStringify) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_parse_string.velo",
+        R"(module app;
+
+use std::json;
+use std::string;
+
+fn main(): int {
+    let value: json = json::parse("\"Alex\"");
+
+    return string::len(json::stringify(value));
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    // "Alex"
+    EXPECT_EQ(result.exitCode, 6);
+}
+
+TEST(DriverTest, ReportsRuntimeErrorForInvalidJsonInput) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_parse_invalid.velo",
+        R"(module app;
+
+use std::json;
+
+fn main(): int {
+    let value: json = json::parse("{bad}");
+
+    return 0;
+}
+)"
+    );
+
+    EXPECT_FALSE(result.success);
+    EXPECT_EQ(result.exitCode, 1);
+    EXPECT_NE(result.error.find("Invalid JSON input"), std::string::npos);
+}
+
+TEST(DriverTest, IrModePrintsJsonParseBuiltinCall) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_parse_ir.velo",
+        R"(module app;
+
+use std::json;
+
+fn main(): int {
+    let value: json = json::parse("{\"id\":42}");
+
+    return 0;
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.irText.find("CallBuiltin json::parse args=1"), std::string::npos);
+}
+
+TEST(DriverTest, BytecodeModePrintsJsonParseBuiltinCall) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_parse_bytecode.velo",
+        R"(module app;
+
+use std::json;
+
+fn main(): int {
+    let value: json = json::parse("{\"id\":42}");
+
+    return 0;
+}
+)",
+        Velo::Driver::DriverMode::Bytecode
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.bytecodeText.find("CallBuiltin json::parse args=1"), std::string::npos);
+}

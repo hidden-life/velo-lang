@@ -92,6 +92,9 @@ data model foundation based on struct.
 - JSON serialization for structs
 - JSON serialization for arrays of structs
 - JSON serialization for maps with struct values
+- runtime `json` type
+- `json::parse`
+- JSON roundtrip through `json::stringify`
 
 ## Standard modules
 Current standard modules:
@@ -266,5 +269,5 @@ MVP 0.7 is currently in progress.
 
 Current step:
 ```text
-0.7.3   json::stringify structs
+0.7.4   runtime json type and json::parse
 ```
