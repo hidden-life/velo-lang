@@ -486,7 +486,87 @@ fn main(): int {
 }
 ```
 
+### `http::request`
+```velo
+http::request(method, path, body)
+```
+
+Creates an HTTP request value.
+
+Signature:
+```text
+string, string, string -> http_request
+```
+
+Example:
+```velo
+let req: http_request = http::request("POST", "/users", "{\"name\":\"Alex\"}");
+```
+
+### `http::method`
+```velo
+http::method(request)
+```
+
+Returns request method.
+
+Signature:
+```text
+http_request -> string
+```
+
+### `http::path`
+```velo
+http::path(request)
+```
+
+Returns request path.
+
+Signature:
+```text
+http_request -> string
+```
+
+### `http::request_body`
+```velo
+http::request_body(request)
+```
+
+Returns raw request body.
+
+Signature:
+```text
+http_request -> string
+```
+
+### `http::json_body`
+```velo
+http::json_body(request)
+```
+
+Parses request body as JSON and returns a runtime `json` value.
+
+Signature:
+```text
+http_request -> json
+```
+
+Example:
+```velo
+module app;
+
+use std::http;
+use std::json;
+
+fn main(): int {
+    let req: http_request = http::request("POST", "/users", "{\"name\":\"Alex\"}");
+    let body: json = http::json_body(req);
+
+    return string::len(json::get_string(body, "name"));
+}
+```
+
 Current limitations:
-- header lookup is case-sensitive
-- request builders are not implemented yet
+- request headers are not implemented yet
+- query parameters are not implemented yet
 - real HTTP server/runtime is not implemented yet

@@ -753,3 +753,20 @@ http::header     http_response, string -> string
 The semantic analyzer validates helper signatures.
 
 Missing headers are runtime errors.
+
+## HTTP request helper typing
+HTTP request helpers are typed as normal builtins.
+
+Signatures:
+```text
+http::request       string, string, string -> http_request
+http::method        http_request -> string
+http::path          http_request -> string
+http::request_body  http_request -> string
+http::json_body     http_request -> json
+```
+
+The semantic analyzer validates helper signatures.
+
+Invalid JSON body is a runtime error.
+

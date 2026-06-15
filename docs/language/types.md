@@ -600,6 +600,26 @@ Header existence can be checked with:
 let exists: bool = http::has_header(res, "Content-Type");
 ```
 
+HTTP request values can be created through `std::http`.
+
+```velo
+use std::http;
+
+let req: http_request = http::request("POST", "/users", "{\"name\":\"Alex\"}");
+```
+
+Request fields can be read through helpers:
+```velo
+let method: string = http::method(req);
+let path: string = http::path(req);
+let body: string = http::request_body(req);
+```
+
+JSON request body can be parsed with:
+```velo
+let jsonBody: json = http::json_body(req);
+```
+
 Current limitations:
 - HTTP builders are not implemented yet
 - HTTP access helpers are not implemented yet

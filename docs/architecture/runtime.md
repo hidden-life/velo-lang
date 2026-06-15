@@ -650,4 +650,24 @@ Runtime behavior:
 - `http::has_header` checks `HttpResponseValue::headers`
 - `http::header` returns a header value or reports a runtime error
 
-Header lookup is case-sensitive in MVP 0.8.3.
+## HTTP request helpers
+Runtime registers request helpers in `std::http`.
+
+Builtins:
+```text
+http::request
+http::method
+http::path
+http::request_body
+http::json_body
+```
+
+`http::request` creates an `HttpRequestValuePtr` with method, path, body, and
+empty headers.
+
+`http::json_body` parses request body using the runtime JSON parser and returns
+a `JsonValuePtr`.
+
+Invalid JSON request body is a runtime error.
+
+No real network/server runtime exists in MVP 0.8.4.

@@ -337,3 +337,90 @@ TEST(RuntimeModuleSyncTest, RegistersHttpHeaderBuiltinInHttpModule) {
     EXPECT_EQ(function->parameterTypes[0], "http_response");
     EXPECT_EQ(function->parameterTypes[1], "string");
 }
+
+TEST(RuntimeModuleSyncTest, RegistersHttpRequestBuiltinInHttpModule) {
+    Velo::Runtime::Runtime runtime;
+
+    const auto *module = runtime.modules().find("http");
+    ASSERT_NE(module, nullptr);
+
+    const auto *function = module->findFunction("request");
+    ASSERT_NE(function, nullptr);
+
+    EXPECT_EQ(function->name, "request");
+    EXPECT_EQ(function->arity, 3U);
+    EXPECT_EQ(function->returnType, "http_request");
+
+    ASSERT_EQ(function->parameterTypes.size(), 3U);
+    EXPECT_EQ(function->parameterTypes[0], "string");
+    EXPECT_EQ(function->parameterTypes[1], "string");
+    EXPECT_EQ(function->parameterTypes[2], "string");
+}
+
+TEST(RuntimeModuleSyncTest, RegistersHttpMethodBuiltinInHttpModule) {
+    Velo::Runtime::Runtime runtime;
+
+    const auto *module = runtime.modules().find("http");
+    ASSERT_NE(module, nullptr);
+
+    const auto *function = module->findFunction("method");
+    ASSERT_NE(function, nullptr);
+
+    EXPECT_EQ(function->name, "method");
+    EXPECT_EQ(function->arity, 1U);
+    EXPECT_EQ(function->returnType, "string");
+
+    ASSERT_EQ(function->parameterTypes.size(), 1U);
+    EXPECT_EQ(function->parameterTypes[0], "http_request");
+}
+
+TEST(RuntimeModuleSyncTest, RegistersHttpPathBuiltinInHttpModule) {
+    Velo::Runtime::Runtime runtime;
+
+    const auto *module = runtime.modules().find("http");
+    ASSERT_NE(module, nullptr);
+
+    const auto *function = module->findFunction("path");
+    ASSERT_NE(function, nullptr);
+
+    EXPECT_EQ(function->name, "path");
+    EXPECT_EQ(function->arity, 1U);
+    EXPECT_EQ(function->returnType, "string");
+
+    ASSERT_EQ(function->parameterTypes.size(), 1U);
+    EXPECT_EQ(function->parameterTypes[0], "http_request");
+}
+
+TEST(RuntimeModuleSyncTest, RegistersHttpRequestBodyBuiltinInHttpModule) {
+    Velo::Runtime::Runtime runtime;
+
+    const auto *module = runtime.modules().find("http");
+    ASSERT_NE(module, nullptr);
+
+    const auto *function = module->findFunction("request_body");
+    ASSERT_NE(function, nullptr);
+
+    EXPECT_EQ(function->name, "request_body");
+    EXPECT_EQ(function->arity, 1U);
+    EXPECT_EQ(function->returnType, "string");
+
+    ASSERT_EQ(function->parameterTypes.size(), 1U);
+    EXPECT_EQ(function->parameterTypes[0], "http_request");
+}
+
+TEST(RuntimeModuleSyncTest, RegistersHttpJsonBodyBuiltinInHttpModule) {
+    Velo::Runtime::Runtime runtime;
+
+    const auto *module = runtime.modules().find("http");
+    ASSERT_NE(module, nullptr);
+
+    const auto *function = module->findFunction("json_body");
+    ASSERT_NE(function, nullptr);
+
+    EXPECT_EQ(function->name, "json_body");
+    EXPECT_EQ(function->arity, 1U);
+    EXPECT_EQ(function->returnType, "json");
+
+    ASSERT_EQ(function->parameterTypes.size(), 1U);
+    EXPECT_EQ(function->parameterTypes[0], "http_request");
+}

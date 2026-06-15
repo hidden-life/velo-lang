@@ -113,6 +113,11 @@ data model foundation based on struct.
 - `http::body`
 - `http::has_header`
 - `http::header`
+- `http::request`
+- `http::method`
+- `http::path`
+- `http::request_body`
+- `http::json_body`
 
 ## Standard modules
 Current standard modules:
@@ -297,5 +302,5 @@ MVP 0.8 is currently in progress.
 
 Current step:
 ```text
-0.8.3   std::http response access helpers
+0.8.4   std::http request builders and access helpers
 ```

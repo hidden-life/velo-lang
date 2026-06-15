@@ -1617,5 +1617,234 @@ namespace Velo::Runtime {
                 }
             }
         );
+
+        _registry.registerFunc(
+            BuiltinFunction {
+                "http::request",
+                {"string", "string", "string"},
+                "http_request",
+                [](const std::vector<Value> &args) -> ExecutionResult {
+                    if (args.size() != 3U) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::request expects exactly three arguments."
+                        };
+                    }
+
+                    if (!std::holds_alternative<std::string>(args[0])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::request expects string method as first argument."
+                        };
+                    }
+
+                    if (!std::holds_alternative<std::string>(args[1])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::request expects string path as second argument."
+                        };
+                    }
+
+                    if (!std::holds_alternative<std::string>(args[2])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::request expects string body as third argument."
+                        };
+                    }
+
+                    auto request = std::make_shared<HttpRequestValue>();
+                    request->method = std::get<std::string>(args[0]);
+                    request->path = std::get<std::string>(args[1]);
+                    request->body = std::get<std::string>(args[2]);
+
+                    return ExecutionResult {
+                        .success = true,
+                        .exitCode = 0,
+                        .error = {},
+                        .returnValue = request
+                    };
+                }
+            }
+        );
+
+        _registry.registerFunc(
+            BuiltinFunction {
+                "http::method",
+                {"http_request"},
+                "string",
+                [](const std::vector<Value> &args) -> ExecutionResult {
+                    if (args.size() != 1U) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::method expects exactly one argument."
+                        };
+                    }
+
+                    if (!std::holds_alternative<HttpRequestValuePtr>(args[0])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::method expects an http_request argument."
+                        };
+                    }
+
+                    const auto request = std::get<HttpRequestValuePtr>(args[0]);
+                    if (request == nullptr) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::method received a null http_equest value."
+                        };
+                    }
+
+                    return ExecutionResult {
+                        .success = true,
+                        .exitCode = 0,
+                        .error = {},
+                        .returnValue = request->method
+                    };
+                }
+            }
+        );
+
+        _registry.registerFunc(
+            BuiltinFunction {
+                "http::path",
+                {"http_request"},
+                "string",
+                [](const std::vector<Value> &args) -> ExecutionResult {
+                    if (args.size() != 1U) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::path expects exactly one argument."
+                        };
+                    }
+
+                    if (!std::holds_alternative<HttpRequestValuePtr>(args[0])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::path expects an http_request argument."
+                        };
+                    }
+
+                    const auto request = std::get<HttpRequestValuePtr>(args[0]);
+                    if (request == nullptr) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::path received a null http_request value."
+                        };
+                    }
+
+                    return ExecutionResult {
+                        .success = true,
+                        .exitCode = 0,
+                        .error = {},
+                        .returnValue = request->path
+                    };
+                }
+            }
+        );
+
+        _registry.registerFunc(
+            BuiltinFunction {
+                "http::request_body",
+                {"http_request"},
+                "string",
+                [](const std::vector<Value> &args) -> ExecutionResult {
+                    if (args.size() != 1U) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::request_body expects exactly one argument."
+                        };
+                    }
+
+                    if (!std::holds_alternative<HttpRequestValuePtr>(args[0])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::request_body expects an http_request argument."
+                        };
+                    }
+
+                    const auto request = std::get<HttpRequestValuePtr>(args[0]);
+                    if (request == nullptr) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::request_body received a null http_request value."
+                        };
+                    }
+
+                    return ExecutionResult {
+                        .success = true,
+                        .exitCode = 0,
+                        .error = {},
+                        .returnValue = request->body
+                    };
+                }
+            }
+        );
+
+        _registry.registerFunc(
+            BuiltinFunction {
+                "http::json_body",
+                {"http_request"},
+                "json",
+                [](const std::vector<Value> &args) -> ExecutionResult {
+                    if (args.size() != 1U) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::json_body expects exactly one argument."
+                        };
+                    }
+
+                    if (!std::holds_alternative<HttpRequestValuePtr>(args[0])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::json_body expects an http_request argument."
+                        };
+                    }
+
+                    const auto request = std::get<HttpRequestValuePtr>(args[0]);
+                    if (request == nullptr) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::json_body received a null http_request value."
+                        };
+                    }
+
+                    const auto decoded = decodeStringEscapes(request->body);
+                    JsonParser parser(decoded);
+                    auto parsed = parser.parse();
+
+                    if (!parsed.has_value()) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "Invalid HTTP JSON body."
+                        };
+                    }
+
+                    return ExecutionResult {
+                        .success = true,
+                        .exitCode = 0,
+                        .error = {},
+                        .returnValue = *parsed
+                    };
+                }
+            }
+        );
     }
 }

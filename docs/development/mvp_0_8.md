@@ -16,7 +16,7 @@ a real HTTP server in a later milestone.
 
 ## Current step
 ```text
-0.8.3   std::http response access helpers
+0.8.4   std::http request builders and access helpers
 ```
 
 ## 0.8.1 scope
@@ -118,7 +118,39 @@ http::has_header    http_response, string -> bool
 http::header        http_response, string -> string
 ```
 
+## 0.8.4 scope
+Implemented in this step:
+- `http::request`
+- `http::method`
+- `http::path`
+- `http::request_body`
+- `http::json_body`
+- request builder runtime implementation
+- request access helper runtime implementation
+- JSON request body parsing
+- runtime module sync tests
+- semantic tests
+- driver tests
+- example
+- documentation
+
+Request helper signatures:
+```text
+http::request      string, string, string -> http_request
+http::method       http_request -> string
+http::path         http_request -> string
+http::request_body http_request -> string
+http::json_body    http_request -> json
+```
+
+Example:
+```velo
+let req: http_request = http::request("POST", "/users", "{\"name\":\"Alex\"}");
+let body: json = http::json_body(req);
+let name: string = json::get_string(body, "name");
+```
+
 Current limitations:
-- header lookup is case-sensitive
-- request builders are npt implemented yet
+- request headers are not implemented yet
+- query parsing is not implemented yet
 - real HTTP server/runtime is not implemented yet

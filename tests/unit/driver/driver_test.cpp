@@ -4494,3 +4494,309 @@ fn main(): int {
 
     EXPECT_NE(result.bytecodeText.find("CallBuiltin http::status args=1"), std::string::npos);
 }
+
+TEST(DriverTest, ExecutesHttpRequestBuilder) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_request_builder.velo",
+        R"(module app;
+
+use std::http;
+
+fn main(): int {
+    let req: http_request = http::request("POST", "/users", "Hello");
+
+    return 0;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 0);
+}
+
+TEST(DriverTest, ExecutesHttpMethodHelper) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_method_helper.velo",
+        R"(module app;
+
+use std::http;
+use std::string;
+
+fn main(): int {
+    let req: http_request = http::request("POST", "/users", "Hello");
+
+    return string::len(http::method(req));
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 4);
+}
+
+TEST(DriverTest, ExecutesHttpPathHelper) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_path_helper.velo",
+        R"(module app;
+
+use std::http;
+use std::string;
+
+fn main(): int {
+    let req: http_request = http::request("POST", "/users", "Hello");
+
+    return string::len(http::path(req));
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 6);
+}
+
+TEST(DriverTest, ExecutesHttpRequestBodyHelper) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_request_body_helper.velo",
+        R"(module app;
+
+use std::http;
+use std::string;
+
+fn main(): int {
+    let req: http_request = http::request("POST", "/users", "Hello");
+
+    return string::len(http::request_body(req));
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 5);
+}
+
+TEST(DriverTest, ExecutesHttpJsonBodyHelper) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_json_body_helper.velo",
+        R"(module app;
+
+use std::http;
+use std::json;
+use std::string;
+
+fn main(): int {
+    let req: http_request = http::request("POST", "/users", "{\"name\":\"Alex\"}");
+    let body: json = http::json_body(req);
+
+    return string::len(json::get_string(body, "name"));
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 4);
+}
+
+TEST(DriverTest, ReportsRuntimeErrorForInvalidHttpJsonBody) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "invalid_http_json_body.velo",
+        R"(module app;
+
+use std::http;
+
+fn main(): int {
+    let req: http_request = http::request("POST", "/users", "{bad}");
+    let body: json = http::json_body(req);
+
+    return 0;
+}
+)"
+    );
+
+    EXPECT_FALSE(result.success);
+    EXPECT_EQ(result.exitCode, 1);
+    EXPECT_NE(result.error.find("Invalid HTTP JSON body"), std::string::npos);
+}
+
+TEST(DriverTest, IrModePrintsHttpRequestBuiltinCall) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_request_ir.velo",
+        R"(module app;
+
+use std::http;
+
+fn main(): int {
+    let req: http_request = http::request("POST", "/users", "Hello");
+
+    return 0;
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.irText.find("CallBuiltin http::request args=3"), std::string::npos);
+}
+
+TEST(DriverTest, BytecodeModePrintsHttpRequestBuiltinCall) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_request_bytecode.velo",
+        R"(module app;
+
+use std::http;
+
+fn main(): int {
+    let req: http_request = http::request("POST", "/users", "Hello");
+
+    return 0;
+}
+)",
+        Velo::Driver::DriverMode::Bytecode
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.bytecodeText.find("CallBuiltin http::request args=3"), std::string::npos);
+}
+
+TEST(DriverTest, IrModePrintsHttpJsonBodyBuiltinCall) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_json_body_ir.velo",
+        R"(module app;
+
+use std::http;
+use std::json;
+
+fn main(): int {
+    let req: http_request = http::request("POST", "/users", "{\"name\":\"Alex\"}");
+    let body: json = http::json_body(req);
+
+    return 0;
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.irText.find("CallBuiltin http::json_body args=1"), std::string::npos);
+}
+
+TEST(DriverTest, BytecodeModePrintsHttpJsonBodyBuiltinCall) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_json_body_bytecode.velo",
+        R"(module app;
+
+use std::http;
+use std::json;
+
+fn main(): int {
+    let req: http_request = http::request("POST", "/users", "{\"name\":\"Alex\"}");
+    let body: json = http::json_body(req);
+
+    return 0;
+}
+)",
+        Velo::Driver::DriverMode::Bytecode
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.bytecodeText.find("CallBuiltin http::json_body args=1"), std::string::npos);
+}

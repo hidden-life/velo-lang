@@ -1,0 +1,18 @@
+module app;
+
+use std::console;
+use std::http;
+use std::json;
+
+fn main(): int {
+    let req: http_request = http::request("POST", "/users", "{\"name\":\"Alex\"}");
+
+    console::println(http::method(req));
+    console::println(http::path(req));
+    console::println(http::request_body(req));
+
+    let body: json = http::json_body(req);
+    console::println(json::get_string(body, "name"));
+
+    return 0;
+}
