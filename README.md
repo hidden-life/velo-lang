@@ -231,13 +231,15 @@ Start here:
 - [Velo v0.5.0 release notes draft](docs/development/release_notes_v0_5.md)
 - [MVP 0.6 status](docs/development/mvp_0_6.md)
 - [Velo v0.6.0 release notes draft](docs/development/release_notes_v0_6.md)
+- [MVP 0.7 status](docs/development/mvp_0_7.md)
+- [Velo v0.7.0 release notes draft](docs/development/release_notes_v0_7.md)
 
 ## Current development focus
-The project is currently moving toward **Velo MVP 0.7**.
+The project has completed **Velo MVP 0.7**.
 
 MVP 0.7 focuses on JSON foundation and serialization.
 
-Planned steps:
+Completed steps:
 ```text
 0.7.1   std::json module and json::stringify primitives
 0.7.2   json::stringify arrays and maps
@@ -245,6 +247,11 @@ Planned steps:
 0.7.4   runtime json type and json::parse
 0.7.5   json access helpers and examples
 0.7.6   docs/examples/release checklist
+```
+
+Suggested next milestone:
+```text
+MVP 0.8     HTTP runtime foundation
 ```
 
 Main properties:
@@ -271,9 +278,4 @@ MVP 0.5 is tagged as `v0.5.0`.
 MVP 0.6 is tagged as `v0.6.0`.
 
 ## MVP 0.7 status
-MVP 0.7 is currently in progress. 
-
-Current step:
-```text
-0.7.5   json access helpers and examples
-```
+MVP 0.7 is tagged as `v0.7.0`. 

@@ -203,6 +203,11 @@ examples/map_literal/main.velo
 examples/map_indexing/main.velo
 examples/map_assignment/main.velo
 examples/map_builtin/main.velo
+examples/json_stringify_primitives/main.velo
+examples/json_stringify_collections/main.velo
+examples/json_stringify_struct/main.velo
+examples/json_parse/main.velo
+examples/json_access/main.velo
 ```
 
 ## Integration showcase example

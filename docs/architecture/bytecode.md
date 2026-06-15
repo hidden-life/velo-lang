@@ -277,3 +277,15 @@ MapValuePtr + string    -> map entry assignment
 Leaf map assignment inserts missing keys.
 
 Non-leaf missing map keys are runtime errors.
+
+## JSON builtins
+JSON helpers compile to normal bytecode builtin calls.
+
+Examples:
+```text
+CallBuiltin json::stringify args=1
+CallBuiltin json::parse args=1
+CallBuiltin json::get_int args=2
+```
+
+No dedicated JSON bytecode opcode exists in MVP 0.7.

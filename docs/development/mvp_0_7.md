@@ -1,6 +1,9 @@
 # Velo MVP 0.7 status
 MVP 0.7 focuses on JSON foundation and serialization.
 
+The goal is to add JSON serialization, runtime JSON values, JSON parsing, and
+basic JSON object access helpers.
+
 ## Roadmap
 ```text
 0.7.1   std::json module and json::stringify primitives
@@ -13,7 +16,7 @@ MVP 0.7 focuses on JSON foundation and serialization.
 
 ## Current step
 ```text
-0.7.5   json access helpers and examples
+0.7.6   docs/examples/release checklist
 ```
 
 ## 0.7.1 scope
@@ -39,14 +42,6 @@ json::stringify(true)
 json::stringify(false)
 ```
 `json::stringify` return `string`.
-
-Not implemented in 0.7.1:
-- array serialization
-- map serialization
-- struct serialization
-- `json::parse`
-- runtime JSON value type
-- JSON access helpers
 
 ## 0.7.2 scope
 Implemented in this step:
@@ -103,6 +98,8 @@ Example output:
 {"a":{"id":1},"b":{"id":2}}
 ```
 
+Struct field order follows runtime field storage order.
+
 ## 0.7.4 scope
 Implemented in this step:
 - `json` semantic type
@@ -126,6 +123,17 @@ Example:
 ```velo
 let value: json = json::parse("{\"id\":42}");
 let text: string = json::stringify(value);
+```
+
+Supported JSON input in MVP 0.7:
+```text
+null
+true
+false
+42
+"Alex"
+[1,2,3]
+{"id": 42,"name":"Alex"}
 ```
 
 ## 0.7.5 scope
@@ -159,8 +167,81 @@ let profile: json = json::get_json(value, "profile");
 let age: int = json::get_int(profile, "age");
 ```
 
-Current limitations:
-- direct JSON indexing syntax is not implemented yet
-- JSON array access helpers are not implemented yet
-- JSON object length helpers are not implemented yet
-- JSON null helpers are not implemented yet
+## 0.7.6 scope
+Implemented in this step:
+- MVP 0.7 documentation review
+- examples documentation review
+- release checklist update
+- release notes draft
+- README current status update
+- architecture docs synchronization
+- language docs synchronization
+- smoke-test command list
+- tag instructions
+
+## MVP 0.7 completed feature set
+MVP 0.7 includes:
+- all MVP 0.1 language foundation
+- all MVP 0.2 struct foundation
+- all MVP 0.3 value semantics and block scope foundation
+- all MVP 0.4 array foundation
+- all MVP 0.5 bytecode foundation
+- all MVP 0.6 map foundation
+- `std::json` module
+- `json::stringify`
+- JSON serialization for primitives
+- JSON serialization for arrays
+- JSON serialization for maps
+- JSON serialization for structs
+- recursive JSON serialization
+- runtime `json` type
+- runtime JSON value representation
+- deep-copy support for runtime JSON values
+- `json::parse`
+- `json::has`
+- `json::get_int`
+- `json::get_string`
+- `json::get_bool`
+- `json::get_json`
+
+## MVP 0.7 examples
+```text
+examples/json_stringify_primitives/main.velo
+examples/json_stringify_collections/main.velo
+examples/json_stringify_struct/main.velo
+examples/json_parse/main.velo
+examples/json_access/main.velo
+```
+
+## MVP 0.7 limitations
+Not implemented in MVP 0.7:
+- JSON float numbers
+- unicode escape parsing such as `\uXXXX`
+- direct JSON indexing syntax
+- JSON array access helpers
+- JSON object length helpers
+- JSON null helpers
+- JSON mutation helpers
+- pretty JSON formatting
+- custom JSON field names
+- schema validation
+- HTTP runtime
+- file IO
+- nullable user-level types
+- generics
+- methods
+- iterators
+- `for` loops
+- standalone `veloc`
+- standalone `velovm`
+
+## next milestone
+Suggested next milestone:
+```text
+MVP 0.8     HTTP runtime foundation
+```
+
+Reason:
+- MVP 0.7 gives JSON serialization/parsing
+- HTTP runtime becomes much more useful after JSON foundation
+- API/backend direction needs request/response primitives next

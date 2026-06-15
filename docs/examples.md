@@ -385,3 +385,107 @@ Expected output:
 0
 3
 ```
+
+## MVP 0.7 JSON examples
+### JSON stringify primitives
+```text
+examples/json_stringify_primitives/main.velo
+```
+
+Demonstrates:
+- importing `std::json`
+- `json::stringify`
+- primitive JSON serialization
+- JSON string output
+
+Expected output:
+```text
+42
+"Alex"
+true
+false
+```
+
+### JSON stringify collections
+```text
+examples/json_stringify_collections/main.velo
+```
+
+Demonstrates:
+- array JSON serialization
+- map JSON serialization
+- nested collection JSON serialization
+
+Expected output:
+```text
+[1,2,3]
+["Alex","Bob"]
+[true,false]
+{"Alex":10,"Bob":20}
+{"a":[1,2],"b":[3,4]}
+```
+
+### JSON stringify structs
+
+```text
+examples/json_stringify_struct/main.velo
+```
+
+Demonstrates:
+
+- struct JSON serialization
+- array of structs JSON serialization
+- map with struct values JSON serialization
+
+Expected output:
+
+```text
+{"active":true,"id":1,"name":"Alex"}
+[{"active":true,"id":1,"name":"Alex"},{"active":false,"id":2,"name":"Bob"}]
+{"alex":{"active":true,"id":1,"name":"Alex"},"bob":{"active":false,"id":2,"name":"Bob"}}
+```
+
+### JSON parse
+
+```text
+examples/json_parse/main.velo
+```
+
+Demonstrates:
+
+- runtime `json` type
+- `json::parse`
+- roundtrip through `json::stringify`
+
+Expected output:
+
+```text
+{"id":42,"name":"Alex"}
+[1,2,3]
+"hello"
+```
+
+### JSON access helpers
+
+```text
+examples/json_access/main.velo
+```
+
+Demonstrates:
+
+- `json::has`
+- `json::get_int`
+- `json::get_string`
+- `json::get_bool`
+- `json::get_json`
+- nested JSON object access
+
+Expected output:
+
+```text
+42
+Alex
+true
+17
+has name
+```

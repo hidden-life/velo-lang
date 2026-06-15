@@ -335,6 +335,8 @@ Runtime behavior:
 - access helpers currently work with JSON objects only
 
 Current limitations:
-- floats are not implemented yet
+- JSON float numbers are not implemented yet
 - unicode escapes such as `\uXXXX` are not implemented yet
-- JSON access helpers are not implemented yet
+- JSON array access helpers are not implemented yet
+- direct JSON indexing syntax is not implemented yet
+- JSON mutation helpers are not implemented yet

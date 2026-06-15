@@ -1,5 +1,5 @@
-# MVP 0.6 release checklist
-This checklist should be completed before tagging or announcing Velo MVP 0.6.
+# MVP 0.7 release checklist
+This checklist should be completed before tagging or announcing Velo MVP 0.7.
 
 The goal is to make sure the MVP is small, stable, documented, and reproducible.
 
@@ -72,102 +72,119 @@ Expected:
 same behavior as velo run ./examples/arithmetic/main.velo
 ```
 
-## 5. MVP 0.6 map example smoke tests
+## 5. MVP 0.7 JSON example smoke tests
 Run:
 ```bash
-./build/debug/apps/velo/velo run ./examples/map_literal/main.velo
-./build/debug/apps/velo/velo run ./examples/map_indexing/main.velo
-./build/debug/apps/velo/velo run ./examples/map_assignment/main.velo
-./build/debug/apps/velo/velo run ./examples/map_builtin/main.velo
+./build/debug/apps/velo/velo run ./examples/json_stringify_primitives/main.velo
+./build/debug/apps/velo/velo run ./examples/json_stringify_collections/main.velo
+./build/debug/apps/velo/velo run ./examples/json_stringify_struct/main.velo
+./build/debug/apps/velo/velo run ./examples/json_parse/main.velo
+./build/debug/apps/velo/velo run ./examples/json_access/main.velo
 ```
-Expected `map_literal` output:
-```text
-<map len=2>
-<map len=2>
-<map len=0>
-```
-
-Expected `map_indexing` output:
-```text
-20
-Bob
-4
-```
-
-Expected `map_assignment` output:
+Expected `json_stringify_primitives` output:
 ```text
 42
-30
-99
-77
+"Alex"
+true
+false
 ```
 
-Expected `map_builtin` output:
+Expected `json_stringify_collections` output:
 ```text
-2
-2
-0
-3
+[1,2,3]
+["Alex","Bob"]
+[true,false]
+{"Alex":10,"Bob":20}
+{"a":[1,2],"b":[3,4]}
 ```
 
-All MVP 0.6 demo examples should exit with code `0`.
+Expected `json_stringify_struct` output:
+```text
+{"active":true,"id":1,"name":"Alex"}
+[{"active":true,"id":1,"name":"Alex"},{"active":false,"id":2,"name":"Bob"}]
+{"alex":{"active":true,"id":1,"name":"Alex"},"bob":{"active":false,"id":2,"name":"Bob"}}
+```
 
-## 6. MVP 0.6 map check smoke tests
+Expected `json_parse` output:
+```text
+{"id":42,"name":"Alex"}
+[1,2,3]
+"hello"
+```
+
+Expected `json_access` output:
+```text
+42
+Alex
+true
+17
+has name
+```
+
+All MVP 0.7 demo examples should exit with code `0`.
+
+## 6. MVP 0.7 JSON check smoke tests
 Run:
 ```bash
-./build/debug/apps/velo/velo check ./examples/map_literal/main.velo
-./build/debug/apps/velo/velo check ./examples/map_indexing/main.velo
-./build/debug/apps/velo/velo check ./examples/map_assignment/main.velo
-./build/debug/apps/velo/velo check ./examples/map_builtin/main.velo
+./build/debug/apps/velo/velo check ./examples/json_stringify_primitives/main.velo
+./build/debug/apps/velo/velo check ./examples/json_stringify_collections/main.velo
+./build/debug/apps/velo/velo check ./examples/json_stringify_struct/main.velo
+./build/debug/apps/velo/velo check ./examples/json_parse/main.velo
+./build/debug/apps/velo/velo check ./examples/json_access/main.velo
 ```
 Expected:
 ```text
 all commands exit with code 0
 ```
 
-## 7. MVP 0.6 map IR smoke tests
+## 7. MVP 0.6 JSON IR smoke tests
 Run:
 ```bash
-./build/debug/apps/velo/velo ir ./examples/map_literal/main.velo
-./build/debug/apps/velo/velo ir ./examples/map_indexing/main.velo
-./build/debug/apps/velo/velo ir ./examples/map_assignment/main.velo
-./build/debug/apps/velo/velo ir ./examples/map_builtin/main.velo
+./build/debug/apps/velo/velo ir ./examples/json_stringify_primitives/main.velo
+./build/debug/apps/velo/velo ir ./examples/json_stringify_collections/main.velo
+./build/debug/apps/velo/velo ir ./examples/json_stringify_struct/main.velo
+./build/debug/apps/velo/velo ir ./examples/json_parse/main.velo
+./build/debug/apps/velo/velo ir ./examples/json_access/main.velo
 ```
 
 Check for representative fragments:
 ```text
-BuildMap entries=2
-LoadIndex
-StoreIndexPath indexes=1
-StoreIndexPath indexes=2
-CallBuiltin map::len args=1
+CallBuiltin json::stringify args=1
+CallBuiltin json::parse args=1
+CallBuiltin json::get_int args=2
+CallBuiltin json::get_string args=2
+CallBuiltin json::get_bool args=2
+CallBuiltin json::get_json args=2
+CallBuiltin json::has args=2
 ```
 
-## 8. MVP 0.6 bytecode smoke tests
+## 8. MVP 0.7 JSON bytecode smoke tests
 Run:
 ```bash
-./build/debug/apps/velo/velo bytecode ./examples/map_literal/main.velo
-./build/debug/apps/velo/velo bytecode ./examples/map_indexing/main.velo
-./build/debug/apps/velo/velo bytecode ./examples/map_assignment/main.velo
-./build/debug/apps/velo/velo bytecode ./examples/map_builtin/main.velo
+./build/debug/apps/velo/velo bytecode ./examples/json_stringify_primitives/main.velo
+./build/debug/apps/velo/velo bytecode ./examples/json_stringify_collections/main.velo
+./build/debug/apps/velo/velo bytecode ./examples/json_stringify_struct/main.velo
+./build/debug/apps/velo/velo bytecode ./examples/json_parse/main.velo
+./build/debug/apps/velo/velo bytecode ./examples/json_access/main.velo
 ```
 
 Check for representative fragments:
 ```text
-BuildMap entries=2
-LoadIndex
-StoreIndexPath indexes=1
-StoreIndexPath indexes=2
-CallBuiltin map::len args=1
+CallBuiltin json::stringify args=1
+CallBuiltin json::parse args=1
+CallBuiltin json::get_int args=2
+CallBuiltin json::get_string args=2
+CallBuiltin json::get_bool args=2
+CallBuiltin json::get_json args=2
+CallBuiltin json::has args=2
 ```
 
-## 9. Focused map tests
+## 9. Focused JSON tests
 Run:
 ```bash
-ctest --test-dir build/debug -R "ParserTest.*Map" --output-on-failure
-ctest --test-dir build/debug -R "SemanticAnalyzerTest.*Map" --output-on-failure
-ctest --test-dir build/debug -R "DriverTest.*Map" --output-on-failure
-ctest --test-dir build/debug -R "BytecodeVmTest.*Map" --output-on-failure
+ctest --test-dir build/debug -R "RuntimeModuleSyncTest.*Json" --output-on-failure
+ctest --test-dir build/debug -R "SemanticAnalyzerTest.*Json" --output-on-failure
+ctest --test-dir build/debug -R "DriverTest.*Json" --output-on-failure
 ```
 
 Expected:
@@ -175,7 +192,26 @@ Expected:
 all selected tests pass
 ```
 
-## 10. Bytecode regression tests
+## 10. Regression tests from previous milestones
+Run representative previous examples:
+```bash
+./build/debug/apps/velo/velo run ./examples/array_literal/main.velo
+./build/debug/apps/velo/velo run ./examples/array_indexing/main.velo
+./build/debug/apps/velo/velo run ./examples/array_assignment/main.velo
+./build/debug/apps/velo/velo run ./examples/array_builtin/main.velo
+
+./build/debug/apps/velo/velo run ./examples/map_literal/main.velo
+./build/debug/apps/velo/velo run ./examples/map_indexing/main.velo
+./build/debug/apps/velo/velo run ./examples/map_assignment/main.velo
+./build/debug/apps/velo/velo run ./examples/map_builtin/main.velo
+```
+
+Expected:
+```text
+all commands exit with code 0
+```
+
+## 11. Bytecode regression tests
 Run:
 ```bash
 ctest --test-dir build/debug -R "BytecodeTest" --output-on-failure
@@ -189,31 +225,7 @@ Expected:
 all selected tests pass
 ```
 
-## 11. Previous MVP example smoke tests
-Run representative examples from previous milestone:
-```bash
-./build/debug/apps/velo/velo run ./examples/array_literal/main.velo
-./build/debug/apps/velo/velo run ./examples/array_indexing/main.velo
-./build/debug/apps/velo/velo run ./examples/array_assignment/main.velo
-./build/debug/apps/velo/velo run ./examples/array_builtin/main.velo
-```
-Expected:
-```text
-all commands exit with code 0
-```
-
-## 12. Error example smoke tests
-Run known invalid example:
-```bash
-./build/debug/apps/velo/velo check ./examples/errors/missing_return.velo
-```
-
-Expected:
-- command exits with non-zero status
-- diagnostic is readable
-- diagnostic code is stable
-
-## 13. Documentation review
+## 12. Documentation review
 Review:
 ```text
 README.md
@@ -236,6 +248,7 @@ docs/development/mvp_0_3.md
 docs/development/mvp_0_4.md
 docs/development/mvp_0_5.md
 docs/development/mvp_0_6.md
+docs/development/mvp_0_7.md
 
 docs/development/diagnostics.md
 docs/development/example_guidelines.md
@@ -247,52 +260,51 @@ docs/development/release_notes_v0_3.md
 docs/development/release_notes_v0_4.md
 docs/development/release_notes_v0_5.md
 docs/development/release_notes_v0_6.md
+docs/development/release_notes_v0_7.md
 ```
 
 Check:
 - no outdated limitations remain
-- map examples are documented
-- map diagnostics are documented
-- CLI commands match actual behavior
-- `std::map` and `map::len` are documented
+- JSON examples are documented
+- `std::json` is documented
+- `json::stringify` is documented
+- `json::parse` is documented
+- JSON access helpers are documented
 - release notes match completed features
 - release checklist is reproducible
 
-## 14. MVP scope review
-MVP 0.6 includes:
-- map type syntax
-- map semantic type model
-- map literals
-- runtime map values
-- deep-copy support for maps
-- map indexing read
-- map element assignment
-- map element insert assignment
-- nested map assignment
-- mixed map/array index assignment
-- `std::map`
-- `map::len`
+## 13. MVP scope review
+MVP 0.7 includes:
+- `std::json`
+- `json::stringify`
+- JSON serialization for primitives
+- JSON serialization for arrays
+- JSON serialization for maps
+- JSON serialization for structs
+- runtime `json` type
+- `json::parse`
+- JSON object access helpers
 
 Not included:
-- non-string map keys
-- field assignment through map index, for example `users["bob"].id = 3`
-- `map::has`
-- `map::keys`
-- `map::values`
-- `map::remove`
-- JSON parser
-- JSON serializer
-- nullable types
+- JSON float numbers
+- unicode escape parsing such as `\uXXXX`
+- direct JSON indexing syntax
+- JSON array access helpers
+- JSON object length helpers
+- JSON null helpers
+- JSON mutation helpers
+- pretty JSON formatting
+- HTTP runtime
+- file IO
+- nullable user-level types
 - generics
 - methods
 - iterators
 - `for` loops
-- bytecode optimizer
-- bytecode verifier
 - standalone `veloc`
 - standalone `velovm`
 
-## 15. Git status
+## 14. Git status
 Check repository status:
 ```bash
 git status
@@ -303,27 +315,27 @@ Expected:
 only intentional changes
 ```
 
-## 16. Suggested release commit flow
+## 15. Suggested release commit flow
 Before release:
 ```bash
 git add README.md docs
-git commit -m "docs(mvp): finalize MVP 0.6 documentation"
+git commit -m "docs(mvp): finalize MVP 0.7 documentation"
 ```
 
-## 17. Suggested tag
+## 16. Suggested tag
 When ready:
 ```bash
-git tag -a v0.6.0 -m "Velo MVP 0.6.0"
+git tag -a v0.7.0 -m "Velo MVP 0.7.0"
 ```
 
 Push:
 ```bash
 git push origin main
-git push origin v0.6.0
+git push origin v0.7.0
 ```
 
 Use only when the project is actually ready to publish the tag.
 
-## 18. Release notes draft
+## 17. Release notes draft
 Release notes are tracked here:
-- [Velo v0.6.0 release notes draft](release_notes_v0_6.md)
+- [Velo v0.7.0 release notes draft](release_notes_v0_7.md)

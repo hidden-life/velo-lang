@@ -447,3 +447,15 @@ PushInt 20
 BuildMap entries=2
 StoreLocal local[0]
 ```
+
+## JSON builtins
+JSON helpers are lowered as normal builtin calls.
+
+Examples:
+```text
+CallBuiltin json::stringify args=1
+CallBuiltin json::parse args=1
+CallBuiltin json::get_int args=2
+```
+
+No dedicated JSON IR instruction exists in MVP 0.7.
