@@ -612,4 +612,25 @@ Debug string output:
 <http_response STATUS len=BODY_LENGTH>
 ```
 
-The MVP 0.8.1 runtime model does not include a real HTTP server.
+Runtime registers response builders in `std::http`.
+
+Builtins:
+```text
+http::response
+http::text_response
+http::json_response
+```
+
+`http::response` creates a response with status and raw body.
+
+`http::text_response` creates a response with:
+```text
+Content-Type: text/plain
+```
+
+`http::json_response` serializes a runtime `json` value and creates a response with:
+```text
+Content-Type: application/json
+```
+
+No real network/server runtime exists in MVP 0.8.2.

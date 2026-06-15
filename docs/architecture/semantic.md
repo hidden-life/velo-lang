@@ -720,6 +720,21 @@ fn handle(req: http_request): http_response {
 }
 ```
 
-MVP 0.8.1 only adds the type foundation.
+## HTTP response builder typing
+HTTP response builders are typed as normal builtins.
 
-HTTP builders and access helpers are implemented in later MVP 0.8 steps.
+Signatures:
+```text
+http::response      int, string -> http_response
+http::text_response int, string -> http_response
+http::json_response int, json   -> http_response
+```
+
+The semantic analyzer validates:
+- imported `std::http` module
+- builtin existence
+- arity
+- argument types
+- assignment target type
+
+Runtime response field contents are validated by runtime tests and later access helpers.

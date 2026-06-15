@@ -213,3 +213,57 @@ TEST(RuntimeModuleSyncTest, RegistersJsonGetJsonBuiltinInJsonModule) {
     EXPECT_EQ(function->parameterTypes[0], "json");
     EXPECT_EQ(function->parameterTypes[1], "string");
 }
+
+TEST(RuntimeModuleSyncTest, RegistersHttpResponseBuiltinInHttpModule) {
+    Velo::Runtime::Runtime runtime;
+
+    const auto *module = runtime.modules().find("http");
+    ASSERT_NE(module, nullptr);
+
+    const auto *function = module->findFunction("response");
+    ASSERT_NE(function, nullptr);
+
+    EXPECT_EQ(function->name, "response");
+    EXPECT_EQ(function->arity, 2U);
+    EXPECT_EQ(function->returnType, "http_response");
+
+    ASSERT_EQ(function->parameterTypes.size(), 2U);
+    EXPECT_EQ(function->parameterTypes[0], "int");
+    EXPECT_EQ(function->parameterTypes[1], "string");
+}
+
+TEST(RuntimeModuleSyncTest, RegistersHttpTextResponseBuiltinInHttpModule) {
+    Velo::Runtime::Runtime runtime;
+
+    const auto *module = runtime.modules().find("http");
+    ASSERT_NE(module, nullptr);
+
+    const auto *function = module->findFunction("text_response");
+    ASSERT_NE(function, nullptr);
+
+    EXPECT_EQ(function->name, "text_response");
+    EXPECT_EQ(function->arity, 2U);
+    EXPECT_EQ(function->returnType, "http_response");
+
+    ASSERT_EQ(function->parameterTypes.size(), 2U);
+    EXPECT_EQ(function->parameterTypes[0], "int");
+    EXPECT_EQ(function->parameterTypes[1], "string");
+}
+
+TEST(RuntimeModuleSyncTest, RegistersHttpJsonResponseBuiltinInHttpModule) {
+    Velo::Runtime::Runtime runtime;
+
+    const auto *module = runtime.modules().find("http");
+    ASSERT_NE(module, nullptr);
+
+    const auto *function = module->findFunction("json_response");
+    ASSERT_NE(function, nullptr);
+
+    EXPECT_EQ(function->name, "json_response");
+    EXPECT_EQ(function->arity, 2U);
+    EXPECT_EQ(function->returnType, "http_response");
+
+    ASSERT_EQ(function->parameterTypes.size(), 2U);
+    EXPECT_EQ(function->parameterTypes[0], "int");
+    EXPECT_EQ(function->parameterTypes[1], "json");
+}

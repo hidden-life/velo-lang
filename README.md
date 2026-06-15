@@ -105,6 +105,10 @@ data model foundation based on struct.
 - runtime HTTP response values
 - `http_request`
 - `http_response`
+- `std::http`
+- `http::response`
+- `http::text_response`
+- `http::json_response`
 
 ## Standard modules
 Current standard modules:
@@ -283,3 +287,11 @@ MVP 0.6 is tagged as `v0.6.0`.
 
 ## MVP 0.7 status
 MVP 0.7 is tagged as `v0.7.0`. 
+
+## MVP 0.8 status
+MVP 0.8 is currently in progress.
+
+Current step:
+```text
+0.8.3   std::http response access helpers
+```

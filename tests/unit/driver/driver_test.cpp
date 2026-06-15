@@ -4000,3 +4000,189 @@ fn main(): int {
 
     EXPECT_NE(result.bytecodeText.find("CallBuiltin json::get_int args=2"), std::string::npos);
 }
+
+TEST(DriverTest, ExecutesHttpResponseBuilder) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_response_builder.velo",
+        R"(module app;
+
+use std::http;
+
+fn main(): int {
+    let res: http_response = http::response(200, "OK");
+
+    return 0;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 0);
+}
+
+TEST(DriverTest, ExecutesHttpTextResponseBuilder) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_text_response_builder.velo",
+        R"(module app;
+
+use std::http;
+
+fn main(): int {
+    let res: http_response = http::text_response(200, "OK");
+
+    return 0;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 0);
+}
+
+TEST(DriverTest, ExecutesHttpJsonResponseBuilder) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_json_response_builder.velo",
+        R"(module app;
+
+use std::http;
+use std::json;
+
+fn main(): int {
+    let res: http_response = http::json_response(201, json::parse("{\"ok\":true}"));
+
+    return 0;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 0);
+}
+
+TEST(DriverTest, ExecutesHttpResponseDebugPrint) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_response_debug_print.velo",
+        R"(module app;
+
+use std::console;
+use std::http;
+
+fn main(): int {
+    let res: http_response = http::response(200, "OK");
+
+    console::println(res);
+
+    return 0;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 0);
+}
+
+TEST(DriverTest, IrModePrintsHttpResponseBuilderCall) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_response_ir.velo",
+        R"(module app;
+
+use std::http;
+
+fn main(): int {
+    let res: http_response = http::response(200, "OK");
+
+    return 0;
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.irText.find("CallBuiltin http::response args=2"), std::string::npos);
+}
+
+TEST(DriverTest, BytecodeModePrintsHttpResponseBuilderCall) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_response_bytecode.velo",
+        R"(module app;
+
+use std::http;
+
+fn main(): int {
+    let res: http_response = http::response(200, "OK");
+
+    return 0;
+}
+)",
+        Velo::Driver::DriverMode::Bytecode
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.bytecodeText.find("CallBuiltin http::response args=2"), std::string::npos);
+}

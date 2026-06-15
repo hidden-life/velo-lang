@@ -574,6 +574,18 @@ fn handle(req: http_request): http_response {
 }
 ```
 
+HTTP response values can be created through `std::http` response builders:
+```velo
+use std::http;
+use std::json;
+
+let raw: http_response = http::response(200, "OK");
+let text: http_response = http::text_response(200, "Hello");
+let jsonRes: http_response = http::json_response(201, json::parse("{\"ok\":true}"));
+```
+
+Response builders return `http_response`.
+
 Current limitations:
 - HTTP builders are not implemented yet
 - HTTP access helpers are not implemented yet

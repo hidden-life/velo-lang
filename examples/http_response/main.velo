@@ -1,0 +1,17 @@
+module app;
+
+use std::console;
+use std::http;
+use std::json;
+
+fn main(): int {
+    let raw: http_response = http::response(200, "OK");
+    let text: http_response = http::text_response(200, "Hello");
+    let jsonRes: http_response = http::json_response(201, json::parse("{\"ok\":true}"));
+
+    console::println(raw);
+    console::println(text);
+    console::println(jsonRes);
+
+    return 0;
+}

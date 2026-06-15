@@ -340,3 +340,85 @@ Current limitations:
 - JSON array access helpers are not implemented yet
 - direct JSON indexing syntax is not implemented yet
 - JSON mutation helpers are not implemented yet
+
+## std::http
+The `std::http` module contains HTTP runtime helpers.
+
+Import:
+```velo
+use std::http;
+```
+
+### `http::response`
+```velo
+http::response(status, body)
+```
+
+Creates a raw HTTP response value.
+
+Signature:
+```text
+int, string -> http_response
+```
+
+Example:
+```velo
+let res: http_response = http::response(200, "OK");
+```
+
+### `http::text_response`
+```velo
+http::text_response(status, body)
+```
+
+Creates a text HTTP response value.
+
+Signature:
+
+```text
+int, string -> http_response
+```
+
+Runtime behavior:
+
+```text
+headers["Content-Type"] = "text/plain"
+```
+
+Example:
+
+```velo
+let res: http_response = http::text_response(200, "Hello");
+```
+
+### `http::json_response`
+
+```velo
+http::json_response(status, value)
+```
+
+Creates a JSON HTTP response value.
+
+Signature:
+
+```text
+int, json -> http_response
+```
+
+Runtime behavior:
+
+```text
+body = json::stringify(value)
+headers["Content-Type"] = "application/json"
+```
+
+Example:
+
+```velo
+let res: http_response = http::json_response(201, json::parse("{\"ok\":true}"));
+```
+
+Current limitations:
+- response access helpers are not implemented yet
+- request builders are not implemented yet
+- real HTTP server/runtime is not implemented yet

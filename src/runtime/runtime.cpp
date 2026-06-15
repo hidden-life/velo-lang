@@ -670,6 +670,8 @@ namespace Velo::Runtime {
         registerStdMap();
         // serialization
         registerStdJson();
+        // http
+        registerStdHttp();
 
         buildModulesFromBuiltins();
     }
@@ -1274,6 +1276,151 @@ namespace Velo::Runtime {
                         .exitCode = 0,
                         .error = {},
                         .returnValue = cloneValue(Value { entry })
+                    };
+                }
+            }
+        );
+    }
+
+    void Runtime::registerStdHttp() {
+        _registry.registerFunc(
+            BuiltinFunction {
+                "http::response",
+                {"int", "string"},
+                "http_response",
+                [](const std::vector<Value> &args) -> ExecutionResult {
+                    if (args.size() != 2U) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::response expects exactly two raguments."
+                        };
+                    }
+
+                    if (!std::holds_alternative<int>(args[0])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::response expects int status as first argument."
+                        };
+                    }
+
+                    if (!std::holds_alternative<std::string>(args[1])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::response expects string body as second argument."
+                        };
+                    }
+
+                    auto response = std::make_shared<HttpResponseValue>();
+                    response->status = std::get<int>(args[0]);
+                    response->body = std::get<std::string>(args[1]);
+
+                    return ExecutionResult {
+                        .success = true,
+                        .exitCode = 0,
+                        .error = {},
+                        .returnValue = response
+                    };
+                }
+            }
+        );
+
+        _registry.registerFunc(
+            BuiltinFunction {
+                "http::text_response",
+                {"int", "string"},
+                "http_response",
+                [](const std::vector<Value> &args) -> ExecutionResult {
+                    if (args.size() != 2U) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::text_response expects exactly two arguments."
+                        };
+                    }
+
+                    if (!std::holds_alternative<int>(args[0])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::text_response expects int status as first argument."
+                        };
+                    }
+
+                    if (!std::holds_alternative<std::string>(args[1])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::text_response expects string body as second argument."
+                        };
+                    }
+
+                    auto response = std::make_shared<HttpResponseValue>();
+                    response->status = std::get<int>(args[0]);
+                    response->body = std::get<std::string>(args[1]);
+                    response->headers["Content-Type"] = "text/plain";
+
+                    return ExecutionResult {
+                        .success = true,
+                        .exitCode = 0,
+                        .error = {},
+                        .returnValue = response
+                    };
+                }
+            }
+        );
+
+        _registry.registerFunc(
+            BuiltinFunction {
+                "http::json_response",
+                {"int", "json"},
+                "http_response",
+                [](const std::vector<Value> &args) -> ExecutionResult {
+                    if (args.size() != 2U) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::json_response expects exactly two arguments."
+                        };
+                    }
+
+                    if (!std::holds_alternative<int>(args[0])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::json_response expects int status as first argument."
+                        };
+                    }
+
+                    if (!std::holds_alternative<JsonValuePtr>(args[1])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::json_response expects json body as second argument."
+                        };
+                    }
+
+                    const auto jsonText = valueToJsonString(args[1]);
+                    if (!jsonText.has_value()) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::json_response failed to serialize json body."
+                        };
+                    }
+
+                    auto response = std::make_shared<HttpResponseValue>();
+                    response->status = std::get<int>(args[0]);
+                    response->body = *jsonText;
+                    response->headers["Content-Type"] = "application/json";
+
+                    return ExecutionResult {
+                        .success = true,
+                        .exitCode = 0,
+                        .error = {},
+                        .returnValue = response
                     };
                 }
             }

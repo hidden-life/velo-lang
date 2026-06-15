@@ -26,6 +26,9 @@ namespace Velo::Runtime {
         void registerStdMap();
         void registerStdJson();
 
+        // HTTP
+        void registerStdHttp();
+
         BuiltinRegistry _registry {};
         Module::ModuleRegistry _modules {};
     };

@@ -16,7 +16,7 @@ a real HTTP server in a later milestone.
 
 ## Current step
 ```text
-0.8.1   runtime http request/response values
+0.8.2   std::http response builders
 ```
 
 ## 0.8.1 scope
@@ -67,3 +67,36 @@ Not implemented in 0.8.1:
 - routing
 - sockets
 - benchmarks
+
+## 0.8.2 scope
+Implemented in this step:
+- `std::http` module
+- `http::response`
+- `http::text_response`
+- `http::json_response`
+- response builder runtime implementation
+- response builder semantic validation
+- runtime module sync tests
+- semantic tests
+- driver tests
+- example
+- documentation
+
+Response builder signatures:
+```text
+http::response          int, string -> http_response
+http::text_response     int, string -> http_response
+http::json_response     int, string -> http_response
+```
+
+Examples:
+```velo
+let raw: http_response = http::response(200, "OK");
+let text: http_response = http::text_response(200, "Hello");
+let jsonRes: http_response = http::json_response(201, json::parse("{\"ok\":true}"));
+```
+
+Current limitations:
+- response access helpers are not implemented yet
+- request builders are not implemented yet
+- real HTTP server/runtime is not implemented yet
