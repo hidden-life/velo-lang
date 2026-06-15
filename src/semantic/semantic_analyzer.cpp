@@ -1357,6 +1357,14 @@ namespace Velo::Semantic {
             return actual.kind == SemanticTypeKind::Json;
         }
 
+        if (expected == "http_request") {
+            return actual.kind == SemanticTypeKind::HttpRequest;
+        }
+
+        if (expected == "http_response") {
+            return actual.kind == SemanticTypeKind::HttpResponse;
+        }
+
         return false;
     }
 

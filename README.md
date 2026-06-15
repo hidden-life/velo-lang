@@ -109,6 +109,10 @@ data model foundation based on struct.
 - `http::response`
 - `http::text_response`
 - `http::json_response`
+- `http::status`
+- `http::body`
+- `http::has_header`
+- `http::header`
 
 ## Standard modules
 Current standard modules:

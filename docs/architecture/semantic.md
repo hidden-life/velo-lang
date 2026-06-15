@@ -738,3 +738,18 @@ The semantic analyzer validates:
 - assignment target type
 
 Runtime response field contents are validated by runtime tests and later access helpers.
+
+## HTTP response access helpers typing
+HTTP response access helpers are typed as normal builtins.
+
+Signatures:
+```text
+http::status     http_response -> int
+http::body       http_response -> string
+http::has_header http_response, string -> bool
+http::header     http_response, string -> string
+```
+
+The semantic analyzer validates helper signatures.
+
+Missing headers are runtime errors.

@@ -5389,3 +5389,195 @@ fn main(): int {
     ASSERT_TRUE(engine.hasErrors());
     EXPECT_EQ(engine.diagnostics().front().code(), "SEM010");
 }
+
+TEST(SemanticAnalyzerTest, AcceptsHttpStatusHelper) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::http;
+
+fn main(): int {
+    let res: http_response = http::response(200, "OK");
+
+    return http::status(res);
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, AcceptsHttpBodyHelper) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::http;
+use std::string;
+
+fn main(): int {
+    let res: http_response = http::response(200, "OK");
+    let body: string = http::body(res);
+
+    return string::len(body);
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, AcceptsHttpHasHeaderHelper) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::http;
+
+fn main(): int {
+    let res: http_response = http::text_response(200, "OK");
+    let exists: bool = http::has_header(res, "Content-Type");
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, AcceptsHttpHeaderHelper) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::http;
+
+fn main(): int {
+    let res: http_response = http::text_response(200, "OK");
+    let contentType: string = http::header(res, "Content-Type");
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, ReportsHttpStatusTargetTypeMismatch) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::http;
+
+fn main(): int {
+    return http::status(200);
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM033");
+}
+
+TEST(SemanticAnalyzerTest, ReportsHttpHeaderKeyTypeMismatch) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::http;
+
+fn main(): int {
+    let res: http_response = http::text_response(200, "OK");
+    let value: string = http::header(res, 1);
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM033");
+}
+
+TEST(SemanticAnalyzerTest, ReportsHttpHeaderWrongArity) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::http;
+
+fn main(): int {
+    let res: http_response = http::text_response(200, "OK");
+    let value: string = http::header(res);
+
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_EQ(engine.diagnostics().front().code(), "SEM010");
+}

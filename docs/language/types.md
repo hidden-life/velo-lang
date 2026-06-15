@@ -586,6 +586,20 @@ let jsonRes: http_response = http::json_response(201, json::parse("{\"ok\":true}
 
 Response builders return `http_response`.
 
+HTTP response fields can be read through `std::http` helpers:
+```velo
+let res: http_response = http::text_response(200, "Hello");
+
+let status: int = http::status(res);
+let body: string = http::body(res);
+let contentType: string = http::header(res, "Content-Type");
+```
+
+Header existence can be checked with:
+```velo
+let exists: bool = http::has_header(res, "Content-Type");
+```
+
 Current limitations:
 - HTTP builders are not implemented yet
 - HTTP access helpers are not implemented yet

@@ -633,4 +633,21 @@ Content-Type: text/plain
 Content-Type: application/json
 ```
 
-No real network/server runtime exists in MVP 0.8.2.
+## HTTP response access helpers
+Runtime registers response access helpers in `std::http`.
+
+Builtins:
+```text
+http::status
+http::body
+http::has_header
+http::header
+```
+
+Runtime behavior:
+- `http::status` returns `HttpResponseValue::status`
+- `http::body` returns `HttpResponseValue::body`
+- `http::has_header` checks `HttpResponseValue::headers`
+- `http::header` returns a header value or reports a runtime error
+
+Header lookup is case-sensitive in MVP 0.8.3.

@@ -267,3 +267,73 @@ TEST(RuntimeModuleSyncTest, RegistersHttpJsonResponseBuiltinInHttpModule) {
     EXPECT_EQ(function->parameterTypes[0], "int");
     EXPECT_EQ(function->parameterTypes[1], "json");
 }
+
+TEST(RuntimeModuleSyncTest, RegistersHttpStatusBuiltinInHttpModule) {
+    Velo::Runtime::Runtime runtime;
+
+    const auto *module = runtime.modules().find("http");
+    ASSERT_NE(module, nullptr);
+
+    const auto *function = module->findFunction("status");
+    ASSERT_NE(function, nullptr);
+
+    EXPECT_EQ(function->name, "status");
+    EXPECT_EQ(function->arity, 1U);
+    EXPECT_EQ(function->returnType, "int");
+
+    ASSERT_EQ(function->parameterTypes.size(), 1U);
+    EXPECT_EQ(function->parameterTypes[0], "http_response");
+}
+
+TEST(RuntimeModuleSyncTest, RegistersHttpBodyBuiltinInHttpModule) {
+    Velo::Runtime::Runtime runtime;
+
+    const auto *module = runtime.modules().find("http");
+    ASSERT_NE(module, nullptr);
+
+    const auto *function = module->findFunction("body");
+    ASSERT_NE(function, nullptr);
+
+    EXPECT_EQ(function->name, "body");
+    EXPECT_EQ(function->arity, 1U);
+    EXPECT_EQ(function->returnType, "string");
+
+    ASSERT_EQ(function->parameterTypes.size(), 1U);
+    EXPECT_EQ(function->parameterTypes[0], "http_response");
+}
+
+TEST(RuntimeModuleSyncTest, RegistersHttpHasHeaderBuiltinInHttpModule) {
+    Velo::Runtime::Runtime runtime;
+
+    const auto *module = runtime.modules().find("http");
+    ASSERT_NE(module, nullptr);
+
+    const auto *function = module->findFunction("has_header");
+    ASSERT_NE(function, nullptr);
+
+    EXPECT_EQ(function->name, "has_header");
+    EXPECT_EQ(function->arity, 2U);
+    EXPECT_EQ(function->returnType, "bool");
+
+    ASSERT_EQ(function->parameterTypes.size(), 2U);
+    EXPECT_EQ(function->parameterTypes[0], "http_response");
+    EXPECT_EQ(function->parameterTypes[1], "string");
+}
+
+TEST(RuntimeModuleSyncTest, RegistersHttpHeaderBuiltinInHttpModule) {
+    Velo::Runtime::Runtime runtime;
+
+    const auto *module = runtime.modules().find("http");
+    ASSERT_NE(module, nullptr);
+
+    const auto *function = module->findFunction("header");
+    ASSERT_NE(function, nullptr);
+
+    EXPECT_EQ(function->name, "header");
+    EXPECT_EQ(function->arity, 2U);
+    EXPECT_EQ(function->returnType, "string");
+
+    ASSERT_EQ(function->parameterTypes.size(), 2U);
+    EXPECT_EQ(function->parameterTypes[0], "http_response");
+    EXPECT_EQ(function->parameterTypes[1], "string");
+}

@@ -418,7 +418,75 @@ Example:
 let res: http_response = http::json_response(201, json::parse("{\"ok\":true}"));
 ```
 
+### `http::status`
+```velo
+http::status(response)
+```
+
+Returns response status code.
+
+Signature:
+```text
+http_response -> int
+```
+
+### `http::body`
+```velo
+http::body(response)
+```
+
+Returns response body.
+
+Signature:
+```text
+http_response -> string
+```
+
+### `http::has_header`
+```velo
+http::has_header(response, key)
+```
+
+Returns whether the response has a header with the given key.
+
+Signature:
+```text
+http_response, string -> bool
+```
+
+### `http::header`
+```velo
+http::header(response, key)
+```
+
+Returns response header value.
+
+Signature:
+```text
+http_response, string -> string
+```
+
+Missing header is a runtime error.
+
+Example:
+```velo
+module app;
+
+use std::console;
+use std::http;
+
+fn main(): int {
+    let res: http_response = http::text_response(200, "Hello");
+
+    console::println(http::status(res));
+    console::println(http::body(res));
+    console::println(http::header(res, "Content-Type"));
+
+    return 0;
+}
+```
+
 Current limitations:
-- response access helpers are not implemented yet
+- header lookup is case-sensitive
 - request builders are not implemented yet
 - real HTTP server/runtime is not implemented yet

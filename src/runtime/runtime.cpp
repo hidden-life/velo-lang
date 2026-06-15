@@ -1425,5 +1425,197 @@ namespace Velo::Runtime {
                 }
             }
         );
+
+        _registry.registerFunc(
+            BuiltinFunction {
+                "http::status",
+                {"http_response"},
+                "int",
+                [](const std::vector<Value> &args) -> ExecutionResult {
+                    if (args.size() != 1U) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::status expects exactly one argument."
+                        };
+                    }
+
+                    if (!std::holds_alternative<HttpResponseValuePtr>(args[0])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::status expects an http_response argument."
+                        };
+                    }
+
+                    const auto response = std::get<HttpResponseValuePtr>(args[0]);
+                    if (response == nullptr) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::status received a null http_response value."
+                        };
+                    }
+
+                    return ExecutionResult {
+                        .success = true,
+                        .exitCode = 0,
+                        .error = {},
+                        .returnValue = response->status
+                    };
+                }
+            }
+        );
+
+        _registry.registerFunc(
+            BuiltinFunction {
+                "http::body",
+                {"http_response"},
+                "string",
+                [](const std::vector<Value> &args) -> ExecutionResult {
+                    if (args.size() != 1U) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::body expects exactly one argument."
+                        };
+                    }
+
+                    if (!std::holds_alternative<HttpResponseValuePtr>(args[0])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::body expects an http_response argument."
+                        };
+                    }
+
+                    const auto response = std::get<HttpResponseValuePtr>(args[0]);
+                    if (response == nullptr) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::body received a null http_response value."
+                        };
+                    }
+
+                    return ExecutionResult {
+                        .success = true,
+                        .exitCode = 0,
+                        .error = {},
+                        .returnValue = response->body
+                    };
+                }
+            }
+        );
+
+        _registry.registerFunc(
+            BuiltinFunction {
+                "http::has_header",
+                {"http_response", "string"},
+                "bool",
+                [](const std::vector<Value> &args) -> ExecutionResult {
+                    if (args.size() != 2U) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::has_header expects exactly two arguments."
+                        };
+                    }
+
+                    if (!std::holds_alternative<HttpResponseValuePtr>(args[0])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::has_header expects an http_response as first argument."
+                        };
+                    }
+
+                    if (!std::holds_alternative<std::string>(args[1])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::has_header expects string key as second argument."
+                        };
+                    }
+
+                    const auto response = std::get<HttpResponseValuePtr>(args[0]);
+                    if (response == nullptr) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::has_header received a null http_response value."
+                        };
+                    }
+
+                    const auto &key = std::get<std::string>(args[1]);
+
+                    return ExecutionResult {
+                        .success = true,
+                        .exitCode = 0,
+                        .error = {},
+                        .returnValue = response->headers.find(key) != response->headers.end()
+                    };
+                }
+            }
+        );
+
+        _registry.registerFunc(
+            BuiltinFunction {
+                "http::header",
+                {"http_response", "string"},
+                "string",
+                [](const std::vector<Value> &args) -> ExecutionResult {
+                    if (args.size() != 2U) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::header expects exactly two arguments."
+                        };
+                    }
+
+                    if (!std::holds_alternative<HttpResponseValuePtr>(args[0])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::header expects an http_response as first argument."
+                        };
+                    }
+
+                    if (!std::holds_alternative<std::string>(args[1])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::header expects a string key as second argument."
+                        };
+                    }
+
+                    const auto response = std::get<HttpResponseValuePtr>(args[0]);
+                    if (response == nullptr) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::header received a null http_response value."
+                        };
+                    }
+
+                    const auto &key = std::get<std::string>(args[1]);
+                    const auto headerIt = response->headers.find(key);
+                    if (headerIt == response->headers.end()) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "HTTP response header not found: " + key
+                        };
+                    }
+
+                    return ExecutionResult {
+                        .success = true,
+                        .exitCode = 0,
+                        .error = {},
+                        .returnValue = headerIt->second
+                    };
+                }
+            }
+        );
     }
 }

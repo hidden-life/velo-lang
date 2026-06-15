@@ -1,0 +1,21 @@
+module app;
+
+use std::console;
+use std::http;
+use std::json;
+
+fn main(): int {
+    let text: http_response = http::text_response(200, "Hello");
+    let jsonRes: http_response = http::json_response(201, json::parse("{\"ok\":true}"));
+
+    console::println(http::status(text));
+    console::println(http::body(text));
+    console::println(http::has_header(text, "Content-Type"));
+    console::println(http::header(text, "Content-Type"));
+
+    console::println(http::status(jsonRes));
+    console::println(http::body(jsonRes));
+    console::println(http::header(jsonRes, "Content-Type"));
+
+    return 0;
+}

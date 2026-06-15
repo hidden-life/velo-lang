@@ -16,7 +16,7 @@ a real HTTP server in a later milestone.
 
 ## Current step
 ```text
-0.8.2   std::http response builders
+0.8.3   std::http response access helpers
 ```
 
 ## 0.8.1 scope
@@ -96,7 +96,29 @@ let text: http_response = http::text_response(200, "Hello");
 let jsonRes: http_response = http::json_response(201, json::parse("{\"ok\":true}"));
 ```
 
+## 0.8.3 scope
+Implemented in this step:
+- `http::status`
+- `http::body`
+- `http::has_header`
+- `http::header`
+- response access helper runtime implementation
+- response access helper semantic validation
+- runtime module sync tests
+- semantic tests
+- driver tests
+- example
+- documentation
+
+Response access helper signatures:
+```text
+http::status        http_response -> int
+http::body          http_response -> string
+http::has_header    http_response, string -> bool
+http::header        http_response, string -> string
+```
+
 Current limitations:
-- response access helpers are not implemented yet
-- request builders are not implemented yet
+- header lookup is case-sensitive
+- request builders are npt implemented yet
 - real HTTP server/runtime is not implemented yet

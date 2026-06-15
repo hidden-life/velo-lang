@@ -4186,3 +4186,311 @@ fn main(): int {
 
     EXPECT_NE(result.bytecodeText.find("CallBuiltin http::response args=2"), std::string::npos);
 }
+
+TEST(DriverTest, ExecutesHttpStatusHelper) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_status_helper.velo",
+        R"(module app;
+
+use std::http;
+
+fn main(): int {
+    let res: http_response = http::response(201, "Created");
+
+    return http::status(res);
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 201);
+}
+
+TEST(DriverTest, ExecutesHttpBodyHelper) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_body_helper.velo",
+        R"(module app;
+
+use std::http;
+use std::string;
+
+fn main(): int {
+    let res: http_response = http::response(200, "Hello");
+
+    return string::len(http::body(res));
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 5);
+}
+
+TEST(DriverTest, ExecutesHttpHasHeaderHelper) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_has_header_helper.velo",
+        R"(module app;
+
+use std::http;
+
+fn main(): int {
+    let res: http_response = http::text_response(200, "Hello");
+
+    if (http::has_header(res, "Content-Type")) {
+        return 1;
+    }
+
+    return 0;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 1);
+}
+
+TEST(DriverTest, ExecutesHttpHasHeaderMissingHelper) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_has_header_missing_helper.velo",
+        R"(module app;
+
+use std::http;
+
+fn main(): int {
+    let res: http_response = http::response(200, "Hello");
+
+    if (http::has_header(res, "Content-Type")) {
+        return 1;
+    }
+
+    return 0;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 0);
+}
+
+TEST(DriverTest, ExecutesHttpHeaderHelper) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_header_helper.velo",
+        R"(module app;
+
+use std::http;
+use std::string;
+
+fn main(): int {
+    let res: http_response = http::text_response(200, "Hello");
+
+    return string::len(http::header(res, "Content-Type"));
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 10);
+}
+
+TEST(DriverTest, ExecutesHttpJsonResponseBodyHelper) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_json_response_body_helper.velo",
+        R"(module app;
+
+use std::http;
+use std::json;
+use std::string;
+
+fn main(): int {
+    let res: http_response = http::json_response(201, json::parse("{\"ok\":true}"));
+
+    return string::len(http::body(res));
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 11);
+}
+
+TEST(DriverTest, ExecutesHttpJsonResponseHeaderHelper) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_json_response_header_helper.velo",
+        R"(module app;
+
+use std::http;
+use std::json;
+use std::string;
+
+fn main(): int {
+    let res: http_response = http::json_response(201, json::parse("{\"ok\":true}"));
+
+    return string::len(http::header(res, "Content-Type"));
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 16);
+}
+
+TEST(DriverTest, ReportsRuntimeErrorForMissingHttpResponseHeader) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_missing_header.velo",
+        R"(module app;
+
+use std::http;
+
+fn main(): int {
+    let res: http_response = http::response(200, "OK");
+    let value: string = http::header(res, "Content-Type");
+
+    return 0;
+}
+)"
+    );
+
+    EXPECT_FALSE(result.success);
+    EXPECT_EQ(result.exitCode, 1);
+    EXPECT_NE(result.error.find("HTTP response header not found"), std::string::npos);
+}
+
+TEST(DriverTest, IrModePrintsHttpResponseAccessBuiltinCall) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_response_access_ir.velo",
+        R"(module app;
+
+use std::http;
+
+fn main(): int {
+    let res: http_response = http::response(200, "OK");
+
+    return http::status(res);
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.irText.find("CallBuiltin http::status args=1"), std::string::npos);
+}
+
+TEST(DriverTest, BytecodeModePrintsHttpResponseAccessBuiltinCall) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_response_access_bytecode.velo",
+        R"(module app;
+
+use std::http;
+
+fn main(): int {
+    let res: http_response = http::response(200, "OK");
+
+    return http::status(res);
+}
+)",
+        Velo::Driver::DriverMode::Bytecode
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.bytecodeText.find("CallBuiltin http::status args=1"), std::string::npos);
+}
