@@ -325,6 +325,19 @@ namespace Velo::Runtime {
             return std::nullopt;
         }
 
+        auto findJsonObjectEntry(const JsonValuePtr &value, const std::string &key) -> JsonValuePtr {
+            if (value == nullptr || value->kind != JsonValueKind::Object) {
+                return {};
+            }
+
+            const auto entryIt = value->objectValues.find(key);
+            if (entryIt == value->objectValues.end()) {
+                return {};
+            }
+
+            return entryIt->second;
+        }
+
         class JsonParser final {
         public:
             explicit JsonParser(std::string_view text): _text(text) {}
@@ -973,6 +986,276 @@ namespace Velo::Runtime {
                         .exitCode = 0,
                         .error = {},
                         .returnValue = *parsed
+                    };
+                }
+            }
+        );
+
+        _registry.registerFunc(
+            BuiltinFunction {
+                "json::has",
+                {"json", "string"},
+                "bool",
+                [](const std::vector<Value> &args) -> ExecutionResult {
+                    if (args.size() != 2U) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "json::has expects exactly two arguments."
+                        };
+                    }
+
+                    if (!std::holds_alternative<JsonValuePtr>(args[0])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "json::has expects a json value as first argument."
+                        };
+                    }
+
+                    if (!std::holds_alternative<std::string>(args[1])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "json::has expects a string key as second argument."
+                        };
+                    }
+
+                    const auto jsonValue = std::get<JsonValuePtr>(args[0]);
+                    if (jsonValue == nullptr || jsonValue->kind != JsonValueKind::Object) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "json::has expects a JSON objects."
+                        };
+                    }
+
+                    const auto &key = std::get<std::string>(args[1]);
+                    return ExecutionResult {
+                        .success = true,
+                        .exitCode = 0,
+                        .error = {},
+                        .returnValue = jsonValue->objectValues.contains(key)
+                    };
+                }
+            }
+        );
+
+        _registry.registerFunc(
+            BuiltinFunction {
+                "json::get_int",
+                {"json", "string"},
+                "int",
+                [](const std::vector<Value> &args) -> ExecutionResult {
+                    if (args.size() != 2U) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "json::get_int expects exactly two arguments."
+                        };
+                    }
+
+                    if (!std::holds_alternative<JsonValuePtr>(args[0])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "json::get_int expects a json value as first argument."
+                        };
+                    }
+
+                    if (!std::holds_alternative<std::string>(args[1])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "json::get_int expects a string key as second argument."
+                        };
+                    }
+
+                    const auto entry = findJsonObjectEntry(std::get<JsonValuePtr>(args[0]), std::get<std::string>(args[1]));
+                    if (entry == nullptr) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "JSON object key not found: " + std::get<std::string>(args[1])
+                        };
+                    }
+
+                    if (entry->kind != JsonValueKind::Int) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "JSON object field is not int: " + std::get<std::string>(args[1])
+                        };
+                    }
+
+                    return ExecutionResult {
+                        .success = true,
+                        .exitCode = 0,
+                        .error = {},
+                        .returnValue = entry->intValue
+                    };
+                }
+            }
+        );
+
+        _registry.registerFunc(
+            BuiltinFunction {
+                "json::get_string",
+                {"json", "string"},
+                "string",
+                [](const std::vector<Value> &args) -> ExecutionResult {
+                    if (args.size() != 2U) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "json::get_string expects exactly two arguments."
+                        };
+                    }
+
+                    if (!std::holds_alternative<JsonValuePtr>(args[0])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "json::get_string expects a json value as first argument."
+                        };
+                    }
+
+                    if (!std::holds_alternative<std::string>(args[1])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "json::get_string expects a string key as second argument."
+                        };
+                    }
+
+                    const auto entry = findJsonObjectEntry(std::get<JsonValuePtr>(args[0]), std::get<std::string>(args[1]));
+                    if (entry == nullptr) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "JSON object key not found: " + std::get<std::string>(args[1])
+                        };
+                    }
+
+                    if (entry->kind != JsonValueKind::String) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "JSON object field is not string: " + std::get<std::string>(args[1])
+                        };
+                    }
+
+                    return ExecutionResult {
+                        .success = true,
+                        .exitCode = 0,
+                        .error = {},
+                        .returnValue = entry->stringValue
+                    };
+                }
+            }
+        );
+
+        _registry.registerFunc(
+            BuiltinFunction {
+                "json::get_bool",
+                {"json", "string"},
+                "bool",
+                [](const std::vector<Value> &args) -> ExecutionResult {
+                    if (args.size() != 2U) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "json::get_bool expects exactly two arguments."
+                        };
+                    }
+
+                    if (!std::holds_alternative<JsonValuePtr>(args[0])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "json::get_bool expects a json value as first argument."
+                        };
+                    }
+
+                    if (!std::holds_alternative<std::string>(args[1])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "json::get_bool expects a string key as second argument."
+                        };
+                    }
+
+                    const auto entry = findJsonObjectEntry(std::get<JsonValuePtr>(args[0]), std::get<std::string>(args[1]));
+                    if (entry == nullptr) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "JSON object key not found: " + std::get<std::string>(args[1])
+                        };
+                    }
+
+                    if (entry->kind != JsonValueKind::Bool) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "JSON object field is not bool: " + std::get<std::string>(args[1])
+                        };
+                    }
+
+                    return ExecutionResult {
+                        .success = true,
+                        .exitCode = 0,
+                        .error = {},
+                        .returnValue = entry->boolValue
+                    };
+                }
+            }
+        );
+
+        _registry.registerFunc(
+            BuiltinFunction {
+                "json::get_json",
+                {"json", "string"},
+                "json",
+                [](const std::vector<Value> &args) -> ExecutionResult {
+                    if (args.size() != 2U) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "json::get_json expects exactly two arguments."
+                        };
+                    }
+
+                    if (!std::holds_alternative<JsonValuePtr>(args[0])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "json::get_json expects a json value as first argument."
+                        };
+                    }
+
+                    if (!std::holds_alternative<std::string>(args[1])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "json::get_json expects a string key as second argument."
+                        };
+                    }
+
+                    const auto entry = findJsonObjectEntry(std::get<JsonValuePtr>(args[0]), std::get<std::string>(args[1]));
+                    if (entry == nullptr) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "JSON object key not found: " + std::get<std::string>(args[1])
+                        };
+                    }
+
+                    return ExecutionResult {
+                        .success = true,
+                        .exitCode = 0,
+                        .error = {},
+                        .returnValue = cloneValue(Value { entry })
                     };
                 }
             }

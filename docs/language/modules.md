@@ -303,6 +303,37 @@ Supported JSON input in MVP 0.7.4:
 - arrays
 - objects
 
+### JSON object access helpers
+`std::json` provides object field access helpers.
+
+```velo
+json::has(value, "id")
+json::get_int(value, "id")
+json::get_string(value, "name")
+json::get_bool(value, "active")
+json::get_json(value, "profile")
+```
+
+Example:
+```velo
+module app;
+
+use std::json;
+
+fn main(): int {
+    let value: json = json::parse("{\"id\":42,\"profile\":{\"age\":17}}");
+    let profile: json = json::get_json(value, "profile");
+
+    return json::get_int(profile, "age");
+}
+```
+
+Runtime behavior:
+- missing keys are runtime errors for `get_*`
+- missing keys return `false` for `json::has`
+- field type mismatch is a runtime error
+- access helpers currently work with JSON objects only
+
 Current limitations:
 - floats are not implemented yet
 - unicode escapes such as `\uXXXX` are not implemented yet

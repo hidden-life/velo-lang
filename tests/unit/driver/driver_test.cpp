@@ -3681,3 +3681,322 @@ fn main(): int {
 
     EXPECT_NE(result.bytecodeText.find("CallBuiltin json::parse args=1"), std::string::npos);
 }
+
+TEST(DriverTest, ExecutesJsonGetInt) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_get_int.velo",
+        R"(module app;
+
+use std::json;
+
+fn main(): int {
+    let value: json = json::parse("{\"id\":42}");
+
+    return json::get_int(value, "id");
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 42);
+}
+
+TEST(DriverTest, ExecutesJsonGetString) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_get_string.velo",
+        R"(module app;
+
+use std::json;
+use std::string;
+
+fn main(): int {
+    let value: json = json::parse("{\"name\":\"Alex\"}");
+
+    return string::len(json::get_string(value, "name"));
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 4);
+}
+
+TEST(DriverTest, ExecutesJsonGetBool) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_get_bool.velo",
+        R"(module app;
+
+use std::json;
+
+fn main(): int {
+    let value: json = json::parse("{\"active\":true}");
+
+    if (json::get_bool(value, "active")) {
+        return 1;
+    }
+
+    return 0;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 1);
+}
+
+TEST(DriverTest, ExecutesJsonHas) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_has.velo",
+        R"(module app;
+
+use std::json;
+
+fn main(): int {
+    let value: json = json::parse("{\"id\":42}");
+
+    if (json::has(value, "id")) {
+        return 1;
+    }
+
+    return 0;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 1);
+}
+
+TEST(DriverTest, ExecutesJsonHasMissingKey) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_has_missing.velo",
+        R"(module app;
+
+use std::json;
+
+fn main(): int {
+    let value: json = json::parse("{\"id\":42}");
+
+    if (json::has(value, "missing")) {
+        return 1;
+    }
+
+    return 0;
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 0);
+}
+
+TEST(DriverTest, ExecutesJsonGetNestedJsonField) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_get_nested_json.velo",
+        R"(module app;
+
+use std::json;
+
+fn main(): int {
+    let value: json = json::parse("{\"profile\":{\"age\":42}}");
+    let profile: json = json::get_json(value, "profile");
+
+    return json::get_int(profile, "age");
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 42);
+}
+
+TEST(DriverTest, ReportsRuntimeErrorForMissingJsonObjectKey) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_missing_key.velo",
+        R"(module app;
+
+use std::json;
+
+fn main(): int {
+    let value: json = json::parse("{\"id\":42}");
+
+    return json::get_int(value, "missing");
+}
+)"
+    );
+
+    EXPECT_FALSE(result.success);
+    EXPECT_EQ(result.exitCode, 1);
+    EXPECT_NE(result.error.find("JSON object key not found"), std::string::npos);
+}
+
+TEST(DriverTest, ReportsRuntimeErrorForJsonFieldTypeMismatch) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_field_type_mismatch.velo",
+        R"(module app;
+
+use std::json;
+
+fn main(): int {
+    let value: json = json::parse("{\"id\":\"bad\"}");
+
+    return json::get_int(value, "id");
+}
+)"
+    );
+
+    EXPECT_FALSE(result.success);
+    EXPECT_EQ(result.exitCode, 1);
+    EXPECT_NE(result.error.find("JSON object field is not int"), std::string::npos);
+}
+
+TEST(DriverTest, ReportsRuntimeErrorForJsonGetOnNonObject) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_get_on_non_object.velo",
+        R"(module app;
+
+use std::json;
+
+fn main(): int {
+    let value: json = json::parse("[1,2,3]");
+
+    return json::get_int(value, "id");
+}
+)"
+    );
+
+    EXPECT_FALSE(result.success);
+    EXPECT_EQ(result.exitCode, 1);
+    EXPECT_NE(result.error.find("JSON object key not found"), std::string::npos);
+}
+
+TEST(DriverTest, IrModePrintsJsonAccessBuiltinCall) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_access_ir.velo",
+        R"(module app;
+
+use std::json;
+
+fn main(): int {
+    let value: json = json::parse("{\"id\":42}");
+
+    return json::get_int(value, "id");
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.irText.find("CallBuiltin json::get_int args=2"), std::string::npos);
+}
+
+TEST(DriverTest, BytecodeModePrintsJsonAccessBuiltinCall) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "json_access_bytecode.velo",
+        R"(module app;
+
+use std::json;
+
+fn main(): int {
+    let value: json = json::parse("{\"id\":42}");
+
+    return json::get_int(value, "id");
+}
+)",
+        Velo::Driver::DriverMode::Bytecode
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.bytecodeText.find("CallBuiltin json::get_int args=2"), std::string::npos);
+}

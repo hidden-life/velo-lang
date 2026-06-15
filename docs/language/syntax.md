@@ -837,7 +837,29 @@ Parsed JSON values can be serialized back to text:
 let text: string = json::stringify(value);
 ```
 
+## JSON access helpers
+Parsed JSON objects can be accessed through `std::json` helpers.
+
+```velo
+let value: json = json::parse("{\"id\":42,\"name\":\"Alex\"}");
+
+let id: int = json::get_int(value, "id");
+let name: string = json::get_string(value, "name");
+```
+
+Nested JSON objects can be accessed with `json::get_json`:
+```velo
+let profile: json = json::get_json(value, "profile");
+let age: int = json::get_int(profile, "age");
+```
+
+Field existence can be checked with `json::has`:
+```velo
+if (json::has(value, "name")) {
+    // ...
+}
+```
+
 Current limitations:
-- JSON access helpers are not implemented yet
-- JSON fields are not implemented yet
-- unicode escape parsing is not implemented yet
+- direct JSON indexing syntax is not implemented yet
+- JSON array access helpers are not implemented yet

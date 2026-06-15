@@ -687,3 +687,19 @@ string -> json
 ```text
 json_serializable -> string
 ```
+
+## JSON access helper typing
+JSON access helpers are typed as normal builtins.
+
+Signatures:
+```text
+json::has           json, string -> bool
+json::get_int       json, string -> int
+json::get_string    json, string -> string
+json::get_bool      json, string -> bool
+json::get_json      json, string -> json
+```
+
+The semantic analyzer validates only helper signatures.
+
+Missing keys and field type mismatches are runtime errors.

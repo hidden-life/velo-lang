@@ -525,6 +525,19 @@ JSON values can be serialized with `json::stringify`:
 let text: string = json::stringify(value);
 ```
 
+JSON object fields can be read through helper functions:
+```velo
+let value: json = json::parse("{\"id\":42,\"name\":\"Alex\"}");
+
+let id: int = json::get_int(value, "id");
+let name: string = json::get_string(value, "name");
+```
+
+Nested JSON values can be kept as `json`:
+```velo
+let profile: json = json::get_json(value, "profile");
+```
+
 Current limitations:
 - JSON values cannot be indexed directly yet
 - JSON access helpers are not implemented yet

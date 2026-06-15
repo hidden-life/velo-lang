@@ -563,3 +563,23 @@ Runtime behavior:
 4. return runtime error or invalid JSON input
 
 The MVP parser supports integers but not floats.
+
+## JSON object access helpers
+Runtime JSON object access helpers work on `JsonValuePtr`.
+
+Supported helpers:
+- `json::has`
+- `json::get_int`
+- `json::get_string`
+- `json::get_bool`
+- `json::get_json`
+
+Runtime behavior:
+1. validate target is `JsonValuePtr`
+2. validate target kind is object
+3. validate key is string
+4. locate object field
+5. validate field type for typed getters
+6. return the corresponding Velo value
+
+`json::get_json` returns a deep copy of the selected JSON subtree.

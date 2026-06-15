@@ -123,3 +123,93 @@ TEST(RuntimeModuleSyncTest, RegistersJsonParseBuiltinInJsonModule) {
     ASSERT_EQ(function->parameterTypes.size(), 1U);
     EXPECT_EQ(function->parameterTypes[0], "string");
 }
+
+TEST(RuntimeModuleSyncTest, RegistersJsonHasBuiltinInJsonModule) {
+    Velo::Runtime::Runtime runtime;
+
+    const auto *module = runtime.modules().find("json");
+    ASSERT_NE(module, nullptr);
+
+    const auto *function = module->findFunction("has");
+    ASSERT_NE(function, nullptr);
+
+    EXPECT_EQ(function->name, "has");
+    EXPECT_EQ(function->arity, 2U);
+    EXPECT_EQ(function->returnType, "bool");
+
+    ASSERT_EQ(function->parameterTypes.size(), 2U);
+    EXPECT_EQ(function->parameterTypes[0], "json");
+    EXPECT_EQ(function->parameterTypes[1], "string");
+}
+
+TEST(RuntimeModuleSyncTest, RegistersJsonGetIntBuiltinInJsonModule) {
+    Velo::Runtime::Runtime runtime;
+
+    const auto *module = runtime.modules().find("json");
+    ASSERT_NE(module, nullptr);
+
+    const auto *function = module->findFunction("get_int");
+    ASSERT_NE(function, nullptr);
+
+    EXPECT_EQ(function->name, "get_int");
+    EXPECT_EQ(function->arity, 2U);
+    EXPECT_EQ(function->returnType, "int");
+
+    ASSERT_EQ(function->parameterTypes.size(), 2U);
+    EXPECT_EQ(function->parameterTypes[0], "json");
+    EXPECT_EQ(function->parameterTypes[1], "string");
+}
+
+TEST(RuntimeModuleSyncTest, RegistersJsonGetStringBuiltinInJsonModule) {
+    Velo::Runtime::Runtime runtime;
+
+    const auto *module = runtime.modules().find("json");
+    ASSERT_NE(module, nullptr);
+
+    const auto *function = module->findFunction("get_string");
+    ASSERT_NE(function, nullptr);
+
+    EXPECT_EQ(function->name, "get_string");
+    EXPECT_EQ(function->arity, 2U);
+    EXPECT_EQ(function->returnType, "string");
+
+    ASSERT_EQ(function->parameterTypes.size(), 2U);
+    EXPECT_EQ(function->parameterTypes[0], "json");
+    EXPECT_EQ(function->parameterTypes[1], "string");
+}
+
+TEST(RuntimeModuleSyncTest, RegistersJsonGetBoolBuiltinInJsonModule) {
+    Velo::Runtime::Runtime runtime;
+
+    const auto *module = runtime.modules().find("json");
+    ASSERT_NE(module, nullptr);
+
+    const auto *function = module->findFunction("get_bool");
+    ASSERT_NE(function, nullptr);
+
+    EXPECT_EQ(function->name, "get_bool");
+    EXPECT_EQ(function->arity, 2U);
+    EXPECT_EQ(function->returnType, "bool");
+
+    ASSERT_EQ(function->parameterTypes.size(), 2U);
+    EXPECT_EQ(function->parameterTypes[0], "json");
+    EXPECT_EQ(function->parameterTypes[1], "string");
+}
+
+TEST(RuntimeModuleSyncTest, RegistersJsonGetJsonBuiltinInJsonModule) {
+    Velo::Runtime::Runtime runtime;
+
+    const auto *module = runtime.modules().find("json");
+    ASSERT_NE(module, nullptr);
+
+    const auto *function = module->findFunction("get_json");
+    ASSERT_NE(function, nullptr);
+
+    EXPECT_EQ(function->name, "get_json");
+    EXPECT_EQ(function->arity, 2U);
+    EXPECT_EQ(function->returnType, "json");
+
+    ASSERT_EQ(function->parameterTypes.size(), 2U);
+    EXPECT_EQ(function->parameterTypes[0], "json");
+    EXPECT_EQ(function->parameterTypes[1], "string");
+}

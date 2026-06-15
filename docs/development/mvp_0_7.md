@@ -13,7 +13,7 @@ MVP 0.7 focuses on JSON foundation and serialization.
 
 ## Current step
 ```text
-0.7.4   runtime json type and json::parse
+0.7.5   json access helpers and examples
 ```
 
 ## 0.7.1 scope
@@ -128,8 +128,39 @@ let value: json = json::parse("{\"id\":42}");
 let text: string = json::stringify(value);
 ```
 
+## 0.7.5 scope
+Implemented in this step:
+- `json::has`
+- `json::get_int`
+- `json::get_string`
+- `json::get_bool`
+- `json::get_json`
+- semantic validation for JSON access helper signatures
+- runtime JSON object field access
+- runtime errors for missing JSON keys
+- runtime errors for JSON field type mismatch
+- nested object access through `json::get_json`
+- semantic tests
+- driver tests
+- example
+- documentation
+
+Example:
+```velo
+let value: json = json::parse("{\"id\":42,\"name\":\"Alex\"}");
+
+let id: int = json::get_int(value, "id");
+let name: string = json::get_string(value, "name");
+```
+
+Nested example:
+```velo
+let profile: json = json::get_json(value, "profile");
+let age: int = json::get_int(profile, "age");
+```
+
 Current limitations:
-- JSON floats are not implemented yet
-- unicode escape parsing such as `\uXXXX` is not implemented yet
-- JSON access helpers are not implemented yet
-- JSON parser is intentionally small and MVP-focused
+- direct JSON indexing syntax is not implemented yet
+- JSON array access helpers are not implemented yet
+- JSON object length helpers are not implemented yet
+- JSON null helpers are not implemented yet

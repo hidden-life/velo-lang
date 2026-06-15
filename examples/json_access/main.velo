@@ -1,0 +1,21 @@
+module app;
+
+use std::console;
+use std::json;
+
+fn main(): int {
+    let value: json = json::parse("{\"id\":42,\"name\":\"Alex\",\"active\":true,\"profile\":{\"age\":17}}");
+
+    console::println(json::get_int(value, "id"));
+    console::println(json::get_string(value, "name"));
+    console::println(json::get_bool(value, "active"));
+
+    let profile: json = json::get_json(value, "profile");
+    console::println(json::get_int(profile, "age"));
+
+    if (json::has(value, "name")) {
+        console::println("has name");
+    }
+
+    return 0;
+}

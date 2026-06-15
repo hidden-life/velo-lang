@@ -95,6 +95,12 @@ data model foundation based on struct.
 - runtime `json` type
 - `json::parse`
 - JSON roundtrip through `json::stringify`
+- `json::has`
+- `json::get_int`
+- `json::get_string`
+- `json::get_bool`
+- `json::get_json`
+- nested JSON object access
 
 ## Standard modules
 Current standard modules:
@@ -269,5 +275,5 @@ MVP 0.7 is currently in progress.
 
 Current step:
 ```text
-0.7.4   runtime json type and json::parse
+0.7.5   json access helpers and examples
 ```
