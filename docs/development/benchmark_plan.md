@@ -3,6 +3,33 @@ This document tracks the benchmark strategy for Velo.
 
 Benchmarks should be added gradually and should not become unstable CI gates too early.
 
+The current script measures end-to-end CLI execution time for representative examples.
+
+It includes process startup overhead and should be treated as a smoke benchmark only.
+
+## Dependencies
+The MVP 0.8 benchmark scaffold does not require third-party benchmark tools.
+
+Required standard shell tools:
+```text
+bash
+date
+seq
+chmod
+```
+
+No package installation is required for MVP 0.8.
+
+Future milestones may add optional external tools such as:
+```text
+wrk
+hey
+ab
+```
+
+When these tools are introduced, installation commands and usage instructions must be documented
+in this file and in the release checklist.
+
 ## Current stage
 Current milestone:
 ```text
@@ -13,10 +40,6 @@ Current benchmark scaffold:
 ```text
 benchmarks/runtime/run_smoke.sh
 ```
-
-The current script measures end-to-end CLI execution time for representative examples.
-
-It includes process startup overhead and should be treated as a smoke benchmark only.
 
 ## MVP 0.8 benchmark goals
 The goal of MVP 0.8 benchmarks is to verify that the HTTP/JSON runtime foundation

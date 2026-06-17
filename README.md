@@ -239,6 +239,7 @@ Start here:
 - [Diagnostics](docs/development/diagnostics.md)
 - [Example guidelines](docs/development/example_guidelines.md)
 - [MVP release checklist](docs/development/release_checklist.md)
+- [Benchmark plan](docs/development/benchmark_plan.md)
 - [MVP 0.1 status](docs/development/mvp_0_1.md)
 - [MVP v0.1.0 release notes draft](docs/development/release_notes_v0_1.md)
 - [MVP 0.2 status](docs/development/mvp_0_2.md)
@@ -253,13 +254,15 @@ Start here:
 - [Velo v0.6.0 release notes draft](docs/development/release_notes_v0_6.md)
 - [MVP 0.7 status](docs/development/mvp_0_7.md)
 - [Velo v0.7.0 release notes draft](docs/development/release_notes_v0_7.md)
+- [MVP 0.8 status](docs/development/mvp_0_8.md)
+- [Velo v0.8.0 release notes draft](docs/development/release_notes_v0_8.md)
 
 ## Current development focus
-The project is currently moving toward **Velo MVP 0.8**.
+The project has completed **Velo MVP 0.8**.
 
 MVP 0.8 focuses on HTTP runtime foundation.
 
-Planned steps:
+Completed steps:
 ```text
 0.8.1   runtime http request/response values
 0.8.2   std::http response builders
@@ -271,7 +274,7 @@ Planned steps:
 
 Suggested next milestone:
 ```text
-MVP 0.8     HTTP runtime foundation
+MVP 0.9     HTTP server/router foundation
 ```
 
 Main properties:
@@ -301,9 +304,4 @@ MVP 0.6 is tagged as `v0.6.0`.
 MVP 0.7 is tagged as `v0.7.0`. 
 
 ## MVP 0.8 status
-MVP 0.8 is currently in progress.
-
-Current step:
-```text
-0.8.5   http/json integration examples and micro-benchmark scaffold
-```
+MVP 0.8 is tagged as `v0.8.0`.

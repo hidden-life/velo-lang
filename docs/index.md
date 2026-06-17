@@ -28,6 +28,7 @@ runtime, and MVP planning.
 - [Velo 0.5.0 release notes draft](development/release_notes_v0_5.md)
 - [Velo 0.6.0 release notes draft](development/release_notes_v0_6.md)
 - [Velo 0.7.0 release notes draft](development/release_notes_v0_7.md)
+- [Velo 0.8.0 release notes draft](development/release_notes_v0_8.md)
 - [MVP 0.1 status](development/mvp_0_1.md)
 - [MVP 0.2 status](development/mvp_0_2.md)
 - [MVP 0.3 status](development/mvp_0_3.md)
@@ -35,6 +36,7 @@ runtime, and MVP planning.
 - [MVP 0.5 status](development/mvp_0_5.md)
 - [MVP 0.6 status](development/mvp_0_6.md)
 - [MVP 0.7 status](development/mvp_0_7.md)
+- [MVP 0.8 status](development/mvp_0_8.md)
 
 ## Documentation rules
 When adding a new feature:

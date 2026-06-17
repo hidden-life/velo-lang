@@ -459,3 +459,23 @@ CallBuiltin json::get_int args=2
 ```
 
 No dedicated JSON IR instruction exists in MVP 0.7.
+
+## HTTP builtins
+HTTP helpers are lowered as normal builtin calls.
+
+Examples:
+```text
+CallBuiltin http::response args=2
+CallBuiltin http::text_response args=2
+CallBuiltin http::json_response args=2
+CallBuiltin http::status args=1
+CallBuiltin http::body args=1
+CallBuiltin http::has_header args=2
+CallBuiltin http::header args=2
+CallBuiltin http::request args=3
+CallBuiltin http::method args=1
+CallBuiltin http::path args=1
+CallBuiltin http::json_body args=1
+```
+
+No dedicated HTTP IR instruction exists in MVP 0.8.
