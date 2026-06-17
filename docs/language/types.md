@@ -620,7 +620,13 @@ JSON request body can be parsed with:
 let jsonBody: json = http::json_body(req);
 ```
 
-Current limitations:
-- HTTP builders are not implemented yet
-- HTTP access helpers are not implemented yet
-- real HTTP server/runtime is not implemented yet
+HTTP values can be passed through normal functions:
+```velo
+fn create_user(req: http_request): http_response {
+    let body: json = http::json_body(req);
+
+    return http::json_response(201, json::parse("{\"ok\":true}"));
+}
+```
+
+This is the foundation for future HTTP server handlers.

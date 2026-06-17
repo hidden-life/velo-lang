@@ -566,7 +566,26 @@ fn main(): int {
 }
 ```
 
-Current limitations:
-- request headers are not implemented yet
-- query parameters are not implemented yet
-- real HTTP server/runtime is not implemented yet
+### HTTP and JSON flow
+HTTP request and response helpers can be combined with `std::json`.
+
+```velo
+module app;
+
+use std::http;
+use std::json;
+use std::string;
+
+fn create_user(req: http_request): http_response {
+    let body: json = http::json_body(req);
+    let name: string = json::get_string(body, "name");
+
+    if (string::len(name) == 0) {
+        return http::json_response(400, json::parse("{\"error\":\"empty name\"}"));
+    }
+
+    return http::json_response(201, json::parse("{\"ok\":true}"));
+}
+```
+
+This models backend handler logic without starting a real HTTP server.

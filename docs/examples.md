@@ -489,3 +489,24 @@ true
 17
 has name
 ```
+
+## HTTP JSON flow
+```text
+examples/http_json_flow/main.velo
+```
+
+Demonstrates:
+- creating a synthetic HTTP request
+- parsing request body as JSON
+- reading JSON object fields
+- returning JSON HTTP responses
+- reading response status/body/header
+
+Expected output:
+```text
+POST
+/users
+201
+{"ok":true}
+application/json
+```

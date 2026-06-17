@@ -208,6 +208,10 @@ examples/json_stringify_collections/main.velo
 examples/json_stringify_struct/main.velo
 examples/json_parse/main.velo
 examples/json_access/main.velo
+examples/http_response/main.velo
+examples/http_response_access/main.velo
+examples/http_request/main.velo
+examples/http_json_flow/main.velo
 ```
 
 ## Integration showcase example

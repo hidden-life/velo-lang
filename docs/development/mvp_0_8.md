@@ -16,7 +16,7 @@ a real HTTP server in a later milestone.
 
 ## Current step
 ```text
-0.8.4   std::http request builders and access helpers
+0.8.5   http/json integration examples and micro-benchmark scaffold
 ```
 
 ## 0.8.1 scope
@@ -150,7 +150,40 @@ let body: json = http::json_body(req);
 let name: string = json::get_string(body, "name");
 ```
 
+## 0.8.5 scope
+Implemented in this step:
+- handler-like HTTP/JSON flow example
+- semantic tests for handler-like flow
+- driver tests for handler-like flow
+- driver checks for response status/body/content-type
+- IR smoke test for HTTP/JSON builtin calls
+- bytecode smoke test for HTTP/JSON builtin calls
+- runtime benchmark scaffold
+- benchmark plan documentation
+- documentation updates
+
+Example flow:
+```velo
+fn create_user(req: http_request): http_response {
+    let body: json = http::json_body(req);
+    let name: string = json::get_string(body, "name");
+
+    if (string::len(name) == 0) {
+        return http::json_response(400, json::parse("{\"error\":\"empty name\"}"));
+    }
+
+    return http::json_response(201, json::parse("{\"ok\":true}"));
+}
+```
+
+Benchmark scaffold:
+```text
+benchmarks/runtime/run_smoke.sh
+benchmarks/runtime/README.md
+docs/development/benchmark_plan.md
+```
+
 Current limitations:
-- request headers are not implemented yet
-- query parsing is not implemented yet
+- benchmark script measures CLI end-to-end execution, including process startup
+- no performance thresholds are enforced
 - real HTTP server/runtime is not implemented yet

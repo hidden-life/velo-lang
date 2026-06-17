@@ -118,6 +118,9 @@ data model foundation based on struct.
 - `http::path`
 - `http::request_body`
 - `http::json_body`
+- handler-like HTTP/JSON flow examples
+- runtime benchmark scaffold
+- benchmark plan documentation
 
 ## Standard modules
 Current standard modules:
@@ -302,5 +305,5 @@ MVP 0.8 is currently in progress.
 
 Current step:
 ```text
-0.8.4   std::http request builders and access helpers
+0.8.5   http/json integration examples and micro-benchmark scaffold
 ```

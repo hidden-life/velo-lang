@@ -670,4 +670,19 @@ a `JsonValuePtr`.
 
 Invalid JSON request body is a runtime error.
 
-No real network/server runtime exists in MVP 0.8.4.
+## HTTP and JSON integration
+MVP 0.8 combines HTTP runtime values with runtime JSON values.
+
+Typical flow:
+```text
+http_request
+    -> http::json_body
+    -> json access helpers
+    -> http::json_response
+    -> http_response
+```
+
+This flow does not require a real network server yet.
+
+The runtime can execute handler-like functions that accept `http_request`
+and return `http_response`.

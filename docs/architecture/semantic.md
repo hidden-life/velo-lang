@@ -770,3 +770,19 @@ The semantic analyzer validates helper signatures.
 
 Invalid JSON body is a runtime error.
 
+## Handler-like HTTP function typing
+Velo can type-check handler-like functions:
+```velo
+fn create_user(req: http_request): http_response {
+    return http::json_response(201, json::parse("{\"ok\":true}"));
+}
+```
+
+The semantic analyzer validates:
+- `http_request` parameter type
+- `http_response` return type
+- `http::json_body` result type
+- `json::get_*` access helper usage
+- `http::json_response` return type
+
+A real HTTP server/router is not implemented in MVP 0.8.

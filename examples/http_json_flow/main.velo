@@ -1,0 +1,31 @@
+module app;
+
+use std::console;
+use std::http;
+use std::json;
+use std::string;
+
+fn create_user(req: http_request): http_response {
+    let body: json = http::json_body(req);
+    let name: string = json::get_string(body, "name");
+
+    if (string::len(name) == 0) {
+        return http::json_response(400, json::parse("{\"error\":\"empty name\"}"));
+    }
+
+    return http::json_response(201, json::parse("{\"ok\":true}"));
+}
+
+fn main(): int {
+    let req: http_request = http::request("POST", "/users", "{\"name\":\"Alex\"}");
+    let res: http_response = create_user(req);
+
+    console::println(http::method(req));
+    console::println(http::path(req));
+
+    console::println(http::status(res));
+    console::println(http::body(res));
+    console::println(http::header(res, "Content-Type"));
+
+    return 0;
+}

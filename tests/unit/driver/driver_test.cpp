@@ -4800,3 +4800,253 @@ fn main(): int {
 
     EXPECT_NE(result.bytecodeText.find("CallBuiltin http::json_body args=1"), std::string::npos);
 }
+
+TEST(DriverTest, ExecutesHttpJsonHandlerLikeFlow) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_json_handler_like_flow.velo",
+        R"(module app;
+
+use std::http;
+use std::json;
+use std::string;
+
+fn create_user(req: http_request): http_response {
+    let body: json = http::json_body(req);
+    let name: string = json::get_string(body, "name");
+
+    if (string::len(name) == 0) {
+        return http::json_response(400, json::parse("{\"error\":\"empty name\"}"));
+    }
+
+    return http::json_response(201, json::parse("{\"ok\":true}"));
+}
+
+fn main(): int {
+    let req: http_request = http::request("POST", "/users", "{\"name\":\"Alex\"}");
+    let res: http_response = create_user(req);
+
+    return http::status(res);
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 201);
+}
+
+TEST(DriverTest, ExecutesHttpJsonHandlerLikeValidationBranch) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_json_handler_like_validation.velo",
+        R"(module app;
+
+use std::http;
+use std::json;
+use std::string;
+
+fn create_user(req: http_request): http_response {
+    let body: json = http::json_body(req);
+    let name: string = json::get_string(body, "name");
+
+    if (string::len(name) == 0) {
+        return http::json_response(400, json::parse("{\"error\":\"empty name\"}"));
+    }
+
+    return http::json_response(201, json::parse("{\"ok\":true}"));
+}
+
+fn main(): int {
+    let req: http_request = http::request("POST", "/users", "{\"name\":\"\"}");
+    let res: http_response = create_user(req);
+
+    return http::status(res);
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 400);
+}
+
+TEST(DriverTest, ExecutesHttpJsonHandlerLikeResponseBody) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_json_handler_like_body.velo",
+        R"(module app;
+
+use std::http;
+use std::json;
+use std::string;
+
+fn create_user(req: http_request): http_response {
+    let body: json = http::json_body(req);
+    let name: string = json::get_string(body, "name");
+
+    if (string::len(name) == 0) {
+        return http::json_response(400, json::parse("{\"error\":\"empty name\"}"));
+    }
+
+    return http::json_response(201, json::parse("{\"ok\":true}"));
+}
+
+fn main(): int {
+    let req: http_request = http::request("POST", "/users", "{\"name\":\"Alex\"}");
+    let res: http_response = create_user(req);
+
+    return string::len(http::body(res));
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 11);
+}
+
+TEST(DriverTest, ExecutesHttpJsonHandlerLikeContentType) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_json_handler_like_content_type.velo",
+        R"(module app;
+
+use std::http;
+use std::json;
+use std::string;
+
+fn create_user(req: http_request): http_response {
+    let body: json = http::json_body(req);
+    let name: string = json::get_string(body, "name");
+
+    if (string::len(name) == 0) {
+        return http::json_response(400, json::parse("{\"error\":\"empty name\"}"));
+    }
+
+    return http::json_response(201, json::parse("{\"ok\":true}"));
+}
+
+fn main(): int {
+    let req: http_request = http::request("POST", "/users", "{\"name\":\"Alex\"}");
+    let res: http_response = create_user(req);
+
+    return string::len(http::header(res, "Content-Type"));
+}
+)"
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_EQ(result.exitCode, 16);
+}
+
+TEST(DriverTest, IrModePrintsHttpJsonFlowBuiltinCalls) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_json_flow_ir.velo",
+        R"(module app;
+
+use std::http;
+use std::json;
+
+fn main(): int {
+    let req: http_request = http::request("POST", "/users", "{\"name\":\"Alex\"}");
+    let body: json = http::json_body(req);
+    let res: http_response = http::json_response(201, body);
+
+    return http::status(res);
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.irText.find("CallBuiltin http::request args=3"), std::string::npos);
+    EXPECT_NE(result.irText.find("CallBuiltin http::json_body args=1"), std::string::npos);
+    EXPECT_NE(result.irText.find("CallBuiltin http::json_response args=2"), std::string::npos);
+    EXPECT_NE(result.irText.find("CallBuiltin http::status args=1"), std::string::npos);
+}
+
+TEST(DriverTest, BytecodeModePrintsHttpJsonFlowBuiltinCalls) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "http_json_flow_bytecode.velo",
+        R"(module app;
+
+use std::http;
+use std::json;
+
+fn main(): int {
+    let req: http_request = http::request("POST", "/users", "{\"name\":\"Alex\"}");
+    let body: json = http::json_body(req);
+    let res: http_response = http::json_response(201, body);
+
+    return http::status(res);
+}
+)",
+        Velo::Driver::DriverMode::Bytecode
+    );
+
+    if (!result.success) {
+        ADD_FAILURE() << "Driver error: " << result.error;
+        for (const auto &diag : result.diagnostics) {
+            ADD_FAILURE() << diag.code() << ": " << diag.message();
+        }
+    }
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.diagnostics.empty());
+    ASSERT_TRUE(result.error.empty());
+
+    EXPECT_NE(result.bytecodeText.find("CallBuiltin http::request args=3"), std::string::npos);
+    EXPECT_NE(result.bytecodeText.find("CallBuiltin http::json_body args=1"), std::string::npos);
+    EXPECT_NE(result.bytecodeText.find("CallBuiltin http::json_response args=2"), std::string::npos);
+    EXPECT_NE(result.bytecodeText.find("CallBuiltin http::status args=1"), std::string::npos);
+}
