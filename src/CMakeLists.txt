@@ -191,6 +191,7 @@ target_link_libraries(velo_interpreter
 add_library(velo_http STATIC
         http/http_message.cpp
         http/http_handler.cpp
+        http/http_pipeline.cpp
 )
 
 add_library(Velo::Http ALIAS velo_http)

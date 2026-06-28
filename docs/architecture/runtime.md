@@ -719,3 +719,32 @@ Current limitations:
 - no chunked transfer encoding
 - no keep-alive
 - no TLS
+
+## HTTP request pipeline
+MVP 0.9.3 introduces a reusable raw HTTP request pipeline.
+
+Namespace:
+```text
+Velo::Http
+```
+
+Core function:
+```text
+handleRawHttpRequest(interpreter, module, rawRequest, handlerName)
+```
+
+The pipeline composes the lower-level HTTP pieces:
+```text
+raw HTTP request
+    -> parseHttpRequest(raw)
+    -> executeHttpHandler(...)
+    -> serializeHttpResponse(response)
+    -> raw HTTP response
+```
+
+Malformed raw requests produce a serialized `400 Bad Request` response.
+
+Handler execution failures produce a serialized `500 Internal Server Error` response.
+
+This layer is intentionally independent from sockets and CLI server mode.
+The next sub-step will use it from the blocking HTTP server log.

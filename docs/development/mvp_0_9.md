@@ -16,7 +16,7 @@ serving pipeline.
 
 ## Current step
 ```text
-0.9.1       HTTP parser/serializer foundation
+0.9.3       CLI serve mode with conventional handle(req) function
 ```
 
 ## Architecture direction
@@ -77,3 +77,30 @@ Current limitations:
 - no multipart parsing
 - no query parser
 - header names are case-sensitive
+
+## 0.9.3-A scope
+Implemented in this sub-step:
+- raw HTTP request pipeline
+- parser/handler/serializer composition
+- `400 Bad Request` response for malformed raw requests
+- `500 Internal Server Error` response for handler failures
+- unit tests for pipeline behavior
+
+The pipeline is:
+```text
+raw HTTP request
+    -> parseHttpRequest(raw)
+    -> executeHttpHandler(...)
+    -> serializeHttpResponse(response)
+    -> raw HTTP response
+```
+
+This sub-step does not start a socket server yet.
+
+Current limitations:
+- no socket server yet
+- no `velo serve` command yet
+- no routing helpers yet
+- no keep-alive
+- no chunked transfer encoding
+- no TLS
