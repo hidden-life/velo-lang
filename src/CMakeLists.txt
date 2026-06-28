@@ -188,6 +188,25 @@ target_link_libraries(velo_interpreter
         Velo::Runtime
 )
 
+add_library(velo_http STATIC
+    http/http_message.cpp
+)
+
+add_library(Velo::Http ALIAS velo_http)
+
+target_include_directories(velo_http
+        PUBLIC
+        "${PROJECT_SOURCE_DIR}/include"
+)
+
+target_link_libraries(velo_http
+        PUBLIC
+        Velo::ProjectOptions
+        Velo::ProjectWarnings
+
+        Velo::Runtime
+)
+
 add_library(velo_driver
         driver/driver.cpp
 )

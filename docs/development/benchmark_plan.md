@@ -100,3 +100,28 @@ is stable.
 - Benchmarks should not require external tools unless explicitly documented.
 - Benchmarks should separate correctness tests from performance measurements.
 - CI thresholds should be introduced only when results are stable across machines.
+
+## MVP 0.9 benchmark direction
+MVP 0.9 introduces a real HTTP server foundation.
+
+Benchmark strategy:
+1. keep parser/serializer tests as correctness tests
+2. add manual server smoke benchmarks after `velo serve`
+3. avoid performance thresholds until server behavior is stable
+
+Future optional tools:
+```text
+curl
+ab
+wrk
+hey
+```
+
+When external tools are introduced, installation commands must be documented
+in:
+```text
+docs/development/benchmark_plan.md
+docs/development/release_checklist.md
+```
+
+MVP 0.9.1 does not add third-party benchmark dependencies.

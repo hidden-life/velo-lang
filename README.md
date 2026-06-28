@@ -258,18 +258,18 @@ Start here:
 - [Velo v0.8.0 release notes draft](docs/development/release_notes_v0_8.md)
 
 ## Current development focus
-The project has completed **Velo MVP 0.8**.
+The project is moving toward **Velo MVP 0.9**.
 
-MVP 0.8 focuses on HTTP runtime foundation.
+MVP 0.9 focuses on HTTP server/router foundation.
 
-Completed steps:
+Planned steps:
 ```text
-0.8.1   runtime http request/response values
-0.8.2   std::http response builders
-0.8.3   std::http response access helpers
-0.8.4   std::http request builders and access helpers
-0.8.5   http/json integration examples and micro-benchmark scaffold
-0.8.6   docs/examples/release checklist
+0.9.1       HTTP parser/serializer foundation
+0.9.2       handler signature validation and callable handler execution
+0.9.3       CLI serve mode with conventional handle(req) function
+0.9.4       basic routing helpers
+0.9.5       server examples and local benchmark scripts
+0.9.6       docs/examples/release checklist
 ```
 
 Suggested next milestone:

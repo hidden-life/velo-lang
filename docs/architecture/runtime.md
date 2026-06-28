@@ -686,3 +686,36 @@ This flow does not require a real network server yet.
 
 The runtime can execute handler-like functions that accept `http_request`
 and return `http_response`.
+
+## HTTP parser/serializer foundation
+MVP 0.9 adds a reusable HTTP message layer.
+
+Namespace:
+```text
+Velo::Http
+```
+
+Core functions:
+```text
+parseHttpRequest(raw)
+serializeHttpResponse(response)
+reasonPhraseForStatus(status)
+```
+
+The parser converts raw HTTP request text into `HttpRequestValuePtr`.
+
+The serializer converts `HttpResponseValue` into raw HTTP response text.
+
+This layer is intentionally independent from CLI serve mode.
+
+Future entry points should reuse it:
+```text
+velo serve app.velo
+http::listen(...)
+```
+
+Current limitations:
+- no socket server in 0.9.1
+- no chunked transfer encoding
+- no keep-alive
+- no TLS
