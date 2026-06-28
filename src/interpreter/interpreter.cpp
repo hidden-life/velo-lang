@@ -308,11 +308,15 @@ namespace Velo::Interpreter {
             case OpCode::CallFunction:
                 return callFunction(inst.stringOperand, inst.argsCount);
             case OpCode::Return:
-                if (!_stack.empty() && std::holds_alternative<int>(_stack.back())) {
+                if (!_stack.empty()) {
+                    auto returnValue = Runtime::cloneValue(_stack.back());
+                    const int exitCode = std::holds_alternative<int>(returnValue) ? std::get<int>(returnValue) : 0;
+
                     return Runtime::ExecutionResult {
                         .success = true,
-                        .exitCode = std::get<int>(_stack.back()),
-                        .error = {}
+                        .exitCode = exitCode,
+                        .error = {},
+                        .returnValue = std::move(returnValue)
                     };
                 }
                 return {};
@@ -1109,5 +1113,42 @@ namespace Velo::Interpreter {
         _stack.push_back(Runtime::cloneValue(rootValue));
 
         return {};
+    }
+
+    auto Interpreter::executeFunction(const IR::Module &module, const std::string &name,
+        const std::vector<Runtime::Value> &args) -> Runtime::ExecutionResult {
+        _currentModule = &module;
+        _stack.clear();
+        _locals.clear();
+        _lastJumpTaken = false;
+
+        const auto it = std::ranges::find_if(module.functions, [&name](const IR::Function &f) {
+            return f.name == name;
+        });
+
+        if (it == module.functions.end()) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "Runtime function '" + name + "' was not found."
+            };
+        }
+
+        if (args.size() != it->parameters.size()) {
+            return Runtime::ExecutionResult {
+                .success = false,
+                .exitCode = 1,
+                .error = "Function '" + name + "' expects " +
+                    std::to_string(it->parameters.size()) + " argument(s), but " +
+                    std::to_string(args.size()) + " provided."
+            };
+        }
+
+        _locals.reserve(args.size());
+        for (const auto &arg : args) {
+            _locals.push_back(Runtime::cloneValue(arg));
+        }
+
+        return executeFunc(*it);
     }
 }

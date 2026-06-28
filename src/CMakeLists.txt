@@ -189,7 +189,8 @@ target_link_libraries(velo_interpreter
 )
 
 add_library(velo_http STATIC
-    http/http_message.cpp
+        http/http_message.cpp
+        http/http_handler.cpp
 )
 
 add_library(Velo::Http ALIAS velo_http)
@@ -205,6 +206,7 @@ target_link_libraries(velo_http
         Velo::ProjectWarnings
 
         Velo::Runtime
+        Velo::Interpreter
 )
 
 add_library(velo_driver

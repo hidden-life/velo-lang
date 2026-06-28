@@ -1293,7 +1293,7 @@ namespace Velo::Runtime {
                         return ExecutionResult {
                             .success = false,
                             .exitCode = 1,
-                            .error = "http::response expects exactly two raguments."
+                            .error = "http::response expects exactly two arguments."
                         };
                     }
 
@@ -1698,7 +1698,7 @@ namespace Velo::Runtime {
                         return ExecutionResult {
                             .success = false,
                             .exitCode = 1,
-                            .error = "http::method received a null http_equest value."
+                            .error = "http::method received a null http_request value."
                         };
                     }
 

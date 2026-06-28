@@ -13,6 +13,10 @@ namespace Velo::Interpreter {
         explicit Interpreter(Runtime::Runtime &runtime);
 
         [[nodiscard]] auto execute(const IR::Module &module) -> Runtime::ExecutionResult;
+        [[nodiscard]] auto executeFunction(
+            const IR::Module &module,
+            const std::string &name,
+            const std::vector<Runtime::Value> &args) -> Runtime::ExecutionResult;
 
     private:
         [[nodiscard]] auto executeFunc(const IR::Function &func) -> Runtime::ExecutionResult;
