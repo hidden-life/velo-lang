@@ -192,6 +192,7 @@ add_library(velo_http STATIC
         http/http_message.cpp
         http/http_handler.cpp
         http/http_pipeline.cpp
+        http/http_server.cpp
 )
 
 add_library(Velo::Http ALIAS velo_http)
@@ -206,6 +207,12 @@ target_link_libraries(velo_http
         Velo::ProjectOptions
         Velo::ProjectWarnings
 
+        Velo::Source
+        Velo::Diagnostic
+        Velo::Lexer
+        Velo::Parser
+        Velo::Semantic
+        Velo::IR
         Velo::Runtime
         Velo::Interpreter
 )

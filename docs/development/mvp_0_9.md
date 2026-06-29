@@ -104,3 +104,42 @@ Current limitations:
 - no keep-alive
 - no chunked transfer encoding
 - no TLS
+
+## 0.9.3-B scope
+Implemented in this sub-step:
+- blocking HTTP socket server
+- source file compilation during server startup
+- conventional `handle(req)` validation before binding socket
+- one request per connection
+- request size limit
+- serialized `400 Bad Request` response for incompleted socket reads
+- reusable `HttpServerConfig`
+- reusable `HttpServerResult`
+- startup tests for invalid config/source/handler/semantic errors
+
+The server loop is intentionally minimal:
+```text
+accept connection
+    -> read one HTTP request
+    -> handleRawHttpRequest(...)
+    -> write one HTTP response
+    -> close connection
+```
+
+Current defaults:
+```text
+host: 127.0.0.1
+port: 8080
+handler: handle
+max request bytes: 1048576
+```
+
+Current limitations:
+- no CLI command yet
+- no `http::listen(...)`
+- no keep-alive
+- no chunked transfer encoding
+- no TLS
+- no async runtime
+- no thread pool
+- no routing table

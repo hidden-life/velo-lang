@@ -748,3 +748,46 @@ Handler execution failures produce a serialized `500 Internal Server Error` resp
 
 This layer is intentionally independent from sockets and CLI server mode.
 The next sub-step will use it from the blocking HTTP server log.
+
+## HTTP socket server
+MVP 0.9.3 adds a minimal blocking HTTP server layer.
+
+Core type:
+```text
+HttpServerConfig
+```
+
+Core function:
+```text
+run(config)
+```
+
+The server compiles the Velo source once at startup:
+```text
+source file
+    -> lexer
+    -> parser
+    -> semantic analyzer
+    -> handler signature validation
+    -> IR lowerer
+```
+
+If startup succeeds, the server enters a blocking accept loop:
+```text
+accept
+    -> read request bytes
+    -> handleRawHttpRequest(...)
+    -> write response bytes
+    -> close client socket
+```
+
+This layer still does not define a CLI command. The CLI will call `run(...)` in the next sub-step.
+
+Current limitations:
+- blocking server loop
+- one request per connection
+- IPv4 only
+- no keep-alive
+- no TLS
+- no routing table
+- no host/port CLI flags yet
