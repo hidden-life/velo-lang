@@ -537,3 +537,14 @@ This example demonstrates:
 - `http::path(req)`
 - `http::text_response(...)`
 - minimal CLI serve mode
+
+### HTTP routing helpers
+```text
+examples/http_routing_helpers/main.velo
+```
+
+Demonstrates:
+- `http::is_route`
+- `http::is_path`
+- explicit handler branching
+- simple `404` fallback

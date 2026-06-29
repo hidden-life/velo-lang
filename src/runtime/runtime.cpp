@@ -1796,6 +1796,164 @@ namespace Velo::Runtime {
 
         _registry.registerFunc(
             BuiltinFunction {
+                "http::is_method",
+                {"http_request", "string"},
+                "bool",
+                [](const std::vector<Value> &args) -> ExecutionResult {
+                    if (args.size() != 2U) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::is_method expects exactly two arguments."
+                        };
+                    }
+
+                    if (!std::holds_alternative<HttpRequestValuePtr>(args[0])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::is_method expects an http_request as first argument."
+                        };
+                    }
+
+                    if (!std::holds_alternative<std::string>(args[1])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::is_method expects string method as second argument."
+                        };
+                    }
+
+                    const auto request = std::get<HttpRequestValuePtr>(args[0]);
+                    if (request == nullptr) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::is_method received a null http_request value."
+                        };
+                    }
+
+                    return ExecutionResult {
+                        .success = true,
+                        .exitCode = 0,
+                        .error = {},
+                        .returnValue = request->method == std::get<std::string>(args[1])
+                    };
+                }
+            }
+        );
+
+        _registry.registerFunc(
+            BuiltinFunction {
+                "http::is_path",
+                {"http_request", "string"},
+                "bool",
+                [](const std::vector<Value> &args) -> ExecutionResult {
+                    if (args.size() != 2U) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::is_path expects exactly two arguments."
+                        };
+                    }
+
+                    if (!std::holds_alternative<HttpRequestValuePtr>(args[0])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::is_path expects an http_request as first argument."
+                        };
+                    }
+
+                    if (!std::holds_alternative<std::string>(args[1])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::is_path expects string path as second argument."
+                        };
+                    }
+
+                    const auto request = std::get<HttpRequestValuePtr>(args[0]);
+                    if (request == nullptr) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::is_path received a null http_request value."
+                        };
+                    }
+
+                    return ExecutionResult {
+                        .success = true,
+                        .exitCode = 0,
+                        .error = {},
+                        .returnValue = request->path == std::get<std::string>(args[1])
+                    };
+                }
+            }
+        );
+
+        _registry.registerFunc(
+            BuiltinFunction {
+                "http::is_route",
+                {"http_request", "string", "string"},
+                "bool",
+                [](const std::vector<Value> &args) -> ExecutionResult {
+                    if (args.size() != 3U) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::is_route expects exactly three arguments."
+                        };
+                    }
+
+                    if (!std::holds_alternative<HttpRequestValuePtr>(args[0])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::is_route expects an http_request as first argument."
+                        };
+                    }
+
+                    if (!std::holds_alternative<std::string>(args[1])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::is_route expects string method as second argument."
+                        };
+                    }
+
+                    if (!std::holds_alternative<std::string>(args[2])) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::is_route expects string path as third argument."
+                        };
+                    }
+
+                    const auto request = std::get<HttpRequestValuePtr>(args[0]);
+                    if (request == nullptr) {
+                        return ExecutionResult {
+                            .success = false,
+                            .exitCode = 1,
+                            .error = "http::is_route received a null http_request value."
+                        };
+                    }
+
+                    const auto &method = std::get<std::string>(args[1]);
+                    const auto &path = std::get<std::string>(args[2]);
+
+                    return ExecutionResult {
+                        .success = true,
+                        .exitCode = 0,
+                        .error = {},
+                        .returnValue = request->method == method && request->path == path
+                    };
+                }
+            }
+        );
+
+        _registry.registerFunc(
+            BuiltinFunction {
                 "http::json_body",
                 {"http_request"},
                 "json",

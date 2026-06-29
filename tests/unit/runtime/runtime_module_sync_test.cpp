@@ -424,3 +424,55 @@ TEST(RuntimeModuleSyncTest, RegistersHttpJsonBodyBuiltinInHttpModule) {
     ASSERT_EQ(function->parameterTypes.size(), 1U);
     EXPECT_EQ(function->parameterTypes[0], "http_request");
 }
+
+TEST(RuntimeModuleSyncTest, RegistersHttpIsMethodBuiltinInHttpModule) {
+    Velo::Runtime::Runtime runtime;
+
+    const auto *module = runtime.modules().find("http");
+    ASSERT_NE(module, nullptr);
+
+    const auto *function = module->findFunction("is_method");
+    ASSERT_NE(function, nullptr);
+
+    EXPECT_EQ(function->name, "is_method");
+    EXPECT_EQ(function->arity, 2U);
+    ASSERT_EQ(function->parameterTypes.size(), 2U);
+    EXPECT_EQ(function->parameterTypes[0], "http_request");
+    EXPECT_EQ(function->parameterTypes[1], "string");
+    EXPECT_EQ(function->returnType, "bool");
+}
+
+TEST(RuntimeModuleSyncTest, RegistersHttpIsPathBuiltinInHttpModule) {
+    Velo::Runtime::Runtime runtime;
+
+    const auto *module = runtime.modules().find("http");
+    ASSERT_NE(module, nullptr);
+
+    const auto *function = module->findFunction("is_path");
+    ASSERT_NE(function, nullptr);
+
+    EXPECT_EQ(function->name, "is_path");
+    EXPECT_EQ(function->arity, 2U);
+    ASSERT_EQ(function->parameterTypes.size(), 2U);
+    EXPECT_EQ(function->parameterTypes[0], "http_request");
+    EXPECT_EQ(function->parameterTypes[1], "string");
+    EXPECT_EQ(function->returnType, "bool");
+}
+
+TEST(RuntimeModuleSyncTest, RegistersHttpIsRouteBuiltinInHttpModule) {
+    Velo::Runtime::Runtime runtime;
+
+    const auto *module = runtime.modules().find("http");
+    ASSERT_NE(module, nullptr);
+
+    const auto *function = module->findFunction("is_route");
+    ASSERT_NE(function, nullptr);
+
+    EXPECT_EQ(function->name, "is_route");
+    EXPECT_EQ(function->arity, 3U);
+    ASSERT_EQ(function->parameterTypes.size(), 3U);
+    EXPECT_EQ(function->parameterTypes[0], "http_request");
+    EXPECT_EQ(function->parameterTypes[1], "string");
+    EXPECT_EQ(function->parameterTypes[2], "string");
+    EXPECT_EQ(function->returnType, "bool");
+}

@@ -182,3 +182,36 @@ Current limitations:
 - no chunked transfer encoding
 - no TLS
 - no thread pool
+
+## 0.9.4 scope
+Implemented in this step:
+- `http::is_method(req, method): bool`
+- `http::is_path(req, path): bool`
+- `http::is_route(req, method, path): bool`
+- route helper semantic tests
+- route helper pipeline test
+- route helper driver tests
+- routing helper example
+- documentation updates
+
+The current routing style is explicit Velo code:
+```velo
+fn handle(req: http_request): http_response {
+    if (http::is_route(req, "GET", "/health")) {
+        return http::text_response(200, "OK");
+    }
+
+    return http::text_response(404, "not found");
+}
+```
+
+This step intentionally does not add route tables or callback registration.
+
+Current limitations:
+- no `http::get(...)`
+- no `http::post(...)`
+- no path params
+- no query parser
+- no middleware
+- no function references
+- no `http::listen(...)`

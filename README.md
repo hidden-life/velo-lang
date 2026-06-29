@@ -121,6 +121,10 @@ data model foundation based on struct.
 - handler-like HTTP/JSON flow examples
 - runtime benchmark scaffold
 - benchmark plan documentation
+- HTTP routing helpers:
+  - `http::is_method`
+  - `http::is_route`
+  - `http::is_path`
 
 ## Standard modules
 Current standard modules:
@@ -188,6 +192,18 @@ is equivalent to:
 Start a minimal HTTP server:
 ```bash
 ./build/debug/apps/velo/velo serve ./examples/http_server_basic/main.velo
+```
+
+Routing helper server example:
+```bash
+./build/debug/apps/velo/velo serve ./examples/http_routing_helpers/main.velo
+```
+
+Smoke:
+```bash
+curl -i http://127.0.0.1:8080/health
+curl -i http://127.0.0.1:8080/hello
+curl -i http://127.0.0.1:8080/missing
 ```
 
 ## MVP showcase

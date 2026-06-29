@@ -589,3 +589,24 @@ fn create_user(req: http_request): http_response {
 ```
 
 This models backend handler logic without starting a real HTTP server.
+
+### Routing helpers
+```velo
+http::is_method(req: http_request, method: string): bool
+http::is_path(req: http_request, path: string): bool
+http::is_route(req: http_request, method: string, path: string): bool
+```
+
+Example:
+```velo
+fn handle(req: http_request): http_response {
+    if (http::is_route(req, "GET", "/health")) {
+        return http::text_response(200, "OK");
+    }
+
+    return http::text_response(404, "not found");
+}
+```
+
+These helpers compare exact method and path strings. They do not parse query
+strings and do not support path parameters.

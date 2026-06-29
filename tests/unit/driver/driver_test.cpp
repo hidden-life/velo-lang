@@ -5050,3 +5050,65 @@ fn main(): int {
     EXPECT_NE(result.bytecodeText.find("CallBuiltin http::json_response args=2"), std::string::npos);
     EXPECT_NE(result.bytecodeText.find("CallBuiltin http::status args=1"), std::string::npos);
 }
+
+TEST(DriverTest, ExecutesHttpRouteMatchHelper) {
+    Velo::Driver::Driver driver;
+
+    const auto result = driver.parseText(
+        "http_route_match.velo",
+        R"(module app;
+use std::http;
+
+fn handle(req: http_request): http_response {
+    if (http::is_route(req, "GET", "/health")) {
+        return http::text_response(200, "OK");
+    }
+
+    return http::text_response(404, "not found");
+}
+
+fn main(): int {
+    let req: http_request = http::request("GET", "/health", "");
+    let res: http_response = handle(req);
+
+    return http::status(res);
+}
+)"
+    );
+
+    ASSERT_TRUE(result.success);
+    EXPECT_EQ(result.exitCode, 200);
+    EXPECT_TRUE(result.error.empty());
+    EXPECT_TRUE(result.diagnostics.empty());
+}
+
+TEST(DriverTest, ExecutesHttpRouteMissHelper) {
+    Velo::Driver::Driver driver;
+
+    const auto result = driver.parseText(
+        "http_route_miss.velo",
+        R"(module app;
+use std::http;
+
+fn handle(req: http_request): http_response {
+    if (http::is_route(req, "GET", "/health")) {
+        return http::text_response(200, "OK");
+    }
+
+    return http::text_response(404, "not found");
+}
+
+fn main(): int {
+    let req: http_request = http::request("POST", "/health", "");
+    let res: http_response = handle(req);
+
+    return http::status(res);
+}
+)"
+    );
+
+    ASSERT_TRUE(result.success);
+    EXPECT_EQ(result.exitCode, 404);
+    EXPECT_TRUE(result.error.empty());
+    EXPECT_TRUE(result.diagnostics.empty());
+}

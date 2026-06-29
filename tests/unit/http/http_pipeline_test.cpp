@@ -191,3 +191,38 @@ TEST(HttpPipelineTest, ReturnsInternalServerErrorForHandlerFailure) {
     EXPECT_NE(result.error.find("handle"), std::string::npos);
     EXPECT_NE(result.raw.find("HTTP/1.1 500 Internal Server Error\r\n"), std::string::npos);
 }
+
+TEST(HttpPipelineTest, RoutesRawRequestWithHttpRoutingHelpers) {
+    auto compiled = compileProgram(R"(module app;
+use std::http;
+
+fn handle(req: http_request): http_response {
+    if (http::is_route(req, "GET", "/health")) {
+        return http::text_response(200, "OK");
+    }
+
+    return http::text_response(404, "not found");
+}
+
+fn main(): int {
+    return 0;
+}
+)");
+
+    ASSERT_TRUE(compiled.success);
+
+    Velo::Runtime::Runtime runtime;
+    Velo::Interpreter::Interpreter interpreter(runtime);
+
+    const auto result = Velo::Http::handleRawHttpRequest(
+        interpreter,
+        compiled.module,
+        "GET /health HTTP/1.1\r\n"
+        "Host: localhost\r\n"
+        "\r\n"
+    );
+
+    ASSERT_TRUE(result.isSuccess) << result.error;
+    EXPECT_NE(result.raw.find("HTTP/1.1 200 OK\r\n"), std::string::npos);
+    EXPECT_NE(result.raw.find("\r\n\r\nOK"), std::string::npos);
+}

@@ -827,3 +827,34 @@ Current limitations:
 - no graceful shutdown API
 - no TLS
 - no keep-alive
+
+## HTTP routing helpers
+MVP 0.9.4 adds basic routing helper builtins in `std::http`.
+
+Helpers:
+```text
+http::is_method(http_request, string): bool
+http::is_path(http_request, string): bool
+http::is_route(http_request, string, string): bool
+```
+
+They are intentionally simple predicates over `HttpRequestValue`:
+```text
+is_method   ->  request.method == method
+is_path     ->  request.path == path
+is_route    ->  request.method == method && request.path == path
+```
+
+The helpers allow server handlers to branch without adding route tables yet:
+```velo
+fn handle(req: http_request): http_response {
+    if (http::is_route(req, "GET", "/health")) {
+        return http::text_response(200, "OK");
+    }
+
+    return http::text_response(404, "not found");
+}
+```
+
+Future milestones may add route registration APIs after function references exist.
+
