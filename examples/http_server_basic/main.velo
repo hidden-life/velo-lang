@@ -1,0 +1,11 @@
+module app;
+
+use std::http;
+
+fn handle(req: http_request): http_response {
+    return http::text_response(200, http::path(req));
+}
+
+fn main(): int {
+    return 0;
+}

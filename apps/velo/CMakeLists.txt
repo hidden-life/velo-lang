@@ -7,4 +7,5 @@ target_link_libraries(velo PRIVATE
         Velo::ProjectWarnings
 
         Velo::Driver
+        Velo::Http
 )

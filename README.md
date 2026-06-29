@@ -185,10 +185,25 @@ is equivalent to:
 ./build/debug/apps/velo/velo run ./examples/arithmetic/main.velo
 ```
 
+Start a minimal HTTP server:
+```bash
+./build/debug/apps/velo/velo serve ./examples/http_server_basic/main.velo
+```
+
 ## MVP showcase
 Run the MVP showcase example:
 ```bash
 ./build/debug/apps/velo/velo run ./examples/mvp_showcase/main.velo
+```
+
+Smoke request:
+```bash
+curl -i http://127.0.0.1:8080/health
+```
+
+Expected response body:
+```text
+/health
 ```
 
 Expected output:

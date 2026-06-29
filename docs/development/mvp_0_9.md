@@ -143,3 +143,42 @@ Current limitations:
 - no async runtime
 - no thread pool
 - no routing table
+
+## 0.9.3-C scope
+Implemented in this sub-step:
+- `velo serve <source-file.velo>` CLI command
+- CLI integration with `HttpServerConfig`
+- CLI error/diagnostic printing for server startup
+- HTTP server example
+- manual curl smoke flow
+- README/docs examples updates
+
+The command is:
+```bash
+./build/debug/apps/velo/velo serve ./examples/http_server_basic/main.velo
+```
+
+The default bind address is:
+```text
+127.0.0.1:8080
+```
+
+Manual smoke request:
+```bash
+curl -i http://127.0.0.1:8080/health
+```
+
+Expected response body:
+```text
+/health
+```
+
+Current limitations:
+- no host flag yet
+- no port flag yet
+- no route table yet
+- no `http::listen(...)` yet
+- no keep-alive
+- no chunked transfer encoding
+- no TLS
+- no thread pool

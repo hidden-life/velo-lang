@@ -791,3 +791,39 @@ Current limitations:
 - no TLS
 - no routing table
 - no host/port CLI flags yet
+
+## CLI serve mode
+MVP 0.9.3 exposes the HTTP server through the main CLI:
+```bash
+velo serve app.velo
+```
+
+The CLI layer is intentionally thin:
+```text
+CLI args
+    -> HttpServerConfig
+    -> run(config)
+    -> HttpServerResult
+```
+
+The CLI does not parse HTTP requests and does not execute handlers directly.
+Those responsibilities stay in the reusable HTTP runtime layer:
+```text
+run
+    -> handleRawHttpRequest
+    -> parseHttpRequest
+    -> executeHttpHandler
+    -> serializeHttpResponse
+```
+
+Default serve address:
+```text
+127.0.0.1:8080
+```
+
+Current limitations:
+- no configurable host/port flags yet
+- no daemon mode
+- no graceful shutdown API
+- no TLS
+- no keep-alive

@@ -510,3 +510,30 @@ POST
 {"ok":true}
 application/json
 ```
+
+## HTTP server smoke
+Start a minimal HTTP server:
+```bash
+./build/debug/apps/velo/velo serve ./examples/http_server_basic/main.velo
+```
+
+In another terminal:
+```bash
+curl -i http://127.0.0.1:8080/health
+```
+
+Expected response body:
+```text
+/health
+```
+
+Example source:
+```text
+examples/http_server_basic/main.velo
+```
+
+This example demonstrates:
+- conventional `handle(req: http_request): http_response`
+- `http::path(req)`
+- `http::text_response(...)`
+- minimal CLI serve mode

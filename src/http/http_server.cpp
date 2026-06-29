@@ -4,6 +4,7 @@
 
 #include "velo/http/http_server.h"
 
+#include <iostream>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
@@ -35,12 +36,12 @@ namespace {
 
     [[nodiscard]] auto findHeaderBodySeparator(std::string_view raw) -> std::pair<std::size_t, std::size_t> {
         const auto crlfPos = raw.find("\r\n\r\n");
-        if (crlfPos != std::string::npos) {
+        if (crlfPos != std::string_view::npos) {
             return {crlfPos, 4U};
         }
 
         const auto lfPos = raw.find("\n\n");
-        if (lfPos != std::string::npos) {
+        if (lfPos != std::string_view::npos) {
             return {lfPos, 2U};
         }
 
@@ -180,11 +181,19 @@ namespace {
     }
 
     [[nodiscard]] auto readHttpRequestFromSocket(int id, std::size_t maxBytes) -> SocketReadResult {
+        if (maxBytes == 0U) {
+            return SocketReadResult {
+                .isSuccess = false,
+                .request = {},
+                .error = "HTTP request byte limit must be greater than zero.",
+            };
+        }
+
         std::string request;
         char buffer[4096] {};
 
         while (request.size() < maxBytes) {
-            const auto bytesRead = ::recv(id, buffer, sizeof(buffer), 0U);
+            const auto bytesRead = ::recv(id, buffer, sizeof(buffer), 0);
 
             if (bytesRead < 0) {
                 return SocketReadResult {
@@ -195,26 +204,29 @@ namespace {
             }
 
             if (bytesRead == 0) {
-                break;
+                if (hasCompleteRequest(request)) {
+                    return SocketReadResult {
+                        .isSuccess = true,
+                        .request = std::move(request),
+                        .error = {},
+                    };
+                }
+
+                return SocketReadResult {
+                    .isSuccess = false,
+                    .request = {},
+                    .error = "HTTP request was closed before a complete request was received."
+                };
             }
 
             request.append(buffer, static_cast<std::size_t>(bytesRead));
-
             if (hasCompleteRequest(request)) {
                 return SocketReadResult {
-                    .isSuccess = false,
+                    .isSuccess = true,
                     .request = std::move(request),
                     .error = {},
                 };
             }
-        }
-
-        if (request.size() >= maxBytes) {
-            return SocketReadResult {
-                .isSuccess = false,
-                .request = {},
-                .error = "HTTP request is larger than the configured limit."
-            };
         }
 
         return SocketReadResult {
@@ -260,6 +272,15 @@ namespace Velo::Http {
             };
         }
 
+        if (config.maxRequestBytes == 0U) {
+            return HttpServerResult {
+                .isSuccess = false,
+                .exitCode = 1,
+                .error = "Invalid HTTP server max request bytes: 0",
+                .diagnostics = {},
+            };
+        }
+
         Source::SourceManager sourceManager;
         Runtime::Runtime runtime;
 
@@ -278,7 +299,7 @@ namespace Velo::Http {
             return HttpServerResult {
                 .isSuccess = false,
                 .exitCode = 1,
-                .error = "Faield to create HTTP server socket: " + std::string(std::strerror(errno)),
+                .error = "Failed to create HTTP server socket: " + std::string(std::strerror(errno)),
                 .diagnostics = {},
             };
         }
@@ -348,7 +369,7 @@ namespace Velo::Http {
                 };
             }
 
-            const auto readResult = readHttpRequestFromSocket(clientFd, config.maxConnections);
+            const auto readResult = readHttpRequestFromSocket(clientFd, config.maxRequestBytes);
             if (!readResult.isSuccess) {
                 const auto response = makeErrorResponseText(400, readResult.error);
                 static_cast<void>(sendAll(clientFd, response));

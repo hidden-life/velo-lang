@@ -69,6 +69,11 @@ Expected:
 all selected tests pass
 ```
 
+HTTP parser/handler/pipeline/server:
+```bash
+ctest --test-dir build/debug -R "HttpMessageTest|HttpHandlerTest|HttpPipelineTest|HttpServerTest" --output-on-failure
+```
+
 ## 5. HTTP example check smoke tests
 Run:
 ```bash

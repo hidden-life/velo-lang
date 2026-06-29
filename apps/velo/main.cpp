@@ -2,6 +2,7 @@
 
 #include "velo/diagnostic/diagnostic.h"
 #include "velo/driver/driver.h"
+#include "velo/http/http_server.h"
 
 #ifndef VELO_VERSION
 #define VELO_VERSION "dev"
@@ -44,6 +45,7 @@ namespace {
         std::cerr << "    velo ir <source-file.velo>" << std::endl;
         std::cerr << "    velo bytecode <source-file.velo>" << std::endl;
         std::cerr << "    velo bc <source-file.velo>" << std::endl;
+        std::cerr << "    velo serve <source-file.velo>" << std::endl;
         std::cerr << "    velo --version" << std::endl;
         std::cerr << "    velo --help" << std::endl;
     }
@@ -74,7 +76,9 @@ namespace {
             command == "ast" ||
             command == "ir" ||
             command == "bytecode" ||
-            command == "bc";
+            command == "bc" ||
+            command == "serve"
+        ;
     }
 
     auto printResult(
@@ -105,6 +109,24 @@ namespace {
 
         if (printBytecode && !result.bytecodeText.empty()) {
             std::cout << result.bytecodeText;
+        }
+
+        return result.exitCode;
+    }
+
+    auto printServerResult(
+        const Velo::Http::HttpServerResult &result
+    ) -> int {
+        if (!result.error.empty()) {
+            std::cerr << result.error << std::endl;
+        }
+
+        for (const auto &diag : result.diagnostics) {
+            printDiagnostic(diag);
+        }
+
+        if (!result.isSuccess) {
+            return result.exitCode == 0 ? EXIT_FAILURE : result.exitCode;
         }
 
         return result.exitCode;
@@ -142,6 +164,16 @@ int main(int argc, char **argv) {
         if (!isKnownCommand(command)) {
             printUsage();
             return EXIT_FAILURE;
+        }
+
+        if (command == "serve") {
+            Velo::Http::HttpServerConfig config;
+            config.sourcePath = sourcePath;
+
+            std::cerr << "Serving " << sourcePath << " on " << config.host << ":" << config.port << std::endl;
+            const auto result = Velo::Http::run(config);
+
+            return printServerResult(result);
         }
 
         const auto mode = parseMode(command);
