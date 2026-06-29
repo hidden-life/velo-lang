@@ -206,6 +206,24 @@ curl -i http://127.0.0.1:8080/hello
 curl -i http://127.0.0.1:8080/missing
 ```
 
+Run the routing helper server example:
+```bash
+./build/debug/apps/velo/velo serve ./examples/http_routing_helpers/main.velo
+```
+
+In another terminal:
+```bash
+curl -i http://127.0.0.1:8080/health
+curl -i http://127.0.0.1:8080/hello
+curl -i http://127.0.0.1:8080/missing
+```
+
+Run local smoke scripts:
+```bash
+bash benchmarks/http/run_smoke.sh
+bash benchmarks/http/run_curl_loop.sh
+```
+
 ## MVP showcase
 Run the MVP showcase example:
 ```bash

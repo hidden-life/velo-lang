@@ -1,0 +1,21 @@
+module app;
+
+use std::http;
+use std::json;
+
+fn handle(req: http_request): http_response {
+    if (http::is_route(req, "GET", "/health")) {
+        return http::json_response(200, json::parse("{\"status\":\"ok\"}"));
+    }
+
+    if (http::is_route(req, "POST", "/echo")) {
+        let body: json = http::json_body(req);
+        return http::json_response(201, body);
+    }
+
+    return http::json_response(404, json::parse("{\"error\":\"not found\"}"));
+}
+
+fn main(): int {
+    return 0;
+}

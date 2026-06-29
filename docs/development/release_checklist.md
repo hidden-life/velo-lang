@@ -205,7 +205,35 @@ Benchmark notes:
 - script includes CLI process startup overhead
 - this benchmark is not a CI gate
 
-## 10. Regression tests from previous milestones
+## 10. HTTP local smoke scripts
+Run:
+```bash
+bash benchmarks/http/run_smoke.sh
+bash benchmarks/http/run_curl_loop.sh
+bash benchmarks/http/run_curl_loop.sh 100
+```
+
+Expected:
+```text
+HTTP smoke passed
+requests=...
+elapsed_ms=...
+approx_requests_per_second=...
+```
+
+### HTTP server examples
+Check:
+```bash
+./build/debug/apps/velo/velo check ./examples/http_routing_helpers/main.velo
+./build/debug/apps/velo/velo check ./examples/http_server_json/main.velo
+```
+
+Expected:
+```text
+all commands exit with code 0
+```
+
+## 11. Regression tests from previous milestones
 Run representative previous examples:
 ```bash
 ./build/debug/apps/velo/velo run ./examples/array_literal/main.velo
@@ -224,7 +252,7 @@ Expected:
 all commands exit with code 0
 ```
 
-## 11. Documentation review
+## 12. Documentation review
 Review:
 ```text
 README.md
@@ -277,7 +305,7 @@ Check:
 - release notes match completed features
 - release checklist is reproducible
 
-## 12. MVP scope review
+## 13. MVP scope review
 MVP 0.8 includes:
 - `http_request`
 - `http_response`
@@ -300,7 +328,7 @@ Not included:
 - streaming bodies
 - real server benchmarks
 
-## 13. Git status
+## 14. Git status
 Check repository status:
 ```bash
 git status
@@ -311,14 +339,14 @@ Expected:
 only intentional changes
 ```
 
-## 14. Suggested release commit flow
+## 15. Suggested release commit flow
 Before release:
 ```bash
 git add README.md docs
 git commit -m "docs(mvp): finalize MVP 0.8 documentation"
 ```
 
-## 15. Suggested tag
+## 16. Suggested tag
 When ready:
 ```bash
 git tag -a v0.8.0 -m "Velo MVP 0.8.0"
@@ -331,7 +359,3 @@ git push origin v0.7.0
 ```
 
 Use only when the project is actually ready to publish the tag.
-
-## 17. Release notes draft
-Release notes are tracked here:
-- [Velo v0.8.0 release notes draft](release_notes_v0_8.md)

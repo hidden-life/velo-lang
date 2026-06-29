@@ -125,3 +125,33 @@ docs/development/release_checklist.md
 ```
 
 MVP 0.9.1 does not add third-party benchmark dependencies.
+
+## MVP 0.9.5 local HTTP smoke benchmarks
+MVP 0.9.5 adds local scripts for server smoke checks and rough request-loop measurements.
+
+Scripts:
+```text
+benchmarks/http/run_smoke.sh
+benchmarks/http/run_curl_loop.sh
+```
+
+The scripts use:
+```text
+bash
+curl
+date
+seq
+```
+
+They do not define performance thresholds.
+
+The current goal is reproducibility:
+```text
+start local server
+send known requests
+verify responses
+run a simple sequential curl loop
+print approximate requests/sec
+```
+
+External tools such as `wrk`, `hey`, and `ab` are intentionally not required in MVP 0.9.5.

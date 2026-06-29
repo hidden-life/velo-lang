@@ -548,3 +548,40 @@ Demonstrates:
 - `http::is_path`
 - explicit handler branching
 - simple `404` fallback
+
+### HTTP JSON server
+```text
+examples/http_server_json/main.velo
+```
+
+Demonstrates:
+- `http::is_route`
+- `http::json_body`
+- `http::json_response`
+- JSON echo endpoint
+- `404` JSON response
+
+Smoke:
+```bash
+./build/debug/apps/velo/velo serve ./examples/http_server_json/main.velo
+```
+
+In another terminal:
+```bash
+curl -i http://127.0.0.1:8080/health
+
+curl -i \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Alex"}' \
+  http://127.0.0.1:8080/echo
+```
+
+## HTTP local smoke scripts
+```bash
+bash benchmarks/http/run_smoke.sh
+bash benchmarks/http/run_curl_loop.sh
+bash benchmarks/http/run_curl_loop.sh 100
+```
+
+These scripts are local development checks, not production benchmark targets.

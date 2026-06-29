@@ -215,3 +215,38 @@ Current limitations:
 - no middleware
 - no function references
 - no `http::listen(...)`
+
+## 0.9.5 scope
+Implemented in this step:
+- HTTP JSON server example
+- local HTTP smoke script
+- local curl loop benchmark script
+- benchmark README
+- README/example documentation
+- release checklist updates
+
+The scripts intentionally use only common local tools:
+```text
+bash
+curl
+date
+seq
+```
+
+Smoke:
+```bash
+bash benchmarks/http/run_smoke.sh
+```
+
+Curl loop:
+```bash
+bash benchmarks/http/run_curl_loop.sh
+bash benchmarks/http/run_curl_loop.sh 100
+```
+
+Current limitations:
+- no external benchmark tools
+- no performance thresholds
+- no CI benchmark gate
+- no configurable server port yet
+- scripts assume `127.0.0.1:8080`
