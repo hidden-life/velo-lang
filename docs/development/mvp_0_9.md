@@ -1,8 +1,18 @@
 # Velo MVP 0.9 status
-MVP 0.9 focuses on HTTP server/router foundation.
+MVP 0.9 is complete.
 
-The goal is to turn the HTTP runtime values from MVP 0.8 into minimal real HTTP
-serving pipeline.
+MVP 0.9 adds the first HTTP server/router foundation for Velo.
+
+The milestone turns the HTTP runtime values from MVP 0.8 into a minimal working
+server mode.
+
+```text
+raw HTTP request
+    -> parseHttpRequest
+    -> execute handle(req)
+    -> serializeHttpResponse
+    -> raw HTTP response
+```
 
 ## Roadmap
 ```text
@@ -14,9 +24,37 @@ serving pipeline.
 0.9.6       docs/examples/release checklist
 ```
 
-## Current step
-```text
-0.9.3       CLI serve mode with conventional handle(req) function
+## Final capabilities
+MVP 0.9 supports:
+- parsing raw HTTP requests into `http_request`
+- serializing `http_response` into raw HTTP response text
+- validating conventional HTTP handler signatures
+- executing `handle(req: http_request): http_response`
+- serving requests through `velo serve`
+- simple routing helpers:
+  - `http::is_method`
+  - `http::is_route`
+  - `http::is_path`
+- local server examples
+- local curl-based smoke benchmark scripts
+
+Example handler:
+```velo
+module app;
+
+use std::http;
+
+fn handle(req: http_request): http_response {
+    if (http::is_route(req, "GET", "/health")) {
+        return http::text_response(200, "OK");
+    }
+
+    return http::text_response(404, "not found");
+}
+
+fn main(): int {
+    return 0;
+}
 ```
 
 ## Architecture direction
@@ -67,17 +105,6 @@ Connection: close
 body
 ```
 
-Current limitations:
-- no socket server yet
-- no `velo serve` yet
-- no `http::listen(...)` yet
-- no chunked transfer encoding
-- no keep-alive
-- no TLS
-- no multipart parsing
-- no query parser
-- header names are case-sensitive
-
 ## 0.9.3-A scope
 Implemented in this sub-step:
 - raw HTTP request pipeline
@@ -96,14 +123,6 @@ raw HTTP request
 ```
 
 This sub-step does not start a socket server yet.
-
-Current limitations:
-- no socket server yet
-- no `velo serve` command yet
-- no routing helpers yet
-- no keep-alive
-- no chunked transfer encoding
-- no TLS
 
 ## 0.9.3-B scope
 Implemented in this sub-step:
@@ -134,16 +153,6 @@ handler: handle
 max request bytes: 1048576
 ```
 
-Current limitations:
-- no CLI command yet
-- no `http::listen(...)`
-- no keep-alive
-- no chunked transfer encoding
-- no TLS
-- no async runtime
-- no thread pool
-- no routing table
-
 ## 0.9.3-C scope
 Implemented in this sub-step:
 - `velo serve <source-file.velo>` CLI command
@@ -173,16 +182,6 @@ Expected response body:
 /health
 ```
 
-Current limitations:
-- no host flag yet
-- no port flag yet
-- no route table yet
-- no `http::listen(...)` yet
-- no keep-alive
-- no chunked transfer encoding
-- no TLS
-- no thread pool
-
 ## 0.9.4 scope
 Implemented in this step:
 - `http::is_method(req, method): bool`
@@ -206,15 +205,6 @@ fn handle(req: http_request): http_response {
 ```
 
 This step intentionally does not add route tables or callback registration.
-
-Current limitations:
-- no `http::get(...)`
-- no `http::post(...)`
-- no path params
-- no query parser
-- no middleware
-- no function references
-- no `http::listen(...)`
 
 ## 0.9.5 scope
 Implemented in this step:
@@ -244,9 +234,20 @@ bash benchmarks/http/run_curl_loop.sh
 bash benchmarks/http/run_curl_loop.sh 100
 ```
 
-Current limitations:
-- no external benchmark tools
-- no performance thresholds
-- no CI benchmark gate
-- no configurable server port yet
-- scripts assume `127.0.0.1:8080`
+## Limitations
+MVP 0.9 intentionally does not include:
+- `http::listen(...)`
+- annotations
+- route table registration
+- path params
+- query parser
+- middleware
+- cookies
+- multipart
+- TLS
+- keep-alive
+- chunked transfer encoding
+- async runtime
+- thread pool
+- websocket
+- production logging

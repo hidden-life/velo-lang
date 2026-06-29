@@ -786,3 +786,23 @@ The semantic analyzer validates:
 - `http::json_response` return type
 
 A real HTTP server/router is not implemented in MVP 0.8.
+
+## HTTP handler semantic model
+MVP 0.9 keeps HTTP handler validation outside the general entry point rules.
+
+The normal Velo entry point is still:
+```velo
+fn main(): int
+```
+
+HTTP server mode additionally validates a conventional handler:
+```velo
+fn handle(req: http_request): http_response
+```
+
+The handler must:
+- exist
+- accept exactly one `http_request`
+- return `http_response`
+
+This validation is used by `velo serve`.

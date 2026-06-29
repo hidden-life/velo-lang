@@ -1,10 +1,10 @@
-# MVP 0.8 release checklist
-This checklist should be completed before tagging or announcing Velo MVP 0.8.
+# MVP 0.9 release checklist
+This checklist should be completed before tagging or announcing Velo MVP 0.9.
 
 The goal is to make sure the MVP is small, stable, documented, and reproducible.
 
 ## 1. Dependencies
-MVP 0.8 does not add third-party runtime libraries.
+MVP 0.9 does not add third-party runtime libraries.
 
 The runtime benchmark smoke script uses standard shell tools:
 ```text
@@ -12,9 +12,10 @@ bash
 date
 seq
 chmod
+curl
 ```
 
-No package installation is required for MVP 0.8.
+No package installation is required for MVP 0.9.
 
 ## 2. Build
 Run a debug build:

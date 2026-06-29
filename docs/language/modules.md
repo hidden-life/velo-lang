@@ -610,3 +610,14 @@ fn handle(req: http_request): http_response {
 
 These helpers compare exact method and path strings. They do not parse query
 strings and do not support path parameters.
+
+### Minimal server handler
+```velo
+fn handle(req: http_request): http_response {
+    if (http::is_route(req, "GET", "/health")) {
+        return http::text_response(200, "OK");
+    }
+
+    return http::text_response(404, "not found");
+}
+```

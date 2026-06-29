@@ -630,3 +630,27 @@ fn create_user(req: http_request): http_response {
 ```
 
 This is the foundation for future HTTP server handlers.
+
+## HTTP types
+MVP 0.9 uses two built-in HTTP value types:
+```text
+http_request
+http_response
+```
+
+`http_request` stores:
+```text
+method
+path
+headers
+body
+```
+
+`http_response` stores:
+```text
+status
+headers
+body
+```
+
+These are runtime values. They are not user-defined structs.

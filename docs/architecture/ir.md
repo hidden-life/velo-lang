@@ -479,3 +479,15 @@ CallBuiltin http::json_body args=1
 ```
 
 No dedicated HTTP IR instruction exists in MVP 0.8.
+
+## HTTP handler execution
+MVP 0.9 does not add HTTP-specific IR instructions.
+
+HTTP handlers are normal lowered functions.
+
+The interpreter can execute a named function with explicit runtime arguments:
+```text
+executeFunction(module, "handle", [request])
+```
+
+This keeps HTTP serving separate from IR instruction design.
