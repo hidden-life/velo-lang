@@ -57,6 +57,44 @@ namespace Velo::AST {
             return stream.str();
         }
 
+        auto joinAnnotationArgument(const AnnotationArgument &arg) -> std::string {
+            std::ostringstream stream;
+
+            switch (arg.kind) {
+                case AnnotationArgumentKind::StringLiteral:
+                    stream << '"' << arg.value << '"';
+                    break;
+                case AnnotationArgumentKind::IntegerLiteral:
+                case AnnotationArgumentKind::BooleanLiteral:
+                    stream << arg.value;
+                    break;
+            }
+
+            return stream.str();
+        }
+
+        auto joinAnnotation(const Annotation &annotation) -> std::string {
+            std::ostringstream stream;
+
+            stream << joinQualifiedName(annotation.name);
+
+            if (!annotation.arguments.empty()) {
+                stream << "(";
+
+                for (std::size_t idx = 0; idx < annotation.arguments.size(); ++idx) {
+                    if (idx > 0) {
+                        stream << ", ";
+                    }
+
+                    stream << joinAnnotationArgument(annotation.arguments[idx]);
+                }
+
+                stream << ")";
+            }
+
+            return stream.str();
+        }
+
         void printExpression(std::ostringstream &stream, const Expression &expression, std::size_t indentLevel);
 
         void printStatement(std::ostringstream &stream, const Statement &statement, std::size_t indentLevel) {
@@ -413,6 +451,11 @@ namespace Velo::AST {
         }
 
         for (const auto &func : program.functions) {
+            for (const auto &annotation : func.annotations) {
+                writeIndent(stream, 1U);
+                stream << "Annotation " << joinAnnotation(annotation) << "\n";
+            }
+
             writeIndent(stream, 1U);
             stream << "Function ";
 

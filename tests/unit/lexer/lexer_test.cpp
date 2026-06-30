@@ -119,7 +119,7 @@ use std::console as out;
 TEST(LexerTest, ReportsUnexpectedCharacter) {
     const SourceFile file(
         "invalid.velo",
-        "@"
+        "$"
     );
 
     DiagnosticEngine engine;
@@ -331,4 +331,53 @@ TEST(LexerTest, LexesArrayTypeBrackets) {
 
     EXPECT_EQ(kinds, expected);
     EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(LexerTest, LexesFunctionAnnotation) {
+    const SourceFile file(
+        "annotation.velo",
+        R"(@http::get("/health")
+fn health(): int {
+    return 0;
+}
+)"
+    );
+
+    DiagnosticEngine engine;
+    Lexer lexer(file, engine);
+
+    const auto tokens = lexer.lexAll();
+    const auto kinds = collectKinds(tokens);
+
+    const std::vector<TokenKind> expected {
+        TokenKind::At,
+        TokenKind::Identifier,
+        TokenKind::DoubleColon,
+        TokenKind::Identifier,
+        TokenKind::OpenParen,
+        TokenKind::StringLiteral,
+        TokenKind::CloseParen,
+
+        TokenKind::KwFn,
+        TokenKind::Identifier,
+        TokenKind::OpenParen,
+        TokenKind::CloseParen,
+        TokenKind::Colon,
+        TokenKind::Identifier,
+        TokenKind::OpenBrace,
+
+        TokenKind::KwReturn,
+        TokenKind::IntegerLiteral,
+        TokenKind::Semicolon,
+        TokenKind::CloseBrace,
+        TokenKind::EndOfFile,
+    };
+
+    EXPECT_EQ(kinds, expected);
+    ASSERT_FALSE(engine.hasErrors());
+
+    EXPECT_EQ(tokens[0].text(), "@");
+    EXPECT_EQ(tokens[1].text(), "http");
+    EXPECT_EQ(tokens[3].text(), "get");
+    EXPECT_EQ(tokens[5].text(), "/health");
 }

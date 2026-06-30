@@ -345,6 +345,24 @@ namespace Velo::AST {
         explicit ContinueStatement(Source::SourceRange sourceRange) : Statement(StatementKind::Continue, sourceRange) {}
     };
 
+    enum class AnnotationArgumentKind {
+        StringLiteral,
+        IntegerLiteral,
+        BooleanLiteral,
+    };
+
+    struct AnnotationArgument final {
+        AnnotationArgumentKind kind {AnnotationArgumentKind::StringLiteral};
+        std::string value {};
+        Source::SourceRange range {};
+    };
+
+    struct Annotation final {
+        QualifiedName name {};
+        std::vector<AnnotationArgument> arguments {};
+        Source::SourceRange range {};
+    };
+
     struct Parameter final {
         std::string name;
         TypeName type {};
@@ -379,6 +397,7 @@ namespace Velo::AST {
     struct FunctionDeclaration final {
         bool isPublic {false};
         std::string name;
+        std::vector<Annotation> annotations {};
         std::vector<Parameter> parameters {};
         TypeName returnType {};
         std::vector<std::unique_ptr<Statement>> statements {};

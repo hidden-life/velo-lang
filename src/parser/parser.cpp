@@ -29,28 +29,55 @@ namespace Velo::Parser {
         }
 
         while (!isAtEnd()) {
+            std::vector<AST::Annotation> annotations;
+
+            while (check(TokenKind::At)) {
+                auto annotation = parseAnnotation();
+                if (!annotation.has_value()) {
+                    sync();
+                    break;
+                }
+
+                annotations.push_back(std::move(*annotation));
+            }
+
             bool isPublic = false;
             if (match(TokenKind::KwPub)) {
                 isPublic = true;
             }
 
             if (check(TokenKind::KwStruct)) {
+                if (!annotations.empty()) {
+                    _engine.error(
+                        "PAR160",
+                        "Annotations are only supported on function declarations.",
+                        annotations.front().range
+                    );
+                }
+
                 if (auto structDecl = parseStructDeclaration(isPublic); structDecl.has_value()) {
                     program->structs.push_back(std::move(*structDecl));
                 }
 
-                continue;;
+                continue;
             }
 
             if (check(TokenKind::KwFn)) {
-                if (auto func = parseFunctionDeclaration(isPublic); func.has_value()) {
+                if (auto func = parseFunctionDeclaration(isPublic, std::move(annotations)); func.has_value()) {
                     program->functions.push_back(std::move(*func));
                 }
 
-                continue;;
+                continue;
+            }
+
+            if (!annotations.empty()) {
+                reportCurrent("PAR161", "Expected function declaration after annotation.");
+                sync();
+                continue;
             }
 
             reportCurrent("PAR001", "Expected top-level declaration.");
+
             sync();
         }
 
@@ -166,7 +193,75 @@ namespace Velo::Parser {
         };
     }
 
-    auto Parser::parseFunctionDeclaration(bool isPublic) -> std::optional<AST::FunctionDeclaration> {
+    auto Parser::parseAnnotation() -> std::optional<AST::Annotation> {
+        const Token *atToken = consume(TokenKind::At, "PAR162", "Expected '@' before annotation.");
+        if (atToken == nullptr) {
+            return std::nullopt;
+        }
+
+        auto name = parseQualifiedName();
+        if (!name.has_value()) {
+            return std::nullopt;
+        }
+
+        std::vector<AST::AnnotationArgument> arguments;
+        auto annotationEnd = name->range.end();
+
+        if (match(TokenKind::OpenParen)) {
+            if (!check(TokenKind::CloseParen)) {
+                while (true) {
+                    auto argument = parseAnnotationArgument();
+                    if (!argument.has_value()) {
+                        return std::nullopt;
+                    }
+
+                    arguments.push_back(std::move(*argument));
+
+                    if (!match(TokenKind::Comma)) {
+                        break;
+                    }
+                }
+            }
+
+            const Token *closeParen = consume(TokenKind::CloseParen, "PAR163", "Expected ')' after annotation arguments.");
+            if (closeParen == nullptr) {
+                return std::nullopt;
+            }
+
+            annotationEnd = closeParen->range().end();
+        }
+
+        return AST::Annotation {
+            .name = std::move(*name),
+            .arguments = std::move(arguments),
+            .range = Source::SourceRange(atToken->range().begin(), annotationEnd),
+        };
+    }
+
+    auto Parser::parseAnnotationArgument() -> std::optional<AST::AnnotationArgument> {
+        if (check(TokenKind::StringLiteral) || check(TokenKind::IntegerLiteral) || check(TokenKind::BooleanLiteral)) {
+            const Token &token = advance();
+
+            AST::AnnotationArgumentKind kind = AST::AnnotationArgumentKind::StringLiteral;
+            if (token.is(TokenKind::IntegerLiteral)) {
+                kind = AST::AnnotationArgumentKind::IntegerLiteral;
+            } else if (token.is(TokenKind::BooleanLiteral)) {
+                kind = AST::AnnotationArgumentKind::BooleanLiteral;
+            }
+
+            return AST::AnnotationArgument {
+                .kind = kind,
+                .value = std::string(token.text()),
+                .range = token.range(),
+            };
+        }
+
+        reportCurrent("PAR164", "Expected annotation argument literal.");
+
+        return std::nullopt;
+    }
+
+    auto Parser::parseFunctionDeclaration(bool isPublic, std::vector<AST::Annotation> annotations) -> std::optional<AST::FunctionDeclaration> {
         const Token *fnKeyword = consume(TokenKind::KwFn, "PAR007", "Expected 'fn'.");
         if (fnKeyword == nullptr) {
             return std::nullopt;
@@ -251,10 +346,14 @@ namespace Velo::Parser {
         return AST::FunctionDeclaration {
             .isPublic = isPublic,
             .name = std::string(nameToken->text()),
+            .annotations = std::move(annotations),
             .parameters = std::move(params),
             .returnType = std::move(*returnType),
             .statements = std::move(statements),
-            .range = makeRangeFromTokens(*fnKeyword, *closeBrace),
+            .range = Source::SourceRange(
+                annotations.empty() ? fnKeyword->range().begin() : annotations.front().range.begin(),
+                closeBrace->range().end()
+            )
         };
     }
 

@@ -114,3 +114,29 @@ fn main(): int {
     EXPECT_NE(output.find("Struct User"), std::string::npos);
     EXPECT_NE(output.find("Field profile : Profile"), std::string::npos);
 }
+
+TEST(AstPrinterTest, PrintsFunctionAnnotations) {
+    DiagnosticEngine engine;
+
+    const auto program = parseProgram(
+        R"(module app;
+
+@http::get("/health")
+@auth(true)
+fn health(req: http_request): http_response {
+    return http::text_response(200, "OK");
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    ASTPrinter printer;
+    const std::string output = printer.print(*program);
+
+    EXPECT_NE(output.find("Annotation http::get(\"/health\")"), std::string::npos);
+    EXPECT_NE(output.find("Annotation auth(true)"), std::string::npos);
+    EXPECT_NE(output.find("Function health -> http_response"), std::string::npos);
+}

@@ -137,6 +137,10 @@ namespace Velo::Lexer {
                 advance();
                 return makeToken(TokenKind::CloseBracket, "]", beginOffset, beginOffset);
 
+            case '@':
+                advance();
+                return makeToken(TokenKind::At, "@", beginOffset, beginOffset);
+
             default:
                 break;
         }

@@ -806,3 +806,25 @@ The handler must:
 - return `http_response`
 
 This validation is used by `velo serve`.
+
+## Annotation validation direction
+MVP 0.10 introduces annotation syntax in the parser.
+
+The parser only preserves annotation metadata in the AST.
+
+Semantic validation is intentionally separate:
+```text
+parser:
+  parse @name(...)
+  store annotation metadata
+
+semantic analyzer:
+  validate where annotations are allowed
+  validate known annotation names
+  validate argument count and argument literal types
+
+HTTP layer:
+  interpret validated HTTP route annotations
+```
+
+This keeps the parser independent from HTTP-specific behavior.

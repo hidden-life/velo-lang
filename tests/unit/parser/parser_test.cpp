@@ -1418,3 +1418,85 @@ fn main(): int {
     ASSERT_NE(assignment.target->object, nullptr);
     EXPECT_EQ(assignment.target->object->kind, Velo::AST::ExpressionKind::Index);
 }
+
+TEST(ParserTest, ParsesFunctionAnnotations) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+@http::get("/health")
+@auth(true, 10)
+pub fn health(req: http_request): http_response {
+    return http::text_response(200, "OK");
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    ASSERT_EQ(program->functions.size(), 2U);
+
+    const auto &health = program->functions[0];
+    EXPECT_TRUE(health.isPublic);
+    EXPECT_EQ(health.name, "health");
+
+    ASSERT_EQ(health.annotations.size(), 2U);
+
+    const auto &route = health.annotations[0];
+    ASSERT_EQ(route.name.segments.size(), 2U);
+    EXPECT_EQ(route.name.segments[0], "http");
+    EXPECT_EQ(route.name.segments[1], "get");
+
+    ASSERT_EQ(route.arguments.size(), 1U);
+    EXPECT_EQ(route.arguments[0].kind, Velo::AST::AnnotationArgumentKind::StringLiteral);
+    EXPECT_EQ(route.arguments[0].value, "/health");
+
+    const auto &auth = health.annotations[1];
+    ASSERT_EQ(auth.name.segments.size(), 1U);
+    EXPECT_EQ(auth.name.segments[0], "auth");
+
+    ASSERT_EQ(auth.arguments.size(), 2U);
+    EXPECT_EQ(auth.arguments[0].kind, Velo::AST::AnnotationArgumentKind::BooleanLiteral);
+    EXPECT_EQ(auth.arguments[0].value, "true");
+    EXPECT_EQ(auth.arguments[1].kind, Velo::AST::AnnotationArgumentKind::IntegerLiteral);
+    EXPECT_EQ(auth.arguments[1].value, "10");
+}
+
+TEST(ParserTest, ReportsAnnotationBeforeStructDeclaration) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+@model
+struct User {
+    id: int;
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_TRUE(engine.hasErrors());
+
+    bool found = false;
+    for (const auto &diagnostic : engine.diagnostics()) {
+        if (diagnostic.code() == "PAR160") {
+            found = true;
+            break;
+        }
+    }
+
+    EXPECT_TRUE(found);
+    ASSERT_EQ(program->structs.size(), 1U);
+    EXPECT_EQ(program->structs[0].name, "User");
+}

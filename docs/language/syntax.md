@@ -863,3 +863,34 @@ if (json::has(value, "name")) {
 Current limitations:
 - direct JSON indexing syntax is not implemented yet
 - JSON array access helpers are not implemented yet
+
+## Function annotations
+Velo supports function annotations as metadata before function declarations.
+
+```velo
+@http::get("/health")
+fn health(req: http_request): http_response {
+    return http::text_response(200, "OK");
+}
+```
+
+Annotations are parsed and stored in the AST.
+
+Supported forms:
+```text
+@name
+@module::name
+@name("string")
+@name("string", true, 123)
+```
+
+Supported argument literals:
+```text
+string
+bool
+int
+```
+
+In MVP 0.10.1, annotations do not change runtime behavior yet.
+
+HTTP routing annotations are planned for later MVP 0.10 steps.

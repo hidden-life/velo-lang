@@ -95,6 +95,8 @@ namespace Velo::Lexer {
                 return "OpenBracket";
             case TokenKind::CloseBracket:
                 return "CloseBracket";
+            case TokenKind::At:
+                return "At";
         }
 
         return "Unknown";

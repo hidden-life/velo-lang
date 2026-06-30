@@ -2,7 +2,7 @@
 Velo is an experimental programming language and virtual machine focused on backend
 and API-oriented development.
 
-The current goal is **Velo MVP 0.9**: a small, strict, statically checked language
+The current goal is **Velo MVP 0.10**: a small, strict, statically checked language
 with a simple VM, standard modules, and developer-friendly CLI tooling, and basic
 data model foundation based on struct.
 
@@ -309,30 +309,22 @@ Start here:
 - [Velo v0.9.0 release notes draft](docs/development/release_notes_v0_9.md)
 
 ## Current development focus
-**Velo MVP 0.9 is complete.**
+The project is moving toward **Velo MVP 0.10**.
 
-MVP 0.9 adds HTTP server/router foundation:
-- raw HTTP parser/serializer
-- conventional `handle(req)` execution
-- `velo serve`
-- basic routing helpers
-- server examples
-- local HTTP smoke scripts
+MVP 0.10 focuses on annotation foundation and annotation-based HTTP routing.
 
-Completed steps:
+Planned steps:
 ```text
-0.9.1       HTTP parser/serializer foundation
-0.9.2       handler signature validation and callable handler execution
-0.9.3       CLI serve mode with conventional handle(req) function
-0.9.4       basic routing helpers
-0.9.5       server examples and local benchmark scripts
-0.9.6       docs/examples/release checklist
+0.10.1      lexer/parser/AST support for function annotations
+0.10.2      semantic validation for annotations
+0.10.3      IR/module metadata propagation
+0.10.4      HTTP route annotation validation
+0.10.5      serve mode annotation route dispatch
+0.10.6      docs/examples/release checklist
 ```
 
-Suggested next milestone:
-```text
-MVP 0.10     annotation foundation
-```
+MVP 0.9 routing helpers remain supported. MVP 0.10 adds declarative metadata on top
+of the existing HTTP server pipeline.
 
 Main properties:
 - keep the language small and strict
@@ -365,3 +357,6 @@ MVP 0.8 is tagged as `v0.8.0`.
 
 ## MVP 0.9 status
 MVP 0.9 is tagged as `v0.9.0`.
+
+## MVP 0.10 status
+MVP 0.10 is in progress.
