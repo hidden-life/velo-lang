@@ -53,12 +53,18 @@ namespace Velo::Semantic {
         void validateEntryPoint();
         void analyzeStruct(const AST::StructDeclaration &structDecl);
         void analyzeFunction(const AST::FunctionDeclaration &func);
+        void validateFunctionAnnotations(const AST::FunctionDeclaration &func);
+        void validateAnnotation(const AST::FunctionDeclaration &func, const AST::Annotation &annotation);
+
         void analyzeStatement(const AST::Statement &stmt);
         void analyzeExpression(const AST::Expression &expr);
         void resolveQualifiedName(const AST::QualifiedName &name, bool isCallable, std::size_t argsCount);
 
         [[nodiscard]] static auto visibleImportName(const AST::UseDeclaration &useDecl) -> std::string;
         [[nodiscard]] static auto isBuiltinInt(const AST::TypeName &typeName) -> bool;
+
+        [[nodiscard]] static auto annotationNameToString(const AST::Annotation &annotation) -> std::string;
+        [[nodiscard]] static auto annotationArgumentKindToString(AST::AnnotationArgumentKind kind) -> std::string;
 
         [[nodiscard]] auto analyzeExpressionType(const AST::Expression &expression) -> SemanticType;
 

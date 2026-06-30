@@ -894,3 +894,59 @@ int
 In MVP 0.10.1, annotations do not change runtime behavior yet.
 
 HTTP routing annotations are planned for later MVP 0.10 steps.
+
+### Annotation semantic rules
+In MVP 0.10.2, function annotations are semantically validated.
+
+Supported annotation names:
+```text
+@name
+@module::name
+```
+
+Qualified annotations require a visible import:
+```velo
+use std::http;
+
+@http::get("/health")
+fn health(req: http_request): http_response {
+    return http::text_response(200, "OK");
+}
+```
+
+Import aliases are supported:
+```velo
+use std::http as web;
+
+@web::get("/health")
+fn health(req: http_request): http_response {
+    return web::text_response(200, "OK");
+}
+```
+
+Duplicate annotations on the same function are rejected:
+```velo
+@auth
+@auth
+fn main(): int {
+    return 0;
+}
+```
+
+Deep annotation names are not supported yet:
+```velo
+@std::http::get("/health")
+fn main(): int {
+    return 0;
+}
+```
+
+Use:
+```velo
+use std::http;
+
+@http::get("/health")
+fn main(): int {
+    return 0;
+}
+```

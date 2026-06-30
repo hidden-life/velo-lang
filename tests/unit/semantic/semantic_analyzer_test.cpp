@@ -22,6 +22,16 @@ namespace {
 
         return parser.parse();
     }
+
+    auto hasDiagnosticCode(const DiagnosticEngine &engine, std::string_view code) -> bool {
+        for (const auto &diag : engine.diagnostics()) {
+            if (diag.code() == code) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
 
 TEST(SemanticAnalyzerTest, AcceptsValidHelloWorldProgram) {
@@ -5929,4 +5939,160 @@ fn main(): int {
 
     ASSERT_TRUE(engine.hasErrors());
     EXPECT_EQ(engine.diagnostics().front().code(), "SEM014");
+}
+
+TEST(SemanticAnalyzerTest, AcceptsUnqualifiedFunctionAnnotation) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+@auth(true)
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, AcceptsQualifiedFunctionAnnotationWithImport) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::http;
+
+@http::get("/health")
+fn handle(req: http_request): http_response {
+    return http::text_response(200, "OK");
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, AcceptsQualifiedFunctionAnnotationWithImportAlias) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::http as web;
+
+@web::get("/health")
+fn handle(req: http_request): http_response {
+    return web::text_response(200, "OK");
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, ReportsDuplicateFunctionAnnotation) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+@auth
+@auth
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_TRUE(hasDiagnosticCode(engine, "SEM063"));
+}
+
+TEST(SemanticAnalyzerTest, ReportsUnknownAnnotationModuleQualifier) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+@http::get("/health")
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_TRUE(hasDiagnosticCode(engine, "SEM065"));
+}
+
+TEST(SemanticAnalyzerTest, ReportsTooDeeplyQualifiedFunctionAnnotation) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::http;
+
+@std::http::get("/health")
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_TRUE(hasDiagnosticCode(engine, "SEM064"));
 }

@@ -828,3 +828,45 @@ HTTP layer:
 ```
 
 This keeps the parser independent from HTTP-specific behavior.
+
+## Function annotation validation
+The parser stores function annotations as AST metadata.
+
+The semantic analyzer performs generic annotation checks before analyzing
+function parameters and function body statements.
+
+Generic validation includes:
+- name presence
+- supported name shape: `@name` or `@module::name`
+- visible module qualifier for qualified annotations
+- duplicate annotation detection per function
+
+The semantic analyzer does not interpret HTTP route behavior in MVP 0.10.2.
+
+This separation keeps annotation syntax reusable:
+```velo
+@auth(true)
+fn protected(): int {
+    return 0;
+}
+```
+
+```velo
+use std::http;
+
+@http::get("/health")
+fn health(req: http_request): http_response {
+    return http::text_response(200, "OK");
+}
+```
+
+HTTP-specific rules are expected to be layered later:
+```text
+generic annotation validation
+    ↓
+HTTP annotation validation
+    ↓
+HTTP route table construction
+    ↓
+serve mode route dispatch
+```

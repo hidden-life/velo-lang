@@ -323,9 +323,6 @@ Planned steps:
 0.10.6      docs/examples/release checklist
 ```
 
-MVP 0.9 routing helpers remain supported. MVP 0.10 adds declarative metadata on top
-of the existing HTTP server pipeline.
-
 Main properties:
 - keep the language small and strict
 - keep the compiler pipeline understandable

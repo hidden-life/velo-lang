@@ -197,6 +197,8 @@ namespace Velo::Semantic {
     }
 
     void SemanticAnalyzer::analyzeFunction(const AST::FunctionDeclaration &func) {
+        validateFunctionAnnotations(func);
+
         _currentParameters.clear();
         _scopeStack.clear();
         validateDeclaredType(func.returnType, true, "function '" + func.name + "' return type");
@@ -240,6 +242,97 @@ namespace Velo::Semantic {
         _currentParameters.clear();
         _scopeStack.clear();
         _currentFunctionReturnType = {};
+    }
+
+    void SemanticAnalyzer::validateFunctionAnnotations(const AST::FunctionDeclaration &func) {
+        std::unordered_set<std::string> seenAnnotations;
+
+        for (const auto &annotation : func.annotations) {
+            validateAnnotation(func, annotation);
+
+            const std::string name = annotationNameToString(annotation);
+            if (name.empty()) {
+                continue;
+            }
+
+            const auto [it, inserted] = seenAnnotations.insert(name);
+            if (!inserted) {
+                _engine.error(
+                    "SEM063",
+                    "Duplicate annotation '" + name + "' on function '" + func.name + "'.",
+                    annotation.range
+                );
+            }
+        }
+    }
+
+    void SemanticAnalyzer::validateAnnotation(const AST::FunctionDeclaration &func, const AST::Annotation &annotation) {
+        if (annotation.name.segments.empty()) {
+            _engine.error(
+                "SEM062",
+                "Annotation on function '" + func.name + "' must have a name.",
+                annotation.range
+            );
+
+            return;
+        }
+
+        if (annotation.name.segments.size() > 2U) {
+            _engine.error(
+                "SEM064",
+                "Annotation '" + annotationNameToString(annotation) + "' must use '@name' or '@module::name' form.",
+                annotation.name.range
+            );
+
+            return;
+        }
+
+        if (annotation.name.segments.size() == 2U) {
+            const std::string &moduleQualifier = annotation.name.segments.front();
+            if (_visibleImports.find(moduleQualifier) == _visibleImports.end()) {
+                _engine.error(
+                    "SEM065",
+                    "Unknown annotation module qualifier '" + moduleQualifier + "'. Add a matching 'use' declaration.",
+                    annotation.name.range
+                );
+            }
+        }
+
+        for (const auto &argument : annotation.arguments) {
+            switch (argument.kind) {
+                case AST::AnnotationArgumentKind::StringLiteral:
+                case AST::AnnotationArgumentKind::IntegerLiteral:
+                case AST::AnnotationArgumentKind::BooleanLiteral:
+                    break;
+            }
+        }
+    }
+
+    auto SemanticAnalyzer::annotationNameToString(const AST::Annotation &annotation) -> std::string {
+        std::string result;
+
+        for (std::size_t idx = 0; idx < annotation.name.segments.size(); ++idx) {
+            if (idx > 0U) {
+                result += "::";
+            }
+
+            result += annotation.name.segments[idx];
+        }
+
+        return result;
+    }
+
+    auto SemanticAnalyzer::annotationArgumentKindToString(AST::AnnotationArgumentKind kind) -> std::string {
+        switch (kind) {
+            case AST::AnnotationArgumentKind::StringLiteral:
+                return "string";
+            case AST::AnnotationArgumentKind::IntegerLiteral:
+                return "int";
+            case AST::AnnotationArgumentKind::BooleanLiteral:
+                return "bool";
+        }
+
+        return "unknown";
     }
 
     void SemanticAnalyzer::analyzeStatement(const AST::Statement &stmt) {
