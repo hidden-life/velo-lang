@@ -127,6 +127,7 @@ namespace Velo::Semantic {
         collectStructs();
         collectFunctions();
         validateEntryPoint();
+        validateHttpRouteAnnotations();
 
         for (const auto &strDecl : _program.structs) {
             analyzeStruct(strDecl);
@@ -1960,5 +1961,144 @@ namespace Velo::Semantic {
         }
 
         return analyzeCheckedExpressionType(expr);
+    }
+
+    void SemanticAnalyzer::validateHttpRouteAnnotations() {
+        std::unordered_map<std::string, const AST::Annotation*> seenRoutes;
+
+        for (const auto &func : _program.functions) {
+            std::size_t httpRouteAnnotationCount = 0U;
+
+            for (const auto &annotation : func.annotations) {
+                if (!isHttpRouteAnnotation(annotation)) {
+                    continue;
+                }
+
+                ++httpRouteAnnotationCount;
+                validateHttpRouteAnnotation(func, annotation);
+
+                if (
+                    annotation.arguments.size() == 1U &&
+                    annotation.arguments[0].kind == AST::AnnotationArgumentKind::StringLiteral &&
+                    !annotation.arguments[0].value.empty() &&
+                    annotation.arguments[0].value.front() == '/') {
+                    const std::string routeKey = httpRouteMethodFromAnnotation(annotation) + " " + annotation.arguments[0].value;
+                    const auto [it, inserted] = seenRoutes.emplace(routeKey, &annotation);
+
+                    if (!inserted) {
+                        _engine.error(
+                            "SEM072",
+                            "Duplicate HTTP route annotation '" + routeKey + "'.",
+                            annotation.range
+                        );
+                    }
+                }
+            }
+
+            if (httpRouteAnnotationCount > 1U) {
+                _engine.error(
+                    "SEM073",
+                    "Function '" + func.name + "' must not have more than one HTTP route annotation.",
+                    func.range
+                );
+            }
+        }
+    }
+
+    void SemanticAnalyzer::validateHttpRouteAnnotation(const AST::FunctionDeclaration &func,
+        const AST::Annotation &annotation) {
+        const std::string routeName = annotationNameToString(annotation);
+
+        if (annotation.arguments.size() != 1U) {
+            _engine.error(
+                "SEM066",
+                "HTTP route annotation '" + routeName + "' expects exactly one path argument.",
+                annotation.range
+            );
+        } else {
+            const auto &pathArgument = annotation.arguments[0];
+
+            if (pathArgument.kind != AST::AnnotationArgumentKind::StringLiteral) {
+                _engine.error(
+                    "SEM067",
+                    "HTTP route annotation path must be string, actual '" + annotationArgumentKindToString(pathArgument.kind) + "'. ",
+                    pathArgument.range
+                );
+            } else if (pathArgument.value.empty() || pathArgument.value.front() != '/') {
+                _engine.error(
+                    "SEM068",
+                    "HTTP route annotation path must start with '/'.",
+                    pathArgument.range
+                );
+            }
+        }
+
+        if (func.parameters.size() != 1U) {
+            _engine.error(
+                "SEM069",
+                "HTTP route handler '" + func.name + "' must have exactly one parameter.",
+                func.range
+            );
+        } else {
+            const auto parameterType = typeFromTypeName(func.parameters[0].type);
+
+            if (!isUnknownType(parameterType) && parameterType.kind != SemanticTypeKind::HttpRequest) {
+                _engine.error(
+                    "SEM070",
+                    "HTTP route handler parameter must be 'http_request'.",
+                    func.parameters[0].type.range
+                );
+            }
+        }
+
+        if (
+            const auto returnType = typeFromTypeName(func.returnType);
+            !isUnknownType(returnType) && returnType.kind != SemanticTypeKind::HttpResponse
+            ) {
+            _engine.error(
+                "SEM071",
+                "HTTP route handler return type must be 'http_response'.",
+                func.returnType.range
+            );
+        }
+    }
+
+    auto SemanticAnalyzer::isHttpRouteAnnotation(const AST::Annotation &annotation) const -> bool {
+        if (annotation.name.segments.size() != 2U) {
+            return false;
+        }
+
+        const std::string &moduleQualifier = annotation.name.segments[0];
+        const std::string &annotationName = annotation.name.segments[1];
+        const auto importIt = _visibleImports.find(moduleQualifier);
+
+        if (importIt == _visibleImports.end()) {
+            return false;
+        }
+
+        const std::string importedModule = importedModuleName(*importIt->second);
+        if (importedModule != "http") {
+            return false;
+        }
+
+        return annotationName == "get" || annotationName == "post";
+    }
+
+    auto SemanticAnalyzer::httpRouteMethodFromAnnotation(const AST::Annotation &annotation) const -> std::string {
+        if (annotation.name.segments.size() != 2U) {
+            return {};
+        }
+
+        const std::string &annotationName = annotation.name.segments[1];
+
+        if (annotationName == "get") {
+            return "GET";
+        }
+
+        if (annotationName == "post") {
+            return "POST";
+        }
+
+        return {};
     }
 }

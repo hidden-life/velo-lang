@@ -950,3 +950,56 @@ fn main(): int {
     return 0;
 }
 ```
+
+### HTTP route annotations
+
+HTTP route annotations are supported as validated metadata.
+
+```velo
+use std::http;
+
+@http::get("/health")
+fn health(req: http_request): http_response {
+    return http::text_response(200, "OK");
+}
+```
+
+Supported route annotations:
+```text
+@http::get("/path")
+@http::post("/path")
+```
+
+Handler signature:
+```text
+fn name(req: http_request): http_response
+```
+
+Invalid examples:
+```velo
+@http::get("health")
+fn bad(req: http_request): http_response {
+    return http::text_response(200, "OK");
+}
+```
+
+The path must start with `/`.
+```velo
+@http::get("/health")
+fn bad(req: string): http_response {
+    return http::text_response(200, "OK");
+}
+```
+
+The parameter must be `http_request`.
+```velo
+@http::get("/health")
+fn bad(req: http_request): int {
+    return 0;
+}
+```
+
+The return type must be `http_response`.
+
+MVP 0.10.4 validates route annotations, but serve-mode dispatch by 
+annotations is planned for the next step.

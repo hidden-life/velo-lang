@@ -870,3 +870,44 @@ HTTP route table construction
     ↓
 serve mode route dispatch
 ```
+
+## HTTP route annotation validation
+Generic annotation validation is followed by HTTP-specific route validation.
+
+HTTP route annotations are recognized only when the annotation qualifier resolves
+to the `http` module.
+
+Examples:
+```velo
+use std::http;
+
+@http::get("/health")
+fn health(req: http_request): http_response {
+    return http::text_response(200, "OK");
+}
+```
+
+```velo
+use std::http as web;
+
+@web::post("/echo")
+fn echo(req: http_request): http_response {
+    let body: json = web::json_body(req);
+    return web::json_response(201, body);
+}
+```
+
+The semantic analyzer validates route annotation shape, handler signature, and duplicate method/path routes.
+
+Validation happens before route dispatch exists.
+
+This keeps serve-mode route construction simple in later steps:
+```text
+validated annotations
+    ↓
+IR function metadata
+    ↓
+HTTP route table
+    ↓
+request dispatch
+```

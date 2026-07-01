@@ -361,7 +361,16 @@ MVP 0.10 is in progress:
 0.10.1      lexer/parser/AST support for function annotations
 0.10.2      semantic validation for annotations
 0.10.3      IR/module metadata propagation
+0.10.4      HTTP route annotation validation
 ```
-The compiler now preserves validated function annotation metadata in IR functions.
-Import aliases are normalized during lowering, so `@web::get(...)` can become canonical
-`http::get(...)` metadata.
+
+HTTP route annotations are now semantically validated:
+```velo
+@http::get("/health")
+fn health(req: http_request): http_response {
+    return http::text_response(200, "OK");
+}
+```
+
+Validated metadata is not used by `velo serve` yet. Annotation-based dispatch is
+planned for the next step.

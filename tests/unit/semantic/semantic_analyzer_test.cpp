@@ -6096,3 +6096,308 @@ fn main(): int {
     ASSERT_TRUE(engine.hasErrors());
     EXPECT_TRUE(hasDiagnosticCode(engine, "SEM064"));
 }
+
+TEST(SemanticAnalyzerTest, AcceptsHttpGetRouteAnnotation) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::http;
+
+@http::get("/health")
+fn health(req: http_request): http_response {
+    return http::text_response(200, "OK");
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, AcceptsHttpPostRouteAnnotationWithAlias) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::http as web;
+
+@web::post("/echo")
+fn echo(req: http_request): http_response {
+    let body: json = web::json_body(req);
+    return web::json_response(201, body);
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_TRUE(analyzer.analyze());
+    EXPECT_FALSE(engine.hasErrors());
+}
+
+TEST(SemanticAnalyzerTest, ReportsHttpRouteAnnotationWithoutPathArgument) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::http;
+
+@http::get()
+fn health(req: http_request): http_response {
+    return http::text_response(200, "OK");
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_TRUE(hasDiagnosticCode(engine, "SEM066"));
+}
+
+TEST(SemanticAnalyzerTest, ReportsHttpRouteAnnotationNonStringPathArgument) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::http;
+
+@http::get(123)
+fn health(req: http_request): http_response {
+    return http::text_response(200, "OK");
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_TRUE(hasDiagnosticCode(engine, "SEM067"));
+}
+
+TEST(SemanticAnalyzerTest, ReportsHttpRouteAnnotationPathWithoutLeadingSlash) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::http;
+
+@http::get("health")
+fn health(req: http_request): http_response {
+    return http::text_response(200, "OK");
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_TRUE(hasDiagnosticCode(engine, "SEM068"));
+}
+
+TEST(SemanticAnalyzerTest, ReportsHttpRouteHandlerWrongParameterCount) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::http;
+
+@http::get("/health")
+fn health(): http_response {
+    return http::text_response(200, "OK");
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_TRUE(hasDiagnosticCode(engine, "SEM069"));
+}
+
+TEST(SemanticAnalyzerTest, ReportsHttpRouteHandlerWrongParameterType) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::http;
+
+@http::get("/health")
+fn health(req: string): http_response {
+    return http::text_response(200, "OK");
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_TRUE(hasDiagnosticCode(engine, "SEM070"));
+}
+
+TEST(SemanticAnalyzerTest, ReportsHttpRouteHandlerWrongReturnType) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::http;
+
+@http::get("/health")
+fn health(req: http_request): int {
+    return 0;
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_TRUE(hasDiagnosticCode(engine, "SEM071"));
+}
+
+TEST(SemanticAnalyzerTest, ReportsDuplicateHttpRouteAnnotation) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::http;
+
+@http::get("/health")
+fn health_one(req: http_request): http_response {
+    return http::text_response(200, "OK");
+}
+
+@http::get("/health")
+fn health_two(req: http_request): http_response {
+    return http::text_response(200, "OK");
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_TRUE(hasDiagnosticCode(engine, "SEM072"));
+}
+
+TEST(SemanticAnalyzerTest, ReportsMultipleHttpRouteAnnotationsOnSameFunction) {
+    DiagnosticEngine engine;
+    const auto program = parseProgram(
+        R"(module app;
+
+use std::http;
+
+@http::get("/health")
+@http::post("/health")
+fn health(req: http_request): http_response {
+    return http::text_response(200, "OK");
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        engine
+    );
+
+    ASSERT_NE(program, nullptr);
+    ASSERT_FALSE(engine.hasErrors());
+
+    Velo::Runtime::Runtime runtime;
+    SemanticAnalyzer analyzer(*program, engine, runtime.modules());
+
+    EXPECT_FALSE(analyzer.analyze());
+    ASSERT_TRUE(engine.hasErrors());
+    EXPECT_TRUE(hasDiagnosticCode(engine, "SEM073"));
+}

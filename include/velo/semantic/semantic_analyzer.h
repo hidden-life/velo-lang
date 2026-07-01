@@ -121,6 +121,11 @@ namespace Velo::Semantic {
         [[nodiscard]] auto resolveStructType(const SemanticType &type) const -> const AST::StructDeclaration*;
         [[nodiscard]] static auto isBuiltinTypeName(const std::string &typeName) -> bool;
 
+        void validateHttpRouteAnnotations();
+        void validateHttpRouteAnnotation(const AST::FunctionDeclaration &func, const AST::Annotation &annotation);
+        [[nodiscard]] auto isHttpRouteAnnotation(const AST::Annotation &annotation) const -> bool;
+        [[nodiscard]] auto httpRouteMethodFromAnnotation(const AST::Annotation &annotation) const -> std::string;
+
         const AST::Program &_program;
         Diagnostic::DiagnosticEngine &_engine;
 

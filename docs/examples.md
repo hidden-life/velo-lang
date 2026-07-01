@@ -616,3 +616,42 @@ Run:
 ./build/debug/apps/velo/velo ast examples/annotation_metadata/main.velo
 ./build/debug/apps/velo/velo ir examples/annotation_metadata/main.velo
 ```
+
+## HTTP annotation routes
+```text
+examples/http_annotation_routes/main.velo
+```
+
+This example demonstrates validated HTTP route annotations.
+
+```velo
+use std::http;
+
+@http::get("/health")
+fn health(req: http_request): http_response {
+    return http::text_response(200, "OK");
+}
+
+@http::post("/echo")
+fn echo(req: http_request): http_response {
+    let body: json = http::json_body(req);
+    return http::json_response(201, body);
+}
+```
+
+Run:
+```bash
+./build/debug/apps/velo/velo check examples/http_annotation_routes/main.velo
+./build/debug/apps/velo/velo ast examples/http_annotation_routes/main.velo
+./build/debug/apps/velo/velo ir examples/http_annotation_routes/main.velo
+```
+
+Expected IR metadata:
+```text
+Annotation http::get("/health")
+Annotation http::post("/echo")
+```
+
+In MVP 0.10.4, this example validates annotations only.
+
+Serve-mode dispatch by annotations is planned for MVP 0.10.5.
