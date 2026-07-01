@@ -585,3 +585,34 @@ bash benchmarks/http/run_curl_loop.sh 100
 ```
 
 These scripts are local development checks, not production benchmark targets.
+
+## Annotation metadata
+Path:
+```text
+examples/annotation_metadata/main.velo
+```
+
+This example demonstrates function annotations and IR metadata propagation.
+
+```velo
+use std::http as web;
+
+@web::get("/health")
+fn health(req: http_request): http_response {
+    return web::text_response(200, "OK");
+}
+```
+
+The source uses the `web` import alias.
+
+The IR output normalizes the annotation name to the canonical module name:
+```text
+Annotation http::get("/health")
+```
+
+Run:
+```bash
+./build/debug/apps/velo/velo check examples/annotation_metadata/main.velo
+./build/debug/apps/velo/velo ast examples/annotation_metadata/main.velo
+./build/debug/apps/velo/velo ir examples/annotation_metadata/main.velo
+```

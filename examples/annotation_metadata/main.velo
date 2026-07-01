@@ -1,0 +1,18 @@
+module app;
+
+use std::http as web;
+
+@web::get("/health")
+fn health(req: http_request): http_response {
+    return web::text_response(200, "OK");
+}
+
+@web::post("/echo")
+fn echo(req: http_request): http_response {
+    let body: json = web::json_body(req);
+    return web::json_response(201, body);
+}
+
+fn main(): int {
+    return 0;
+}
