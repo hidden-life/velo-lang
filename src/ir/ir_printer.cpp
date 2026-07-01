@@ -4,6 +4,46 @@
 #include <sstream>
 
 namespace Velo::IR {
+    namespace {
+        auto annotationArgumentToString(const AnnotationArgument &arg) -> std::string {
+            std::ostringstream stream;
+
+            switch (arg.kind) {
+                case AnnotationArgumentKind::StringLiteral:
+                    stream << '"' << arg.value << '"';
+                    break;
+                case AnnotationArgumentKind::IntegerLiteral:
+                case AnnotationArgumentKind::BooleanLiteral:
+                    stream << arg.value;
+                    break;
+            }
+
+            return stream.str();
+        }
+
+        auto annotationToString(const Annotation &annotation) -> std::string {
+            std::ostringstream stream;
+
+            stream << annotation.name;
+
+            if (!annotation.arguments.empty()) {
+                stream << "(";
+
+                for (std::size_t idx = 0; idx < annotation.arguments.size(); ++idx) {
+                    if (idx > 0U) {
+                        stream << ", ";
+                    }
+
+                    stream << annotationArgumentToString(annotation.arguments[idx]);
+                }
+
+                stream << ")";
+            }
+
+            return stream.str();
+        }
+    }
+
     auto IRPrinter::print(const Module &module) const -> std::string {
         std::ostringstream stream;
 
@@ -32,6 +72,10 @@ namespace Velo::IR {
         }
 
         stream << "\n";
+
+        for (const auto &annotation : func.annotations) {
+            stream << "    Annotation " << annotationToString(annotation) << "\n";
+        }
 
         for (std::size_t idx = 0; idx < func.instructions.size(); ++idx) {
             printInstruction(stream, idx, func.instructions[idx]);

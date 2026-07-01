@@ -30,6 +30,7 @@ add_executable(velo_smoke_tests
         unit/http/http_handler_test.cpp
         unit/http/http_pipeline_test.cpp
         unit/http/http_server_test.cpp
+        unit/ir/ir_annotation_test.cpp
 )
 
 target_link_libraries(velo_smoke_tests PRIVATE

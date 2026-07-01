@@ -95,6 +95,7 @@ namespace Velo::IR {
     Function Lowerer::lowerFunction(const AST::FunctionDeclaration &func) {
         Function f;
         f.name = func.name;
+        f.annotations = lowerAnnotations(func.annotations);
 
         _scopeStack.clear();
         _nextLocalIndex = 0U;
@@ -783,5 +784,51 @@ namespace Velo::IR {
             .stringOperand = encodeMapKeys(keys),
             .argsCount = expr.entries.size(),
         });
+    }
+
+    auto Lowerer::lowerAnnotations(const std::vector<AST::Annotation> &annotations) const -> std::vector<Annotation> {
+        std::vector<Annotation> result;
+
+        result.reserve(annotations.size());
+
+        for (const auto &annotation : annotations) {
+            result.push_back(lowerAnnotation(annotation));
+        }
+
+        return result;
+    }
+
+    auto Lowerer::lowerAnnotation(const AST::Annotation &annotation) const -> Annotation {
+        Annotation result;
+
+        result.name = lowerQualifiedName(annotation.name);
+        result.arguments.reserve(annotation.arguments.size());
+
+        for (const auto &arg : annotation.arguments) {
+            result.arguments.push_back(lowerAnnotationArgument(arg));
+        }
+
+        return result;
+    }
+
+    auto Lowerer::lowerAnnotationArgument(const AST::AnnotationArgument &arg) -> AnnotationArgument {
+        AnnotationArgumentKind kind = AnnotationArgumentKind::StringLiteral;
+
+        switch (arg.kind) {
+            case AST::AnnotationArgumentKind::StringLiteral:
+                kind = AnnotationArgumentKind::StringLiteral;
+                break;
+            case AST::AnnotationArgumentKind::IntegerLiteral:
+                kind = AnnotationArgumentKind::IntegerLiteral;
+                break;
+            case AST::AnnotationArgumentKind::BooleanLiteral:
+                kind = AnnotationArgumentKind::BooleanLiteral;
+                break;
+        }
+
+        return AnnotationArgument {
+            .kind = kind,
+            .value = arg.value,
+        };
     }
 }

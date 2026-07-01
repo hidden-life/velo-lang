@@ -5112,3 +5112,31 @@ fn main(): int {
     EXPECT_TRUE(result.error.empty());
     EXPECT_TRUE(result.diagnostics.empty());
 }
+
+TEST(DriverTest, PrintsAnnotationMetadataInIrMode) {
+    Driver driver;
+    const auto result = driver.parseText(
+        "annotation_ir.velo",
+        R"(module app;
+
+use std::http;
+
+@http::get("/health")
+fn health(req: http_request): http_response {
+    return http::text_response(200, "OK");
+}
+
+fn main(): int {
+    return 0;
+}
+)",
+        Velo::Driver::DriverMode::Ir
+    );
+
+    ASSERT_TRUE(result.success);
+    ASSERT_TRUE(result.error.empty());
+    ASSERT_TRUE(result.diagnostics.empty());
+
+    EXPECT_NE(result.irText.find("Function health(req)"), std::string::npos);
+    EXPECT_NE(result.irText.find("Annotation http::get(\"/health\")"), std::string::npos);
+}

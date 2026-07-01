@@ -356,4 +356,12 @@ MVP 0.8 is tagged as `v0.8.0`.
 MVP 0.9 is tagged as `v0.9.0`.
 
 ## MVP 0.10 status
-MVP 0.10 is in progress.
+MVP 0.10 is in progress:
+```text
+0.10.1      lexer/parser/AST support for function annotations
+0.10.2      semantic validation for annotations
+0.10.3      IR/module metadata propagation
+```
+The compiler now preserves validated function annotation metadata in IR functions.
+Import aliases are normalized during lowering, so `@web::get(...)` can become canonical
+`http::get(...)` metadata.

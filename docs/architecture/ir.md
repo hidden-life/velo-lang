@@ -491,3 +491,46 @@ executeFunction(module, "handle", [request])
 ```
 
 This keeps HTTP serving separate from IR instruction design.
+
+## Function annotation metadata
+IR functions can carry lowered annotation metadata.
+
+Source-level annotations are parsed into AST first:
+```text
+@http::get("/health")
+fn health(req: http_request): http_response
+```
+
+During lowering, annotations are copied into `IR::Function`.
+
+The IR representation stores:
+```text
+annotation name
+annotation argument list
+annotation argument literal kinds
+```
+
+The IR annotation name is canonicalized through the same import alias mechanism
+used for function calls.
+
+Example:
+```velo
+use std::http as web;
+
+@web::get("/health")
+fn health(req: http_request): http_response {
+    return web::text_response(200, "OK");
+}
+```
+
+Lowered annotation name:
+```text
+http::get
+```
+
+This keeps later HTTP route construction independent from local import aliases.
+
+Current limitations:
+- annotations do not affect instruction execution
+- bytecode does not preserve annotation metadata yet
+- HTTP route construction is not implemented in MVP 0.10.3

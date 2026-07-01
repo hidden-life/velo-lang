@@ -26,6 +26,10 @@ namespace Velo::IR {
         void collectModuleAliases(const AST::Program &program);
         [[nodiscard]] auto lowerQualifiedName(const AST::QualifiedName &name) const -> std::string;
 
+        [[nodiscard]] auto lowerAnnotations(const std::vector<AST::Annotation> &annotations) const -> std::vector<Annotation>;
+        [[nodiscard]] auto lowerAnnotation(const AST::Annotation &annotation) const -> Annotation;
+        [[nodiscard]] static auto lowerAnnotationArgument(const AST::AnnotationArgument &arg) -> AnnotationArgument;
+
         [[nodiscard]] auto lowerTypeName(const AST::TypeName &typeName) const -> std::string;
         void lowerStructLiteralExpression(const AST::StructLiteralExpression &expr, Function &func);
         void lowerArrayLiteralExpression(const AST::ArrayLiteralExpression &expr, Function &func);

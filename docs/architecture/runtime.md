@@ -858,3 +858,25 @@ fn handle(req: http_request): http_response {
 
 Future milestones may add route registration APIs after function references exist.
 
+## Annotation metadata and HTTP routing direction
+MVP 0.10.3 keeps annotation metadata in IR functions.
+
+The runtime server does not use this metadata yet.
+
+The intended flow is:
+```text
+source annotations
+    ↓
+AST annotations
+    ↓
+semantic validation
+    ↓
+IR function annotation metadata
+    ↓
+HTTP route table
+    ↓
+serve mode dispatch
+```
+
+This allows `velo serve` to eventually route requests through annotated functions
+without depending on parser AST objects.
