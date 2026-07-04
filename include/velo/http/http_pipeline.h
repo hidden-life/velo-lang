@@ -4,6 +4,7 @@
 #include <string>
 
 #include "velo/interpreter/interpreter.h"
+#include "velo/http/http_router.h"
 
 namespace Velo::Http {
     struct HttpPipelineResult final {
@@ -16,7 +17,8 @@ namespace Velo::Http {
         Interpreter::Interpreter &interpreter,
         const IR::Module &module,
         std::string_view rawRequest,
-        std::string_view handlerName = "handle"
+        std::string_view handlerName = "handle",
+        const HttpRouteTable *table = nullptr
     ) -> HttpPipelineResult;
 }
 

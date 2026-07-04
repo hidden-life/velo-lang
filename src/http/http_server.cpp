@@ -3,6 +3,7 @@
 #include <sys/socket.h>
 
 #include "velo/http/http_server.h"
+#include "velo/http/http_router.h"
 
 #include <iostream>
 #include <arpa/inet.h>
@@ -24,6 +25,7 @@ namespace {
     struct CompiledServerProgram final {
         bool isSuccess {false};
         Velo::IR::Module module {};
+        Velo::Http::HttpRouteTable routeTable {};
         std::string error {};
         std::vector<Velo::Diagnostic::Diagnostic> diagnostics {};
     };
@@ -118,6 +120,7 @@ namespace {
             return CompiledServerProgram {
                 .isSuccess = false,
                 .module = {},
+                .routeTable = {},
                 .error = "HTTP server source path is empty.",
                 .diagnostics = {},
             };
@@ -128,6 +131,7 @@ namespace {
             return CompiledServerProgram {
                 .isSuccess = false,
                 .module = {},
+                .routeTable = {},
                 .error = "Failed to load source file: " + config.sourcePath,
                 .diagnostics = {},
             };
@@ -142,6 +146,7 @@ namespace {
             return CompiledServerProgram {
                 .isSuccess = false,
                 .module = {},
+                .routeTable = {},
                 .error = {},
                 .diagnostics = engine.diagnostics(),
             };
@@ -154,27 +159,42 @@ namespace {
             return CompiledServerProgram {
                 .isSuccess = false,
                 .module = {},
+                .routeTable = {},
                 .error = {},
                 .diagnostics = engine.diagnostics(),
             };
         }
 
-        const auto validation = Velo::Http::validateHttpHandlerSignature(*program, config.handlerName);
-        if (!validation.isSuccess) {
+        Velo::IR::Lowerer lowerer;
+        auto module = lowerer.lower(*program);
+        const auto routeBuildResult = Velo::Http::buildTable(module);
+        if (!routeBuildResult.isSuccess) {
             return CompiledServerProgram {
                 .isSuccess = false,
                 .module = {},
-                .error = validation.error,
+                .routeTable = {},
+                .error = routeBuildResult.error,
                 .diagnostics = {},
             };
         }
 
-        Velo::IR::Lowerer lowerer;
-        auto module = lowerer.lower(*program);
+        if (!Velo::Http::hasHttpRoutes(routeBuildResult.routeTable)) {
+            const auto validation = Velo::Http::validateHttpHandlerSignature(*program, config.handlerName);
+            if (!validation.isSuccess) {
+                return CompiledServerProgram {
+                    .isSuccess = false,
+                    .module = {},
+                    .routeTable = {},
+                    .error = validation.error,
+                    .diagnostics = {},
+                };
+            }
+        }
 
         return CompiledServerProgram {
             .isSuccess = true,
             .module = std::move(module),
+            .routeTable = std::move(routeBuildResult.routeTable),
             .error = {},
             .diagnostics = {},
         };
@@ -379,7 +399,15 @@ namespace Velo::Http {
                 continue;
             }
 
-            const auto pipelineResult = handleRawHttpRequest(interpreter, compiled.module, readResult.request, config.handlerName);
+            const auto *routeTable = hasHttpRoutes(compiled.routeTable) ? &compiled.routeTable : nullptr;
+
+            const auto pipelineResult = handleRawHttpRequest(
+                interpreter,
+                compiled.module,
+                readResult.request,
+                config.handlerName,
+                routeTable
+                );
             static_cast<void>(sendAll(clientFd, pipelineResult.raw));
             ::close(clientFd);
 

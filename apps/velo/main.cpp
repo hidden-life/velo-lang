@@ -126,6 +126,10 @@ namespace {
         }
 
         if (!result.isSuccess) {
+            if (result.error.empty() && result.diagnostics.empty()) {
+                std::cerr << "HTT server failed without error details." << std::endl;
+            }
+            
             return result.exitCode == 0 ? EXIT_FAILURE : result.exitCode;
         }
 

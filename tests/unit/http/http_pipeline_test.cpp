@@ -226,3 +226,117 @@ fn main(): int {
     EXPECT_NE(result.raw.find("HTTP/1.1 200 OK\r\n"), std::string::npos);
     EXPECT_NE(result.raw.find("\r\n\r\nOK"), std::string::npos);
 }
+
+TEST(HttpPipelineTest, HandlesRawRequestWithAnnotationRoute) {
+    auto compiled = compileProgram(R"(module app;
+use std::http;
+
+@http::get("/health")
+fn health(req: http_request): http_response {
+    return http::text_response(200, "OK");
+}
+
+fn main(): int {
+    return 0;
+}
+)");
+
+    ASSERT_TRUE(compiled.success);
+
+    const auto routeBuildResult = Velo::Http::buildTable(compiled.module);
+    ASSERT_TRUE(routeBuildResult.isSuccess) << routeBuildResult.error;
+    ASSERT_TRUE(Velo::Http::hasHttpRoutes(routeBuildResult.routeTable));
+
+    Velo::Runtime::Runtime runtime;
+    Velo::Interpreter::Interpreter interpreter(runtime);
+
+    const auto result = Velo::Http::handleRawHttpRequest(
+        interpreter,
+        compiled.module,
+        "GET /health HTTP/1.1\r\n"
+        "Host: localhost\r\n"
+        "\r\n",
+        "handle",
+        &routeBuildResult.routeTable
+    );
+
+    ASSERT_TRUE(result.isSuccess) << result.error;
+    EXPECT_NE(result.raw.find("HTTP/1.1 200 OK\r\n"), std::string::npos);
+    EXPECT_NE(result.raw.find("\r\n\r\nOK"), std::string::npos);
+}
+
+TEST(HttpPipelineTest, HandlesPostRequestWithAnnotationRoute) {
+    auto compiled = compileProgram(R"(module app;
+use std::http;
+
+@http::post("/echo")
+fn echo(req: http_request): http_response {
+    return http::text_response(201, http::request_body(req));
+}
+
+fn main(): int {
+    return 0;
+}
+)");
+
+    ASSERT_TRUE(compiled.success);
+
+    const auto routeBuildResult = Velo::Http::buildTable(compiled.module);
+    ASSERT_TRUE(routeBuildResult.isSuccess) << routeBuildResult.error;
+
+    Velo::Runtime::Runtime runtime;
+    Velo::Interpreter::Interpreter interpreter(runtime);
+
+    const auto result = Velo::Http::handleRawHttpRequest(
+        interpreter,
+        compiled.module,
+        "POST /echo HTTP/1.1\r\n"
+        "Host: localhost\r\n"
+        "Content-Length: 5\r\n"
+        "\r\n"
+        "hello",
+        "handle",
+        &routeBuildResult.routeTable
+    );
+
+    ASSERT_TRUE(result.isSuccess) << result.error;
+    EXPECT_NE(result.raw.find("HTTP/1.1 201 Created\r\n"), std::string::npos);
+    EXPECT_NE(result.raw.find("\r\n\r\nhello"), std::string::npos);
+}
+
+TEST(HttpPipelineTest, ReturnsNotFoundForMissingAnnotationRoute) {
+    auto compiled = compileProgram(R"(module app;
+use std::http;
+
+@http::get("/health")
+fn health(req: http_request): http_response {
+    return http::text_response(200, "OK");
+}
+
+fn main(): int {
+    return 0;
+}
+)");
+
+    ASSERT_TRUE(compiled.success);
+
+    const auto routeBuildResult = Velo::Http::buildTable(compiled.module);
+    ASSERT_TRUE(routeBuildResult.isSuccess) << routeBuildResult.error;
+
+    Velo::Runtime::Runtime runtime;
+    Velo::Interpreter::Interpreter interpreter(runtime);
+
+    const auto result = Velo::Http::handleRawHttpRequest(
+        interpreter,
+        compiled.module,
+        "GET /missing HTTP/1.1\r\n"
+        "Host: localhost\r\n"
+        "\r\n",
+        "handle",
+        &routeBuildResult.routeTable
+    );
+
+    EXPECT_FALSE(result.isSuccess);
+    EXPECT_NE(result.raw.find("HTTP/1.1 404 Not Found\r\n"), std::string::npos);
+    EXPECT_NE(result.raw.find("HTTP route was not found."), std::string::npos);
+}

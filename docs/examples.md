@@ -652,6 +652,41 @@ Annotation http::get("/health")
 Annotation http::post("/echo")
 ```
 
-In MVP 0.10.4, this example validates annotations only.
+Path:
+```text
+examples/http_annotation_routes/main.velo
+```
 
-Serve-mode dispatch by annotations is planned for MVP 0.10.5.
+This example demonstrates annotation-based HTTP routing.
+```velo
+use std::http;
+
+@http::get("/health")
+fn health(req: http_request): http_response {
+    return http::text_response(200, "OK");
+}
+
+@http::post("/echo")
+fn echo(req: http_request): http_response {
+    return http::text_response(201, http::request_body(req));
+}
+```
+
+Run:
+```bash
+./build/debug/apps/velo/velo serve examples/http_annotation_routes/main.velo
+```
+
+Smoke:
+```bash
+curl -i http://127.0.0.1:8080/health
+curl -i -X POST http://127.0.0.1:8080/echo -d 'hello'
+curl -i http://127.0.0.1:8080/missing
+```
+
+Expected:
+```text
+GET /health     ->  200 OK
+POST /echo      ->  201 Created
+GET /missing    ->  404 Not Found
+```

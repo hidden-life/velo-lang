@@ -1,0 +1,17 @@
+module app;
+
+use std::http;
+
+@http::get("/health")
+fn health(req: http_request): http_response {
+    return http::text_response(200, "OK");
+}
+
+@http::post("/echo")
+fn echo(req: http_request): http_response {
+    return http::text_response(201, http::request_body(req));
+}
+
+fn main(): int {
+    return 0;
+}

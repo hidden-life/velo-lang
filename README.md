@@ -362,6 +362,7 @@ MVP 0.10 is in progress:
 0.10.2      semantic validation for annotations
 0.10.3      IR/module metadata propagation
 0.10.4      HTTP route annotation validation
+0.10.5      serve mode annotation route dispatch
 ```
 
 HTTP route annotations are now semantically validated:
@@ -374,3 +375,17 @@ fn health(req: http_request): http_response {
 
 Validated metadata is not used by `velo serve` yet. Annotation-based dispatch is
 planned for the next step.
+
+`velo serve` can now dispatch requests through validated HTTP route annotations.
+
+```velo
+@http::get("/health")
+fn health(req: http_request): http_response {
+    return http::text_response(200, "OK");
+}
+```
+
+Run:
+```bash
+./build/debug/apps/velo/velo serve examples/http_annotation_routes/main.velo
+```

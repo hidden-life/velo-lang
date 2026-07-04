@@ -880,3 +880,40 @@ serve mode dispatch
 
 This allows `velo serve` to eventually route requests through annotated functions
 without depending on parser AST objects.
+
+## Annotation route dispatch
+MVP 0.10.5 adds annotation-based route dispatch for `velo serve`.
+
+The server builds a route table from IR metadata:
+```text
+IR::Function.annotations
+    ↓
+HttpRouteTable
+```
+
+Route table entries contain:
+```text
+method
+path
+handler function name
+```
+
+At request time:
+```text
+request.method + request.path
+    ↓
+find route
+    ↓
+execute handler
+```
+
+If a program has HTTP route annotations, the server does not require a conventional `handle(req)`
+function.
+
+If a program has no HTTP route annotations, the old conventional handler mode remains
+active:
+```velo
+fn handle(req: http_request): http_response
+```
+
+This keeps MVP 0.9 server examples compatible.

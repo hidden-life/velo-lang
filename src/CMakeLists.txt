@@ -193,6 +193,7 @@ add_library(velo_http STATIC
         http/http_handler.cpp
         http/http_pipeline.cpp
         http/http_server.cpp
+        http/http_router.cpp
 )
 
 add_library(Velo::Http ALIAS velo_http)
