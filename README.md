@@ -307,13 +307,15 @@ Start here:
 - [Velo v0.8.0 release notes draft](docs/development/release_notes_v0_8.md)
 - [MVP 0.9 status](docs/development/mvp_0_9.md)
 - [Velo v0.9.0 release notes draft](docs/development/release_notes_v0_9.md)
+- [MVP 0.10 status](docs/development/mvp_0_10.md)
+- [Velo v0.10.0 release notes draft](docs/development/release_notes_v0_10.md)
 
 ## Current development focus
-The project is moving toward **Velo MVP 0.10**.
+The project has completed **Velo MVP 0.10**.
 
-MVP 0.10 focuses on annotation foundation and annotation-based HTTP routing.
+MVP 0.10 adds annotation-based HTTP routing foundation.
 
-Planned steps:
+Completed steps:
 ```text
 0.10.1      lexer/parser/AST support for function annotations
 0.10.2      semantic validation for annotations
@@ -356,36 +358,5 @@ MVP 0.8 is tagged as `v0.8.0`.
 MVP 0.9 is tagged as `v0.9.0`.
 
 ## MVP 0.10 status
-MVP 0.10 is in progress:
-```text
-0.10.1      lexer/parser/AST support for function annotations
-0.10.2      semantic validation for annotations
-0.10.3      IR/module metadata propagation
-0.10.4      HTTP route annotation validation
-0.10.5      serve mode annotation route dispatch
-```
+MVP 0.10 is tagged as `v0.10.0`.
 
-HTTP route annotations are now semantically validated:
-```velo
-@http::get("/health")
-fn health(req: http_request): http_response {
-    return http::text_response(200, "OK");
-}
-```
-
-Validated metadata is not used by `velo serve` yet. Annotation-based dispatch is
-planned for the next step.
-
-`velo serve` can now dispatch requests through validated HTTP route annotations.
-
-```velo
-@http::get("/health")
-fn health(req: http_request): http_response {
-    return http::text_response(200, "OK");
-}
-```
-
-Run:
-```bash
-./build/debug/apps/velo/velo serve examples/http_annotation_routes/main.velo
-```

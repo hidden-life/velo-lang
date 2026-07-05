@@ -1003,3 +1003,28 @@ The return type must be `http_response`.
 
 MVP 0.10.4 validates route annotations, but serve-mode dispatch by 
 annotations is planned for the next step.
+
+## Function annotations
+Velo supports function annotations as metadata before function declarations.
+
+```velo
+@auth(true)
+fn main(): int {
+    return 0;
+}
+```
+
+Supported forms:
+```text
+@name
+@module::name
+@name("string")
+@name("string", true, 123)
+```
+
+Supported argument literals:
+```text
+string
+bool
+int
+```

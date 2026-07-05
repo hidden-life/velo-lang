@@ -911,3 +911,13 @@ HTTP route table
     ↓
 request dispatch
 ```
+
+Validation rules:
+- route annotation must have exactly one argument
+- route argument must be a string literal
+- route path must start with `/`
+- route handler must have exactly one parameter
+- route handler parameter must be `http_request`
+- route handler return type must be `http_response`
+- duplicate method/path routes are rejected
+- multiple HTTP route annotations on the same function are rejected

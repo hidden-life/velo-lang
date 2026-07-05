@@ -360,3 +360,106 @@ git push origin v0.7.0
 ```
 
 Use only when the project is actually ready to publish the tag.
+
+## MVP 0.10 release checklist
+## Dependencies
+Required tools:
+```text
+cmake
+ninja
+c++ compiler with C++23 support
+curl
+```
+
+No new third-party runtime dependencies are introduced by MVP 0.10.
+
+## Build
+```bash
+cmake --build build/debug
+```
+
+Or:
+```bash
+cmake --build --preset debug
+```
+
+## Full tests
+```bash
+ctest --test-dir build/debug --output-on-failure
+```
+
+## Focused annotation tests
+```bash
+ctest --test-dir build/debug -R "LexerTest.*Annotation|ParserTest.*Annotation|AstPrinterTest.*Annotation" --output-on-failure
+ctest --test-dir build/debug -R "SemanticAnalyzerTest.*Annotation|IRAnnotationTest" --output-on-failure
+ctest --test-dir build/debug -R "HttpRouterTest|HttpPipelineTest" --output-on-failure
+```
+
+## Examples
+```bash
+./build/debug/apps/velo/velo check examples/annotation_metadata/main.velo
+./build/debug/apps/velo/velo ast examples/annotation_metadata/main.velo
+./build/debug/apps/velo/velo ir examples/annotation_metadata/main.velo
+
+./build/debug/apps/velo/velo check examples/http_annotation_routes/main.velo
+./build/debug/apps/velo/velo ast examples/http_annotation_routes/main.velo
+./build/debug/apps/velo/velo ir examples/http_annotation_routes/main.velo
+```
+
+## Serve smoke
+Start server:
+```bash
+./build/debug/apps/velo/velo serve examples/http_annotation_routes/main.velo
+```
+
+In another terminal:
+```bash
+curl -i http://127.0.0.1:8080/health
+curl -i -X POST http://127.0.0.1:8080/echo -d 'hello'
+curl -i http://127.0.0.1:8080/missing
+```
+
+Expected:
+```text
+GET /health     -> 200 OK
+POST /echo      -> 201 Created
+GET /missing    -> 404 Not Found
+```
+
+## Backward compatibility smoke
+Start old conventional handler example:
+```bash
+./build/debug/apps/velo/velo serve examples/http_routing_helpers/main.velo
+```
+
+In another terminal:
+```bash
+curl -i http://127.0.0.1:8080/health
+curl -i http://127.0.0.1:8080/hello
+curl -i http://127.0.0.1:8080/missing
+```
+
+## Documentation review
+Review:
+```text
+README.md
+docs/index.md
+docs/examples.md
+docs/language/syntax.md
+docs/language/modules.md
+docs/language/types.md
+docs/architecture/runtime.md
+docs/architecture/semantic.md
+docs/architecture/ir.md
+docs/development/mvp_0_10.md
+docs/development/release_notes_v0_10.md
+docs/development/release_checklist.md
+docs/development/benchmark_plan.md
+```
+
+## Git tag
+```bash
+git tag -a v0.10.0 -m "Velo MVP 0.10.0"
+git push origin main
+git push origin v0.10.0
+```

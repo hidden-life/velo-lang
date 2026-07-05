@@ -155,3 +155,31 @@ print approximate requests/sec
 ```
 
 External tools such as `wrk`, `hey`, and `ab` are intentionally not required in MVP 0.9.5.
+
+## MVP 0.10 annotation routing benchmark direction
+MVP 0.10 adds annotation-based HTTP routing.
+
+Benchmark scope for MVP 0.10 remains smoke-level only.
+
+Current checks:
+- server start with annotation routes
+- `GET /health` returns `200 OK`
+- `POST /echo` returns `201 Created`
+- missing route returns `404 Not Found`
+- conventional `handle(req)` mode still works
+
+Manual smoke commands:
+```bash
+./build/debug/apps/velo/velo serve examples/http_annotation_routes/main.velo
+```
+
+```bash
+curl -i http://127.0.0.1:8080/health
+curl -i -X POST http://127.0.0.1:8080/echo -d 'hello'
+curl -i http://127.0.0.1:8080/missing
+```
+
+No performance thresholds are defined in MVP 0.10.
+
+External benchmark tools such as `wrk`, `hey` or `ab` are deferred until server
+behavior is more complete.
